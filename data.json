@@ -1,0 +1,37 @@
+{
+    "1":{
+        "keys" : "ctrl+alt+d",
+        "actions":[
+            "a = 0",
+            "a += 1"
+        ],
+        "comment" : "an example of a hotkeys doesn't really do something but you get it"
+    },
+    "2": {
+        "keys": "ctrl+alt+a",
+        "actions": [
+            "import subprocess, keyboard, time",
+            "subprocess.Popen(['cmd.exe'])",
+            "time.sleep(1)",
+            "keyboard.write('Python -m PyInstaller --windowed --onefile *.py -o prog')"
+        ],
+        "comment": "Open the cmd and write 'Python -m PyInstaller --windowed --onefile *.py -o prog' in it"
+    },
+    "3": {
+        "keys": "ctrl+alt+z",
+        "actions": [
+            "import random, time",
+            "if random.randint(0, 10) == 10 : print(time.ctime())"
+        ],
+        "comment": "Give the time with a 10% chance"
+    },
+    "4": {
+        "keys": "ctrl+alt+e",
+        "actions": [
+            "import pyautogui as gui, random",
+            "gui.moveTo(random.randint(0, 100), random.randint(0, 100))",
+            "gui.click(), print(f'clicked at {gui.position()}')"
+        ],
+        "comment": "Click at a random position between (0, 0) and (100, 100) and print it"
+    }
+}

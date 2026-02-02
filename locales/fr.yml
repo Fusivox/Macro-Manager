@@ -1,0 +1,27 @@
+fr:
+  htk:
+    title: Macro Manager
+    info_title: Macro Manager Information
+    startup_msg: "Cette app surveille le clavier jusqu'a désinstallation,\nElle creer aussi un raccourci dans le dossier démarrage de Windows, acceptez-vous ?"
+    thx_msg: Merci d'avoir téléchargé Macro Manager !
+    cancelled_msg : L'installation de l'app a été annulé
+  
+  ui:
+    en: Anglais
+    fr: Français
+    title: Macro Manager
+    options: Options
+    ui_key: Touches GUI
+    lang: Langue
+    uninstall: Désinstaller
+    keys: Touches
+    comment: Commentaire
+    confirm: Confirmation
+    dlt_confirm: "Vous êtes sur le point de supprimer les fichiers de l'app, voulez-vous continuer ? \n(Vous devrez supprimer manuellement l'app après)"
+    info: Informations
+    dlt_success: Fichiers de l'app supprimés avec succès
+    dlt_error: "Une erreur c'est produite, les fichiers n'ont pu être supprimer \nRéessayer plus-tard."
+    ui_key_msg: Quelles touches voulez-vous utiliser, celles actuelles sont
+    ui_key_change: Changer les touches du GUI
+    invalid_key: Touches invalides
+    ui_key_eg: Les touches doivent être dans un format valide ex 'ctrl+alt+a'
