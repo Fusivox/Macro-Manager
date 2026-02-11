@@ -9,9 +9,11 @@ fr:
   ui:
     en: Anglais
     fr: Français
+    help: Aide
+    help_title: Macro Manager - Menu d'Aide
     title: Macro Manager
     options: Options
-    ui_key: Touches GUI
+    key: Touches GUI
     lang: Langue
     uninstall: Désinstaller
     keys: Touches
@@ -21,7 +23,7 @@ fr:
     info: Informations
     dlt_success: Fichiers de l'app supprimés avec succès
     dlt_error: "Une erreur c'est produite, les fichiers n'ont pu être supprimer \nRéessayer plus-tard."
-    ui_key_msg: Quelles touches voulez-vous utiliser, celles actuelles sont
-    ui_key_change: Changer les touches du GUI
+    key_msg: Quelles touches voulez-vous utiliser, celles actuelles sont
+    key_change: Changer les touches du GUI
     invalid_key: Touches invalides
-    ui_key_eg: Les touches doivent être dans un format valide ex 'ctrl+alt+a'
+    key_eg: Les touches doivent être dans un format valide ex 'ctrl+alt+a'

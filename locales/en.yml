@@ -9,9 +9,11 @@ en:
   ui:
     en: English
     fr: French
+    help: Help
+    help_title: Macro Manager - Help Menu
     title: Macro Manager
     options: Options
-    ui_key: GUI keys
+    key: GUI keys
     lang: Language
     uninstall: Uninstall 
     keys: Keys 
@@ -21,7 +23,7 @@ en:
     info: Informations
     dlt_success: App files deleted successfully
     dlt_error: "An error occured, the App files couldn't be deleted. \nPlease try again later."
-    ui_key_msg: Which keys do you want to use, current is
-    ui_key_change: Change the GUI keys
+    key_msg: Which keys do you want to use, current is
+    key_change: Change the GUI keys
     invalid_key: Keys invalid
-    ui_key_eg: The keys must be in a valid format eg 'ctrl+alt+a'
+    key_eg: The keys must be in a valid format eg 'ctrl+alt+a'
