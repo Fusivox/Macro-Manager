@@ -1,4 +1,7 @@
-import json, keyboard, os, ui, utils, sys, i18n
+import sys
+if sys.platform != "win32":
+    raise Exception("This app sadly only works on Windows (for now hopefully :D)")
+import json, keyboard, os, ui, utils, i18n
 from win32com.client import Dispatch
 
 def ressource_path(path):
@@ -61,8 +64,7 @@ class Hotkeys():
                     "comment" : "This is a hotkey example and don't really do something"
                 }
             }
-            with open(f"{self.appdata}\\Macro Manager\\data.json", "w+") as f:
-                json.dump(data, f, indent=4)
+            utils.actualise(data)
             self.create_shortcut()  
             
             app = ui.Application()
@@ -76,7 +78,7 @@ class Hotkeys():
                     message=_("htk.thx_msg")
                     )
             else :
-                utils.delete()
+                utils.delete_win32()
                 ui.messagebox.showinfo(
                     title=_("htk.info_title"),
                     message=_("htk.cancelled_msg")

@@ -10,7 +10,7 @@ def test():
 
 
 root = tk.Tk()
-root.title("tkinter test")
+root.title("tkinter test tk")
 root.geometry("400x300")
 
 menu_bar = tk.Menu(root)
@@ -67,7 +67,7 @@ for m in monitor :
     if m.is_primary :
         print(f"Resolution: {m.width}x{m.height}")
 
-"""import tkinter as tk
+import tkinter as tk
 from tkinter import ttk
 
 
@@ -76,7 +76,7 @@ def test():
 
 
 root = tk.Tk()
-root.title("tkinter test")
+root.title("tkinter test ttk")
 root.geometry("400x300")
 
 # =======================
@@ -148,4 +148,3 @@ def on_select(event):
 tree.bind("<<TreeviewSelect>>", on_select)
 
 root.mainloop()
-"""

@@ -6,7 +6,7 @@ try :
     os.rmdir(f"{appdata}\\Macro manager") 
     os.remove(f"{appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk")
 
-    if not os.path.exists(f"{appdata}\\Macro manager") or not os.path.exists(f"{appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"):
+    if not os.path.exists(f"{appdata}\\Macro manager") and not os.path.exists(f"{appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"):
         print("Succesfully Uninstalled")
 
     else : print("Something went wrong, Uninstallation failed")

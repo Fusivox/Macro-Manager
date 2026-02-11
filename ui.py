@@ -1,5 +1,5 @@
 import tkinter as tk , os, json, utils, i18n, sys
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox, simpledialog, ttk
 from keyboard import add_hotkey, remove_hotkey
 from screeninfo import get_monitors
 
@@ -38,6 +38,46 @@ class Application(tk.Tk):
         
         self.build_menu()
 
+        # test TTK
+        """self.frame = ttk.Frame(self, padding=0)
+        self.frame.grid(row=0, column=0, sticky="nsew")
+
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.frame.rowconfigure(1, weight=1)
+        self.frame.columnconfigure(1, weight=1, minsize=50)
+
+        self.yScorll = ttk.Scrollbar(self.frame, orient=tk.VERTICAL)
+        self.yScorll.grid(row=1, column=2, sticky="ns", padx=2, pady=2)
+
+        self.tree = ttk.Treeview(
+            self.frame,
+            show="headings",
+            yscrollcommand=self.yScorll.set,
+            selectmode="browse"
+        )
+        self.tree.grid(row=1, column=1, sticky="nsew", padx=1, pady=2)
+
+        self.yScorll.config(command=self.tree.yview)
+
+        for macro in self.data:
+            self.tree.insert("", "end", values=(macro, self.data[macro]["keys"],))
+        
+        self.selected = ttk.Label(self, text="", wraplength=300, justify="left")
+        self.selected.grid(row=1, column=2, pady=1)
+
+        self.tree.bind("<<TreeviewSelect>>", self.on_select)
+
+    def on_select(self, event):
+        selected = self.tree.selection()
+        Keys = _("ui.keys")
+        comment = _("ui.comment")
+        if selected:
+            index = str(self.tree.index(selected[0]))
+            self.selected.config(text=f"{Keys} : {self.data[index]["keys"]} \n\n{comment} : {self.data[index]["comment"]}" if self.data[str(index)]["comment"] != None else f"{Keys} : {self.data[index]["keys"]} \n\n ")"""
+
+        
+        
         self.yScorll = tk.Scrollbar(self, orient=tk.VERTICAL)
         self.yScorll.grid(row=1, column=1, sticky=tk.N+tk.S, padx=10, pady=10)
 
@@ -62,10 +102,11 @@ class Application(tk.Tk):
         if selection:
             index = str(selection[0])
             self.selected.config(text=f"{Keys} : {self.data[index]["keys"]} \n\n{comment} : {self.data[index]["comment"]}" if self.data[str(index)]["comment"] != None else f"{Keys} : {self.data[index]["keys"]} \n\n ")
+            
 
+        
     def close(self):
-        with open(f"{self.appdata}\\Macro Manager\\data.json", "w+") as f:
-            json.dump(self.data, f, indent=4)
+        utils.actualise(self.data)
         self.destroy()
 
     def confirm(self):
@@ -88,10 +129,10 @@ class Application(tk.Tk):
                 )
 
     def gui_keys(self):
-        msg = _("ui.ui_key_msg")
+        msg = _("ui.key_msg")
 
         keys = simpledialog.askstring(
-            title=_("ui.ui_key_change"),
+            title=_("ui.key_change"),
             prompt=f"{msg} : {self.data["0"]["keys"]}"
         )
         if keys != None and keys != "":
@@ -103,8 +144,12 @@ class Application(tk.Tk):
             except Exception :
                 messagebox.showerror(
                     title=_("ui.invalid_key"),
-                    message=_("ui.ui_key_eg")
+                    message=_("ui.key_eg")
                 )
+
+    def help(self):
+        self.help_menu = tk.Toplevel(height=400, width=400, takefocus=True)
+        self.help_menu.title(_("ui.help_title"))
 
     def set_lang(self, lang):
         i18n.set("locale", lang)
@@ -123,7 +168,8 @@ class Application(tk.Tk):
         self.menu_lang.add_command(label=_("ui.en"), command=lambda: self.set_lang("en"))
         self.menu_lang.add_command(label=_("ui.fr"), command=lambda: self.set_lang("fr"))
 
-        self.menu.add_command(label=_("ui.ui_key"), command=self.gui_keys)
+        self.menu.add_command(label=_("ui.key"), command=self.gui_keys)
+        self.menu.add_command(label=_("ui.help"), command=self.help)
         self.menu.add_separator()
         self.menu.add_command(label=_("ui.uninstall"), command=self.confirm)
         
