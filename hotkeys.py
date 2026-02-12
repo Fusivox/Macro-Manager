@@ -65,7 +65,7 @@ class Hotkeys():
                 }
             }
             utils.actualise(data)
-            self.create_shortcut()  
+            self.create_shortcut_win32()  
             
             app = ui.Application()
             ask_confirm = ui.messagebox.askokcancel(
@@ -93,7 +93,7 @@ class Hotkeys():
                     )
             app.mainloop()
             
-    def create_shortcut(self):
+    def create_shortcut_win32(self):
 
         shortcut_path = f"{self.appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"
         path = sys.executable
@@ -110,4 +110,5 @@ if __name__ == "__main__":
     hotkeys = Hotkeys()
 
 # python -m PyInstaller --onefile --clean --noconsole -n "Macro Manager v*" hotkeys.py --add-data "locales;locales"
+
 # import os ; appdata = os.getenv("APPDATA") ; os.remove(f"{appdata}\\Macro Manager\\data.json") ; os.rmdir(f"{appdata}\\Macro manager") ; os.remove(f"{appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk")
