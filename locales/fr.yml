@@ -5,7 +5,9 @@ fr:
     startup_msg: "Cette app surveille le clavier jusqu'a désinstallation,\nElle creer aussi un raccourci dans le dossier démarrage de Windows, acceptez-vous ?"
     thx_msg: Merci d'avoir téléchargé Macro Manager !
     cancelled_msg : L'installation de l'app a été annulé
-  
+    err_title: Quelque chose a échoué
+    err_inst: "Une erreur est survenu, l'installation n'a pu être annulé.\nVeuillez réessayer plus tard"
+
   ui:
     en: Anglais
     fr: Français
