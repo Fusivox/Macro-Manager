@@ -35,6 +35,11 @@ def delete_win32():
             os.remove(f"{appdata}\\Macro Manager\\data.json") 
             os.rmdir(f"{appdata}\\Macro manager")
             os.remove(f"{appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk")
+            return True
             
-        except Exception as e :
-            raise e
+        except FileNotFoundError:
+            return True
+        
+        except Exception as e:
+            return False + f" {e}"
+        

@@ -1,4 +1,4 @@
-import tkinter as tk , os, json, utils, i18n, sys
+import tkinter as tk, os, json, utils, i18n, sys
 from tkinter import messagebox, simpledialog, ttk
 from keyboard import add_hotkey, remove_hotkey
 from screeninfo import get_monitors
@@ -115,8 +115,8 @@ class Application(tk.Tk):
             message=_("ui.dlt_confirm")
         )
         if sure :
-            utils.delete()
-            if not os.path.exists(f"{self.appdata}\\Macro Manager"):
+            dlt = utils.delete_win32()
+            if dlt:
                 messagebox.showinfo(
                     title=_("ui.info"),
                     message=_("ui.dlt_success")

@@ -78,12 +78,19 @@ class Hotkeys():
                     message=_("htk.thx_msg")
                     )
             else :
-                utils.delete_win32()
-                ui.messagebox.showinfo(
-                    title=_("htk.info_title"),
-                    message=_("htk.cancelled_msg")
-                )
-                app.destroy()
+                dlt = utils.delete_win32()
+
+                if dlt:
+                    ui.messagebox.showinfo(
+                        title=_("htk.info_title"),
+                        message=_("htk.cancelled_msg")
+                    )
+                    app.destroy()
+                else :
+                    ui.messagebox.showerror(
+                        title=_("htk.err_title"),
+                        message=_("htk.err_inst")
+                    )
             app.mainloop()
             
     def create_shortcut(self):
