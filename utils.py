@@ -1,9 +1,30 @@
-import json, os
+import json, os, ui
 
-def make_callback(actions : list):
+def make_callback(actions: list):
     def callback():
-        for action in actions:
-            exec(action)
+        for action, *params in actions:
+            if action == "open":
+
+                if params[0] == "gui": #("open", "gui")
+                    app = ui.Application()
+                    app.mainloop()
+
+                elif params[0] == "cmd": #("open", "cmd", #dossier dans lequel cmd est ouvert None si aucun spécifié)
+                    import subprocess
+                    subprocess.Popen(["cmd.exe"], cwd=params[1])                
+
+            elif action == "wait": #("wait", #temps en secondes)
+                import time
+                time.sleep(params[0])
+
+            elif action == "write": #("write", "#texte a écrire")
+                import pyautogui
+                pyautogui.write(params[0])
+
+            elif action == "click": #("click", #x, #y, #nb clicks ,#temps pour aller au cos)
+                import pyautogui
+                pyautogui.click(params[0], params[1], params[2], params[3])
+                
     return callback
 
 def actualise(data: dict):
@@ -39,7 +60,6 @@ def delete_win32():
             
         except FileNotFoundError:
             return True
-        
-        except Exception as e:
+
+        except Exception as e :
             return False + f" {e}"
-        

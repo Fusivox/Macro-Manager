@@ -48,18 +48,16 @@ class Hotkeys():
                 0 : {
                     "keys" : "ctrl+alt+a",
                     "actions" : [
-                        "app = ui.Application()",
-                        "app.mainloop()"
+                        ("open", "gui")
                     ],
                     "comment" : None
                 },
                 1 : {
                     "keys" : "ctrl+alt+q",
                     "actions" : [
-                        "import subprocess, time, keyboard",
-                        "subprocess.Popen(['cmd.exe'])",
-                        "time.sleep(1)",
-                        "keyboard.write('This is a hotkey example')"
+                        ("open", "cmd", None),
+                        ("wait", 1),
+                        ("write", "This is a hotkey exemple")
                     ],
                     "comment" : "This is a hotkey example and don't really do something"
                 }
@@ -79,16 +77,15 @@ class Hotkeys():
                     )
             else :
                 dlt = utils.delete_win32()
-
                 if dlt:
                     ui.messagebox.showinfo(
                         title=_("htk.info_title"),
                         message=_("htk.cancelled_msg")
                     )
                     app.destroy()
-                else :
+                else:
                     ui.messagebox.showerror(
-                        title=_("htk.err_title"),
+                        title=_("htl.err_title"),
                         message=_("htk.err_inst")
                     )
             app.mainloop()
@@ -110,5 +107,4 @@ if __name__ == "__main__":
     hotkeys = Hotkeys()
 
 # python -m PyInstaller --onefile --clean --noconsole -n "Macro Manager v*" hotkeys.py --add-data "locales;locales"
-
 # import os ; appdata = os.getenv("APPDATA") ; os.remove(f"{appdata}\\Macro Manager\\data.json") ; os.rmdir(f"{appdata}\\Macro manager") ; os.remove(f"{appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk")
