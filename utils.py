@@ -2,28 +2,44 @@ import json, os, ui
 
 def make_callback(actions: list):
     def callback():
-        for action, *params in actions:
+        for action, params in actions:
             if action == "open":
 
-                if params[0] == "gui": #("open", "gui")
+                if params.get("window") == "gui": #("open", {"window":"gui"})
                     app = ui.Application()
                     app.mainloop()
 
-                elif params[0] == "cmd": #("open", "cmd", #dossier dans lequel cmd est ouvert None si aucun spécifié)
-                    import subprocess
-                    subprocess.Popen(["cmd.exe"], cwd=params[1])                
+                elif params.get("window") == "cmd": #("open", {"window":"cmd", "folder":"Dossier dans lequel le cmd est ouvert si spécifié sinon celui par default"})
+                    from subprocess import Popen
+                    Popen(["cmd.exe"], cwd=params.get("folder", None))         
+
+                elif params.get("window") == "explorer": #("open", {"window":"explorer", "folder":"Dossier dans lequel le navigateur de fichier est ouvert si spécifié sinon celui par default"})
+                    from subprocess import Popen
+                    Popen(["Explorer", params.get("folder", None)], shell=True)
 
             elif action == "wait": #("wait", #temps en secondes)
-                import time
-                time.sleep(params[0])
+                from time import sleep
+                sleep(params[0])
 
-            elif action == "write": #("write", "#texte a écrire")
-                import pyautogui
-                pyautogui.write(params[0])
+            elif action == "write": #("write", {"text":"texte a ecrire", "interval":attente entre chaque lettre})
+                from pyautogui import write
+                write(message=params["text"], interval=params.get("interval", 0))
 
-            elif action == "click": #("click", #x, #y, #nb clicks ,#temps pour aller au cos)
-                import pyautogui
-                pyautogui.click(params[0], params[1], params[2], params[3])
+            elif action == "click": #("click", {"x":si rien x curseur, "y":si rien y curseur, "clicks":par default 1, "interval":par default 0, "button":"primary(default) ou secondary ou middle" , "duration":temps pour aller au cos spécifié 0 par default})
+                from pyautogui import click 
+                click(x=params.get("x", None), y=params.get("y", None), clicks=params.get("clicks", 1), interval=params.get("interval", 0), button=params.get("button", "primary"), duration=params.get("duration", 0))
+
+            elif action == "moveto": #("moveto", {"x":..., "y":..., "duration":0 par default})
+                from pyautogui import moveTo
+                moveTo(x=params.get("x", None), y=params.get("x", None), duration=params.get("duration", 0))
+
+            elif action == "move": #("move", {"x":+relatif a la souris, "y":+relatif a la souris, "duration":0 par default})
+                from pyautogui import move
+                move(xOffset=params.get("x", 0), yOffset=params.get("y", 0), duration=params.get("duration", 0))
+
+            elif action == "press":  #("press", {"keys":touche a appuyer, presses=nb de fois appuyer})
+                from pyautogui import press
+                press(keys=params["keys"], presses=params.get("presses", 1), interval=params.get("interval", 0))
                 
     return callback
 
@@ -32,7 +48,7 @@ def actualise(data: dict):
     with open(f"{appdata}\\Macro Manager\\data.json", "w+") as f:
         json.dump(data, f, indent=4)
 
-def add(data: dict, keys: str, actions: str, comment: str = None):
+def add(data: dict, keys: str, actions: list, comment: str = None):
     data[len(data)] = {
         "keys" : keys,
         "actions" : actions,

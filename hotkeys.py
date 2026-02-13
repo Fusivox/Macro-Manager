@@ -48,16 +48,16 @@ class Hotkeys():
                 0 : {
                     "keys" : "ctrl+alt+a",
                     "actions" : [
-                        ("open", "gui")
+                        ("open", {"window":"gui"})
                     ],
                     "comment" : None
                 },
                 1 : {
                     "keys" : "ctrl+alt+q",
                     "actions" : [
-                        ("open", "cmd", None),
+                        ("open", {"window":"gui"}),
                         ("wait", 1),
-                        ("write", "This is a hotkey exemple")
+                        ("write", {"text":"This is a hotkey exemple"})
                     ],
                     "comment" : "This is a hotkey example and don't really do something"
                 }
@@ -75,7 +75,7 @@ class Hotkeys():
                     title=_("htk.info_title"),
                     message=_("htk.thx_msg")
                     )
-            else :
+            else:
                 dlt = utils.delete_win32()
                 if dlt:
                     ui.messagebox.showinfo(
