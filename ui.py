@@ -1,4 +1,4 @@
-import tkinter as tk, os, json, utils, i18n, sys
+import tkinter as tk , os, json, utils, i18n, sys
 from tkinter import messagebox, simpledialog, ttk
 from keyboard import add_hotkey, remove_hotkey
 from screeninfo import get_monitors
@@ -7,16 +7,21 @@ def ressource_path(path):
     base = getattr(sys, '_MEIPASS', os.path.abspath("."))
     return os.path.join(base, path)
 
-i18n.load_path.append(ressource_path("locales"))
-i18n.set("filename_format", "{locale}.yml")
-i18n.set('locale', "en")
-i18n.set("fallback", "fr")
-
-_ = i18n.t
-
 class Application(tk.Tk):
     def __init__(self, screenName = "Main page", baseName = None, className = "Tk", useTk = True, sync = False, use = None):
         super().__init__(screenName, baseName, className, useTk, sync, use)
+
+        i18n.load_path.append(ressource_path("locales"))
+        i18n.set("filename_format", "{locale}.yml")
+
+        appdata = os.getenv("APPDATA")
+        with open(f"{appdata}\\Macro Manager\\settings.json", "r") as f:
+            settings = json.load(f)
+
+        i18n.set('locale', settings["lang"])
+        i18n.set("fallback", settings["fallback"])
+
+        self._ = i18n.t
 
         self.appdata = os.getenv("APPDATA")
         with open(f"{self.appdata}\\Macro Manager\\data.json", "r") as f:
@@ -33,7 +38,7 @@ class Application(tk.Tk):
                     self.tk.call("tk", "scaling", 1.75)
                     self.geometry("500x300")
         
-        self.title(_("ui.title"))
+        self.title(self._("ui.title"))
         self.protocol("WM_DELETE_WINDOW", self.close)
         
         self.build_menu()
@@ -70,8 +75,8 @@ class Application(tk.Tk):
 
     def on_select(self, event):
         selected = self.tree.selection()
-        Keys = _("ui.keys")
-        comment = _("ui.comment")
+        Keys = self._("ui.keys")
+        comment = self._("ui.comment")
         if selected:
             index = str(self.tree.index(selected[0]))
             self.selected.config(text=f"{Keys} : {self.data[index]["keys"]} \n\n{comment} : {self.data[index]["comment"]}" if self.data[str(index)]["comment"] != None else f"{Keys} : {self.data[index]["keys"]} \n\n ")"""
@@ -97,11 +102,11 @@ class Application(tk.Tk):
 
     def on_select(self, event):
         selection = self.listbox.curselection()
-        Keys = _("ui.keys")
-        comment = _("ui.comment")
+        Keys = self._("ui.keys")
+        comment = self._("ui.comment")
         if selection:
             index = str(selection[0])
-            self.selected.config(text=f"{Keys} : {self.data[index]["keys"]} \n\n{comment} : {self.data[index]["comment"]}" if self.data[str(index)]["comment"] != None else f"{Keys} : {self.data[index]["keys"]} \n\n ")
+            self.selected.config(text=f"{Keys} : {self.data[index]["keys"]} \n\n{comment} : {self.data[index]["comment"]}" if self.data[str(index)]["comment"] != None else f"{Keys} : {self.data[index]["keys"]}\n\n")
             
 
         
@@ -111,28 +116,28 @@ class Application(tk.Tk):
 
     def confirm(self):
         sure = messagebox.askokcancel(
-            title=_("ui.confirm"),
-            message=_("ui.dlt_confirm")
+            title=self._("ui.confirm"),
+            message=self._("ui.dlt_confirm")
         )
         if sure :
             dlt = utils.delete_win32()
             if dlt:
                 messagebox.showinfo(
-                    title=_("ui.info"),
-                    message=_("ui.dlt_success")
+                    title=self._("ui.info"),
+                    message=self._("ui.dlt_success")
                 )
                 self.destroy()
             else : 
                 messagebox.showerror(
-                    title=_("ui.info"),
-                    message=_("ui.dlt_error")
+                    title=self._("ui.info"),
+                    message=self._("ui.dlt_error")
                 )
 
     def gui_keys(self):
-        msg = _("ui.key_msg")
+        msg = self._("ui.key_msg")
 
         keys = simpledialog.askstring(
-            title=_("ui.key_change"),
+            title=self._("ui.key_change"),
             prompt=f"{msg} : {self.data["0"]["keys"]}"
         )
         if keys != None and keys != "":
@@ -143,17 +148,17 @@ class Application(tk.Tk):
                 
             except Exception :
                 messagebox.showerror(
-                    title=_("ui.invalid_key"),
-                    message=_("ui.key_eg")
+                    title=self._("ui.invalid_key"),
+                    message=self._("ui.key_eg")
                 )
 
     def help(self):
         self.help_menu = tk.Toplevel(height=400, width=400, takefocus=True)
-        self.help_menu.title(_("ui.help_title"))
+        self.help_menu.title(self._("ui.help_title"))
 
     def set_lang(self, lang):
         i18n.set("locale", lang)
-        self.title(_("ui.title"))
+        self.title(self._("ui.title"))
         self.refresh_menu()
 
     def build_menu(self):
@@ -161,17 +166,17 @@ class Application(tk.Tk):
         self.config(menu=self.menu_bar)
 
         self.menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=_("ui.options"), menu=self.menu)
+        self.menu_bar.add_cascade(label=self._("ui.options"), menu=self.menu)
         self.menu_lang = tk.Menu(self.menu, tearoff=0)
 
-        self.menu.add_cascade(label=_("ui.lang"), menu=self.menu_lang)
-        self.menu_lang.add_command(label=_("ui.en"), command=lambda: self.set_lang("en"))
-        self.menu_lang.add_command(label=_("ui.fr"), command=lambda: self.set_lang("fr"))
+        self.menu.add_cascade(label=self._("ui.lang"), menu=self.menu_lang)
+        self.menu_lang.add_command(label=self._("ui.en"), command=lambda: self.set_lang("en"))
+        self.menu_lang.add_command(label=self._("ui.fr"), command=lambda: self.set_lang("fr"))
 
-        self.menu.add_command(label=_("ui.key"), command=self.gui_keys)
-        self.menu.add_command(label=_("ui.help"), command=self.help)
+        self.menu.add_command(label=self._("ui.key"), command=self.gui_keys)
+        self.menu.add_command(label=self._("ui.help"), command=self.help)
         self.menu.add_separator()
-        self.menu.add_command(label=_("ui.uninstall"), command=self.confirm)
+        self.menu.add_command(label=self._("ui.uninstall"), command=self.confirm)
         
 
     def refresh_menu(self):

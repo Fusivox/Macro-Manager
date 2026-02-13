@@ -1,4 +1,4 @@
-import json, os, ui
+import json, os
 
 def make_callback(actions: list):
     def callback():
@@ -6,6 +6,7 @@ def make_callback(actions: list):
             if action == "open":
 
                 if params.get("window") == "gui": #("open", {"window":"gui"})
+                    import ui
                     app = ui.Application()
                     app.mainloop()
 
@@ -43,10 +44,15 @@ def make_callback(actions: list):
                 
     return callback
 
-def actualise(data: dict):
+def actualise(data: dict|None = None, settings: dict|None = None):
     appdata = os.getenv("APPDATA")
-    with open(f"{appdata}\\Macro Manager\\data.json", "w+") as f:
-        json.dump(data, f, indent=4)
+    if data:
+        with open(f"{appdata}\\Macro Manager\\data.json", "w+") as f:
+            json.dump(data, f, indent=4)
+    if settings:
+        with open(f"{appdata}\\Macro Manager\\settings.json", "w+") as f:
+            json.dump(settings, f, indent=4)
+
 
 def add(data: dict, keys: str, actions: list, comment: str = None):
     data[len(data)] = {
@@ -70,6 +76,7 @@ def delete_win32():
         try :
             appdata = os.getenv("APPDATA")
             os.remove(f"{appdata}\\Macro Manager\\data.json") 
+            os.remove(f"{appdata}\\Macro Manager\\settings.json")
             os.rmdir(f"{appdata}\\Macro manager")
             os.remove(f"{appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk")
             return True
@@ -77,5 +84,5 @@ def delete_win32():
         except FileNotFoundError:
             return True
 
-        except Exception as e :
-            return False + f" {e}"
+        except Exception :
+            return False

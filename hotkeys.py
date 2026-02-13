@@ -28,6 +28,12 @@ class Hotkeys():
             print(f">Debug : {self.appdata}")           
             with open(f"{self.appdata}\\Macro Manager\\data.json", "r") as f:
                 data = json.load(f)
+            with open(f"{self.appdata}\\Macro Manager\\settings.json", "r") as f:
+                settings = json.load(f)
+
+            i18n.set('locale', settings["lang"])
+            i18n.set("fallback", settings["fallback"])
+
             print(data)
             for nb in data:
                 keys = data[nb]["keys"]
@@ -55,14 +61,19 @@ class Hotkeys():
                 1 : {
                     "keys" : "ctrl+alt+q",
                     "actions" : [
-                        ("open", {"window":"gui"}),
+                        ("open", {"window": "gui"}),
                         ("wait", 1),
-                        ("write", {"text":"This is a hotkey exemple"})
+                        ("write", {"text": "This is a hotkey exemple"})
                     ],
                     "comment" : "This is a hotkey example and don't really do something"
                 }
             }
-            utils.actualise(data)
+            settings = {
+                "lang": "en",
+                "fallback": "fr"
+            }
+            utils.actualise(data, settings)
+
             self.create_shortcut_win32()  
             
             app = ui.Application()

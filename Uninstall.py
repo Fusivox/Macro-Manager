@@ -3,6 +3,7 @@ import os
 try :
     appdata = os.getenv("APPDATA")
     os.remove(f"{appdata}\\Macro Manager\\data.json") 
+    os.remove(f"{appdata}\\Macro Manager\\settings.json")
     os.rmdir(f"{appdata}\\Macro manager") 
     os.remove(f"{appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk")
 
@@ -13,6 +14,7 @@ try :
 
 except FileNotFoundError:
     print("Couldn't delete something that doesn't exist")
+    raise
 
 except Exception as e:
     print(f"Something went wrong : {e}")
