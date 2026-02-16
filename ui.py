@@ -3,27 +3,25 @@ from tkinter import messagebox, simpledialog, ttk
 from keyboard import add_hotkey, remove_hotkey
 from screeninfo import get_monitors
 
-def ressource_path(path):
-    base = getattr(sys, '_MEIPASS', os.path.abspath("."))
-    return os.path.join(base, path)
+
 
 class Application(tk.Tk):
     def __init__(self, screenName = "Main page", baseName = None, className = "Tk", useTk = True, sync = False, use = None):
         super().__init__(screenName, baseName, className, useTk, sync, use)
 
-        i18n.load_path.append(ressource_path("locales"))
+        i18n.load_path.append(self.ressource_path("locales"))
         i18n.set("filename_format", "{locale}.yml")
 
-        appdata = os.getenv("APPDATA")
-        with open(f"{appdata}\\Macro Manager\\settings.json", "r") as f:
-            settings = json.load(f)
+        self.appdata = os.getenv("APPDATA")
+        with open(f"{self.appdata}\\Macro Manager\\settings.json", "r") as f:
+            self.settings = json.load(f)
 
-        i18n.set('locale', settings["lang"])
-        i18n.set("fallback", settings["fallback"])
+        i18n.set('locale', self.settings["lang"])
+        i18n.set("fallback", self.settings["fallback"])
 
         self._ = i18n.t
 
-        self.appdata = os.getenv("APPDATA")
+        
         with open(f"{self.appdata}\\Macro Manager\\data.json", "r") as f:
             self.data = json.load(f)
 
@@ -39,6 +37,7 @@ class Application(tk.Tk):
                     self.geometry("500x300")
         
         self.title(self._("ui.title"))
+        self.iconbitmap(default=self.ressource_path("logo.ico"))
         self.protocol("WM_DELETE_WINDOW", self.close)
         
         self.build_menu()
@@ -80,9 +79,7 @@ class Application(tk.Tk):
         if selected:
             index = str(self.tree.index(selected[0]))
             self.selected.config(text=f"{Keys} : {self.data[index]["keys"]} \n\n{comment} : {self.data[index]["comment"]}" if self.data[str(index)]["comment"] != None else f"{Keys} : {self.data[index]["keys"]} \n\n ")"""
-
-        
-        
+  
         self.yScorll = tk.Scrollbar(self, orient=tk.VERTICAL)
         self.yScorll.grid(row=1, column=1, sticky=tk.N+tk.S, padx=10, pady=10)
 
@@ -107,11 +104,9 @@ class Application(tk.Tk):
         if selection:
             index = str(selection[0])
             self.selected.config(text=f"{Keys} : {self.data[index]["keys"]} \n\n{comment} : {self.data[index]["comment"]}" if self.data[str(index)]["comment"] != None else f"{Keys} : {self.data[index]["keys"]}\n\n")
-            
-
         
     def close(self):
-        utils.actualise(self.data)
+        utils.actualise(self.data, self.settings)
         self.destroy()
 
     def confirm(self):
@@ -147,9 +142,10 @@ class Application(tk.Tk):
                 self.data["0"]["keys"] = keys
                 
             except Exception :
+                message = self._("ui.key_eg").format(key=keys)
                 messagebox.showerror(
                     title=self._("ui.invalid_key"),
-                    message=self._("ui.key_eg")
+                    message=message
                 )
 
     def help(self):
@@ -182,3 +178,7 @@ class Application(tk.Tk):
     def refresh_menu(self):
         self.menu_bar.delete(0, "end")
         self.build_menu()
+
+    def ressource_path(self, path):
+        base = getattr(sys, '_MEIPASS', os.path.abspath("."))
+        return os.path.join(base, path)

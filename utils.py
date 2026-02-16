@@ -1,4 +1,5 @@
-import json, os
+import json, os, shutil
+from pathlib import Path
 
 def make_callback(actions: list):
     def callback():
@@ -20,7 +21,7 @@ def make_callback(actions: list):
 
             elif action == "wait": #("wait", #temps en secondes)
                 from time import sleep
-                sleep(params[0])
+                sleep(params)
 
             elif action == "write": #("write", {"text":"texte a ecrire", "interval":attente entre chaque lettre})
                 from pyautogui import write
@@ -32,13 +33,13 @@ def make_callback(actions: list):
 
             elif action == "moveto": #("moveto", {"x":..., "y":..., "duration":0 par default})
                 from pyautogui import moveTo
-                moveTo(x=params.get("x", None), y=params.get("x", None), duration=params.get("duration", 0))
+                moveTo(x=params.get("x", None), y=params.get("y", None), duration=params.get("duration", 0))
 
             elif action == "move": #("move", {"x":+relatif a la souris, "y":+relatif a la souris, "duration":0 par default})
                 from pyautogui import move
                 move(xOffset=params.get("x", 0), yOffset=params.get("y", 0), duration=params.get("duration", 0))
 
-            elif action == "press":  #("press", {"keys":touche a appuyer, presses=nb de fois appuyer})
+            elif action == "press":  #("press", {"keys":touche a appuyer, presses=nb de fois appuyer, "interval":intervale entre les plusieurs presses})
                 from pyautogui import press
                 press(keys=params["keys"], presses=params.get("presses", 1), interval=params.get("interval", 0))
                 
@@ -72,17 +73,21 @@ def remove(data: dict, nb: str|int, id=True):
     except Exception as e:
         raise Exception(f"An error occured : {e}")
     
-def delete_win32():
+def delete_win32() -> bool:
         try :
-            appdata = os.getenv("APPDATA")
-            os.remove(f"{appdata}\\Macro Manager\\data.json") 
-            os.remove(f"{appdata}\\Macro Manager\\settings.json")
-            os.rmdir(f"{appdata}\\Macro manager")
-            os.remove(f"{appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk")
-            return True
             
-        except FileNotFoundError:
-            return True
+            path = Path.home() / "AppData" / "Roaming" / "Macro Manager"
+            lnk = Path.home() / "AppData" / "Roaming" / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup" / "Macro Manager.lnk"
 
-        except Exception :
-            return False
+            if path.exists(): shutil.rmtree(path)
+            
+            if lnk.exists() : os.remove(lnk)
+
+            if not path.exists() and not lnk.exists():
+                return True
+
+            else : return False
+
+        except Exception as e:
+            False
+

@@ -61,7 +61,7 @@ class Hotkeys():
                 1 : {
                     "keys" : "ctrl+alt+q",
                     "actions" : [
-                        ("open", {"window": "gui"}),
+                        ("open", {"window": "cmd"}),
                         ("wait", 1),
                         ("write", {"text": "This is a hotkey exemple"})
                     ],
@@ -73,8 +73,6 @@ class Hotkeys():
                 "fallback": "fr"
             }
             utils.actualise(data, settings)
-
-            self.create_shortcut_win32()  
             
             app = ui.Application()
             ask_confirm = ui.messagebox.askokcancel(
@@ -86,26 +84,21 @@ class Hotkeys():
                     title=_("htk.info_title"),
                     message=_("htk.thx_msg")
                     )
+                self.create_shortcut_win32()  
             else:
-                dlt = utils.delete_win32()
-                if dlt:
-                    ui.messagebox.showinfo(
-                        title=_("htk.info_title"),
-                        message=_("htk.cancelled_msg")
-                    )
-                    app.destroy()
-                else:
-                    ui.messagebox.showerror(
-                        title=_("htl.err_title"),
-                        message=_("htk.err_inst")
-                    )
+                ui.messagebox.showinfo(
+                    title=_("htk.info_title"),
+                    message=_("htk.cancelled_msg")
+                )
+                app.destroy()
+
             app.mainloop()
             
     def create_shortcut_win32(self):
 
         shortcut_path = f"{self.appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"
         path = sys.executable
-        dir = os.path.dirname(path)
+        dir = f"{self.appdata}\\Macro Manager"
 
         shell = Dispatch("WScript.Shell")
         shortcut = shell.CreateShortCut(shortcut_path)
@@ -116,6 +109,3 @@ class Hotkeys():
 
 if __name__ == "__main__":
     hotkeys = Hotkeys()
-
-# python -m PyInstaller --onefile --clean --noconsole -n "Macro Manager v*" hotkeys.py --add-data "locales;locales"
-# import os ; appdata = os.getenv("APPDATA") ; os.remove(f"{appdata}\\Macro Manager\\data.json") ; os.rmdir(f"{appdata}\\Macro manager") ; os.remove(f"{appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk")
