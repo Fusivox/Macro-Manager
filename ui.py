@@ -1,8 +1,5 @@
-import tkinter as tk , os, json, utils, i18n, sys
-from tkinter import messagebox, simpledialog, ttk
-from keyboard import add_hotkey, remove_hotkey
-from screeninfo import get_monitors
-
+import tkinter as tk , os, json, utils, i18n, sys, screeninfo, keyboard
+from tkinter import messagebox, simpledialog
 
 
 class Application(tk.Tk):
@@ -25,85 +22,34 @@ class Application(tk.Tk):
         with open(f"{self.appdata}\\Macro Manager\\data.json", "r") as f:
             self.data = json.load(f)
 
-        monitor = get_monitors()
+        monitor = screeninfo.get_monitors()
 
         for m in monitor:
             if m.is_primary:
                 if m.width > 1920 and m.height > 1080 :
-                    self.tk.call("tk", "scaling", 2)
-                    self.geometry("600x400")
-                else : 
                     self.tk.call("tk", "scaling", 1.75)
-                    self.geometry("500x300")
+                    self.geometry("550x350")
+                else : 
+                    self.tk.call("tk", "scaling", 1.5)
+                    self.geometry("400x200")
+
+        self.resizable(False, False)
         
         self.title(self._("ui.title"))
         self.iconbitmap(default=self.ressource_path("logo.ico"))
         self.protocol("WM_DELETE_WINDOW", self.close)
         
         self.build_menu()
-
-        # test TTK
-        """self.frame = ttk.Frame(self, padding=0)
-        self.frame.grid(row=0, column=0, sticky="nsew")
-
-        self.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
-        self.frame.rowconfigure(1, weight=1)
-        self.frame.columnconfigure(1, weight=1, minsize=50)
-
-        self.yScorll = ttk.Scrollbar(self.frame, orient=tk.VERTICAL)
-        self.yScorll.grid(row=1, column=2, sticky="ns", padx=2, pady=2)
-
-        self.tree = ttk.Treeview(
-            self.frame,
-            show="headings",
-            yscrollcommand=self.yScorll.set,
-            selectmode="browse"
-        )
-        self.tree.grid(row=1, column=1, sticky="nsew", padx=1, pady=2)
-
-        self.yScorll.config(command=self.tree.yview)
-
-        for macro in self.data:
-            self.tree.insert("", "end", values=(macro, self.data[macro]["keys"],))
-        
-        self.selected = ttk.Label(self, text="", wraplength=300, justify="left")
-        self.selected.grid(row=1, column=2, pady=1)
-
-        self.tree.bind("<<TreeviewSelect>>", self.on_select)
+        self.build_main_ui()
 
     def on_select(self, event):
-        selected = self.tree.selection()
+        self.selection = self.listbox.curselection()
         Keys = self._("ui.keys")
         comment = self._("ui.comment")
-        if selected:
-            index = str(self.tree.index(selected[0]))
-            self.selected.config(text=f"{Keys} : {self.data[index]["keys"]} \n\n{comment} : {self.data[index]["comment"]}" if self.data[str(index)]["comment"] != None else f"{Keys} : {self.data[index]["keys"]} \n\n ")"""
-  
-        self.yScorll = tk.Scrollbar(self, orient=tk.VERTICAL)
-        self.yScorll.grid(row=1, column=1, sticky=tk.N+tk.S, padx=10, pady=10)
-
-        self.txt = tk.StringVar()
-
-        self.listbox = tk.Listbox(self, bg='white', exportselection=0, yscrollcommand=self.yScorll.set, activestyle="dotbox", listvariable=self.txt)
-        self.listbox.grid(row=1, column=2, sticky=tk.N+tk.S+tk.E+tk.W, padx=5, pady=10)
-        self.yScorll['command'] = self.listbox.yview
-
-        for macro in self.data:
-            self.listbox.insert(macro, self.data[macro]["keys"])
-
-        self.selected = tk.Label(self, text="", height=10, wraplength=300, justify="left")
-        self.selected.grid(row=1, column=3, padx=5)
-
-        self.listbox.bind("<<ListboxSelect>>", self.on_select)
-
-    def on_select(self, event):
-        selection = self.listbox.curselection()
-        Keys = self._("ui.keys")
-        comment = self._("ui.comment")
-        if selection:
-            index = str(selection[0])
-            self.selected.config(text=f"{Keys} : {self.data[index]["keys"]} \n\n{comment} : {self.data[index]["comment"]}" if self.data[str(index)]["comment"] != None else f"{Keys} : {self.data[index]["keys"]}\n\n")
+        self.rmv_button.config(state="normal", bg="SystemButtonFace")
+        if self.selection:
+            self.index = str(self.selection[0])
+            self.selected.config(text=f"{Keys} : {self.data[self.index]["keys"]} \n\n{comment} : {self.data[self.index]["comment"]}" if self.data[self.index]["comment"] != None else f"{Keys} : {self.data[self.index]["keys"]}\n\n")
         
     def close(self):
         utils.actualise(self.data, self.settings)
@@ -137,8 +83,8 @@ class Application(tk.Tk):
         )
         if keys != None and keys != "":
             try :
-                test = add_hotkey(keys, lambda : None)
-                remove_hotkey(test)
+                test = keyboard.add_hotkey(keys, lambda : None)
+                keyboard.remove_hotkey(test)
                 self.data["0"]["keys"] = keys
                 
             except Exception :
@@ -156,6 +102,49 @@ class Application(tk.Tk):
         i18n.set("locale", lang)
         self.title(self._("ui.title"))
         self.refresh_menu()
+
+    def build_main_ui(self):
+        self.yScorll = tk.Scrollbar(self, orient=tk.VERTICAL)
+        self.yScorll.grid(row=1, column=1, sticky=tk.N+tk.S, padx=10, pady=10)
+
+        self.txt = tk.StringVar()
+
+        self.listbox = tk.Listbox(self, bg='white', exportselection=0, yscrollcommand=self.yScorll.set, activestyle="dotbox", listvariable=self.txt)
+        self.listbox.grid(row=1, column=2, sticky=tk.N+tk.S+tk.E+tk.W, padx=5, pady=10)
+        self.yScorll['command'] = self.listbox.yview
+
+        for macro in self.data:
+            self.listbox.insert(macro, self.data[macro]["keys"])
+
+        self.selected = tk.Label(self, text="", height=10, wraplength=300, justify="left")
+        self.selected.grid(row=1, column=3, padx=5)
+
+        self.listbox.bind("<<ListboxSelect>>", self.on_select)
+
+
+        self.rmv_button = tk.Button(self, text="remove", command=lambda: self.remove(self.index), state="disabled", bg="lightgray")
+        self.rmv_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.E)
+
+        self.add_button = tk.Button(self, text="new macro", command=self.new_macro)
+        self.add_button.grid(row= 2, column=3, pady=10, sticky=tk.W)
+
+    def refresh_listbox(self):
+        self.listbox.delete(0, tk.END)
+        for macro in self.data:
+            self.listbox.insert(macro, self.data[macro]["keys"])
+
+    def remove(self, nb):
+        utils.remove(self.data, nb)
+        self.refresh_listbox()
+        self.listbox.select_clear(0, tk.END)
+        self.selected.config(text="")
+        self.rmv_button.config(state="disabled", bg="lightgray")
+
+    def new_macro(self):
+        print("Rien pour l'instant")
+        # creer une fenetre avec une entrée texte pour les touches (ou appuyer dessus ?)
+        # faire une listebox ou les instructions a faire sont rangé dans l'ordre d'execution avec un boutton "add action" qui ouvre une fentre de selection d'une action avec ses parametres a choisir
+        # et une derniere entrée texte pour le commentaire (par default égal a None) 
 
     def build_menu(self):
         self.menu_bar = tk.Menu(self)
@@ -176,7 +165,7 @@ class Application(tk.Tk):
         
 
     def refresh_menu(self):
-        self.menu_bar.delete(0, "end")
+        self.menu_bar.delete(0, tk.END)
         self.build_menu()
 
     def ressource_path(self, path):
