@@ -49,7 +49,7 @@ class Application(tk.Tk):
         self.rmv_button.config(state="normal", bg="SystemButtonFace")
         if self.selection:
             self.index = str(self.selection[0])
-            self.selected.config(text=f"{Keys} : {self.data[self.index]["keys"]} \n\n{comment} : {self.data[self.index]["comment"]}" if self.data[self.index]["comment"] != None else f"{Keys} : {self.data[self.index]["keys"]}\n\n")
+            self.selected.config(text=f"{Keys} : {self.data[self.index]["keys"]} \n\n{comment} : {self.data[self.index]["comment"]}" if self.data[self.index]["comment"] is not None else f"{Keys} : {self.data[self.index]["keys"]}\n\n")
         
     def close(self):
         utils.actualise(self.data, self.settings)
@@ -81,7 +81,7 @@ class Application(tk.Tk):
             title=self._("ui.key_change"),
             prompt=f"{msg} : {self.data["0"]["keys"]}"
         )
-        if keys != None and keys != "":
+        if keys is not None and keys != "":
             try :
                 test = keyboard.add_hotkey(keys, lambda : None)
                 keyboard.remove_hotkey(test)
@@ -95,8 +95,11 @@ class Application(tk.Tk):
                 )
 
     def help(self):
-        self.help_menu = tk.Toplevel(height=400, width=400, takefocus=True)
+        self.help_menu = tk.Toplevel(height=400, width=400)
         self.help_menu.title(self._("ui.help_title"))
+        self.help_menu.resizable(False, False)
+        self.help_menu.focus_set()
+        self.help_menu.transient(self)
 
     def set_lang(self, lang):
         i18n.set("locale", lang)
@@ -130,11 +133,14 @@ class Application(tk.Tk):
 
     def refresh_listbox(self):
         self.listbox.delete(0, tk.END)
+        print(f">Debug : {self.data}")
         for macro in self.data:
             self.listbox.insert(macro, self.data[macro]["keys"])
 
     def remove(self, nb):
         rmv = utils.remove(self.data, nb)
+        self.data = {str(i): self.data[keys] for i, keys in enumerate(sorted(self.data.keys()))}
+        print(f">Debug : {self.data}")
         if rmv:
             self.refresh_listbox()
             self.listbox.select_clear(0, tk.END)
@@ -146,6 +152,13 @@ class Application(tk.Tk):
         # creer une fenetre avec une entrée texte pour les touches (ou appuyer dessus ?)
         # faire une listebox ou les instructions a faire sont rangé dans l'ordre d'execution avec un boutton "add action" qui ouvre une fentre de selection d'une action avec ses parametres a choisir
         # et une derniere entrée texte pour le commentaire (par default égal a None) 
+        self.nmcr_menu = tk.Toplevel(self, width=300, height=400)
+        self.nmcr_menu.title(self._("ui.nmcr_title"))
+
+        self.nmcr_menu.grab_set()
+        self.nmcr_menu.focus_set()
+        self.nmcr_menu.transient(self)
+        self.nmcr_menu.resizable(False, False)
 
     def build_menu(self):
         self.menu_bar = tk.Menu(self)

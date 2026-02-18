@@ -58,29 +58,27 @@ def add(data: dict, keys: str, actions: list, comment: str = None):
 
 def remove(data: dict, nb: str|int, id=True):
     try :
-        if id:
-            data.pop(nb)
-        else : 
-            del data[nb]
+        if id: data.pop(nb)
+        else: del data[nb]
+        
         return True
-    except Exception:
-        return False
+        
+    except Exception: return False
     
 def delete_win32() -> bool:
-        try :
+        try:
             
             path = Path.home() / "AppData" / "Roaming" / "Macro Manager"
             lnk = Path.home() / "AppData" / "Roaming" / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup" / "Macro Manager.lnk"
 
             if path.exists(): shutil.rmtree(path)
             
-            if lnk.exists() : os.remove(lnk)
+            if lnk.exists(): os.remove(lnk)
 
-            if not path.exists() and not lnk.exists():
-                return True
+            if not path.exists() and not lnk.exists(): return True
 
-            else : return False
+            else: return False
 
         except Exception:
-            False
+            return False
 
