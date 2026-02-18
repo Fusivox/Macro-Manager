@@ -134,11 +134,12 @@ class Application(tk.Tk):
             self.listbox.insert(macro, self.data[macro]["keys"])
 
     def remove(self, nb):
-        utils.remove(self.data, nb)
-        self.refresh_listbox()
-        self.listbox.select_clear(0, tk.END)
-        self.selected.config(text="")
-        self.rmv_button.config(state="disabled", bg="lightgray")
+        rmv = utils.remove(self.data, nb)
+        if rmv:
+            self.refresh_listbox()
+            self.listbox.select_clear(0, tk.END)
+            self.selected.config(text="")
+            self.rmv_button.config(state="disabled", bg="lightgray")
 
     def new_macro(self):
         print("Rien pour l'instant")

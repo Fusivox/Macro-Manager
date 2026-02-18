@@ -1,4 +1,4 @@
-import json, os, shutil
+import json, os, shutil, pyautogui, time
 from pathlib import Path
 
 def make_callback(actions: list):
@@ -20,28 +20,22 @@ def make_callback(actions: list):
                     Popen(["Explorer", params.get("folder", None)], shell=True)
 
             elif action == "wait": #("wait", #temps en secondes)
-                from time import sleep
-                sleep(params)
+                time.sleep(params)
 
             elif action == "write": #("write", {"text":"texte a ecrire", "interval":attente entre chaque lettre})
-                from pyautogui import write
-                write(message=params["text"], interval=params.get("interval", 0))
+                pyautogui.write(message=params["text"], interval=params.get("interval", 0))
 
             elif action == "click": #("click", {"x":si rien x curseur, "y":si rien y curseur, "clicks":par default 1, "interval":par default 0, "button":"primary(default) ou secondary ou middle" , "duration":temps pour aller au cos spécifié 0 par default})
-                from pyautogui import click 
-                click(x=params.get("x", None), y=params.get("y", None), clicks=params.get("clicks", 1), interval=params.get("interval", 0), button=params.get("button", "primary"), duration=params.get("duration", 0))
+                pyautogui.click(x=params.get("x", None), y=params.get("y", None), clicks=params.get("clicks", 1), interval=params.get("interval", 0), button=params.get("button", "primary"), duration=params.get("duration", 0))
 
             elif action == "moveto": #("moveto", {"x":..., "y":..., "duration":0 par default})
-                from pyautogui import moveTo
-                moveTo(x=params.get("x", None), y=params.get("y", None), duration=params.get("duration", 0))
+                pyautogui.moveTo(x=params.get("x", None), y=params.get("y", None), duration=params.get("duration", 0))
 
             elif action == "move": #("move", {"x":+relatif a la souris, "y":+relatif a la souris, "duration":0 par default})
-                from pyautogui import move
-                move(xOffset=params.get("x", 0), yOffset=params.get("y", 0), duration=params.get("duration", 0))
+                pyautogui.move(xOffset=params.get("x", 0), yOffset=params.get("y", 0), duration=params.get("duration", 0))
 
-            elif action == "press":  #("press", {"keys":touche a appuyer, presses=nb de fois appuyer, "interval":intervale entre les plusieurs presses})
-                from pyautogui import press
-                press(keys=params["keys"], presses=params.get("presses", 1), interval=params.get("interval", 0))
+            elif action == "press":  #("press", {"keys":touche a appuyer, presses=nb de fois appuyer, "interval":intervale entre les plusieurs presses}
+                pyautogui.press(keys=params["keys"], presses=params.get("presses", 1), interval=params.get("interval", 0))
                 
     return callback
 
@@ -68,10 +62,9 @@ def remove(data: dict, nb: str|int, id=True):
             data.pop(nb)
         else : 
             del data[nb]
-    except KeyError : 
-        raise Exception("couldn't remove a key that doesn't exist")
-    except Exception as e:
-        raise Exception(f"An error occured : {e}")
+        return True
+    except Exception:
+        return False
     
 def delete_win32() -> bool:
         try :
@@ -88,6 +81,6 @@ def delete_win32() -> bool:
 
             else : return False
 
-        except Exception as e:
+        except Exception:
             False
 
