@@ -28,3 +28,5 @@ fr:
     key_change: Changer les touches du GUI
     invalid_key: Touches invalides
     key_eg: "Les touches doivent être dans un format valide ex 'ctrl+alt+a'\n choisis : {key}"
+    new: nouvelle Macro
+    rmv: supprimer

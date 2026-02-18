@@ -122,10 +122,10 @@ class Application(tk.Tk):
         self.listbox.bind("<<ListboxSelect>>", self.on_select)
 
 
-        self.rmv_button = tk.Button(self, text="remove", command=lambda: self.remove(self.index), state="disabled", bg="lightgray")
+        self.rmv_button = tk.Button(self, text=self._("ui.rmv"), command=lambda: self.remove(self.index), state="disabled", bg="lightgray")
         self.rmv_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.E)
 
-        self.add_button = tk.Button(self, text="new macro", command=self.new_macro)
+        self.add_button = tk.Button(self, text=self._("ui.new"), command=self.new_macro)
         self.add_button.grid(row= 2, column=3, pady=10, sticky=tk.W)
 
     def refresh_listbox(self):
