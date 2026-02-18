@@ -30,3 +30,4 @@ en:
     key_eg: "The keys must be in a valid format eg 'ctrl+alt+a'\n chosen : {key}"
     new: new Macro
     rmv: remove
+    nmcr_title: Macro Manager - New Macro
