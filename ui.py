@@ -17,7 +17,6 @@ class Application(tk.Tk):
         i18n.set("fallback", self.settings["fallback"])
 
         self._ = i18n.t
-
         
         with open(f"{self.appdata}\\Macro Manager\\data.json", "r") as f:
             self.data = json.load(f)
@@ -38,6 +37,8 @@ class Application(tk.Tk):
         self.title(self._("ui.title"))
         self.iconbitmap(default=self.ressource_path("logo.ico"))
         self.protocol("WM_DELETE_WINDOW", self.close)
+
+        self.help_running = False
         
         self.build_menu()
         self.build_main_ui()
@@ -95,11 +96,18 @@ class Application(tk.Tk):
                 )
 
     def help(self):
-        self.help_menu = tk.Toplevel(height=400, width=400)
-        self.help_menu.title(self._("ui.help_title"))
-        self.help_menu.resizable(False, False)
-        self.help_menu.focus_set()
-        self.help_menu.transient(self)
+        if not self.help_running:
+            self.help_running = True
+            self.help_menu = tk.Toplevel(height=400, width=400)
+            self.help_menu.title(self._("ui.help_title"))
+            self.help_menu.resizable(False, False)
+            self.help_menu.focus_set()
+            self.help_menu.transient(self)
+            self.help_menu.protocol("WM_DELETE_WINDOW", self.help_false)
+
+    def help_false(self):
+        self.help_running = False
+        self.help_menu.destroy()
 
     def set_lang(self, lang):
         i18n.set("locale", lang)
@@ -123,7 +131,6 @@ class Application(tk.Tk):
         self.selected.grid(row=1, column=3, padx=5)
 
         self.listbox.bind("<<ListboxSelect>>", self.on_select)
-
 
         self.rmv_button = tk.Button(self, text=self._("ui.rmv"), command=lambda: self.remove(self.index), state="disabled", bg="lightgray")
         self.rmv_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.E)
@@ -176,7 +183,6 @@ class Application(tk.Tk):
         self.menu.add_command(label=self._("ui.help"), command=self.help)
         self.menu.add_separator()
         self.menu.add_command(label=self._("ui.uninstall"), command=self.confirm)
-        
 
     def refresh_menu(self):
         self.menu_bar.delete(0, tk.END)
