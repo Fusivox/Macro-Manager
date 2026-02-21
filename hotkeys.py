@@ -1,8 +1,14 @@
 import sys
-if sys.platform != "win32":
-    raise Exception("This app sadly only works on Windows (for now hopefully :D)")
-import json, keyboard, os, ui, utils, i18n
-from win32com.client import Dispatch
+if sys.platform == "win32":
+    import keyboard
+    from win32com.client import Dispatch
+elif sys.platform == "linux":
+    from lib import keyboard_linux as keyboard
+    from lib.linux32com import Dispatch
+else:
+    raise Exception("This app sadly only works on Windows and linux (for now hopefully :D)")
+
+import json, os, ui, utils, i18n
 
 def ressource_path(path):
     base = getattr(sys, '_MEIPASS', os.path.abspath("."))
