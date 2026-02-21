@@ -15,7 +15,7 @@ case "$option" in
         ln -s 'dist/Macro Manager v2' MacroManager
         ;;
     2)
-        rm -rf build *.spec dist MacroManager __pycache__
+        rm -rf build *.spec dist MacroManager __pycache__ ~/.config/Macro_Manager
         rm -rf None*
         ;;
     *)
