@@ -124,7 +124,7 @@ class Application(tk.Tk):
     def set_lang(self, lang):
         i18n.set("locale", lang)
         self.title(self._("ui.title"))
-        self.refresh_menu()
+        self.refresh_ui()
 
     def build_main_ui(self):
         self.yScorll = tk.Scrollbar(self, orient=tk.VERTICAL)
@@ -229,7 +229,6 @@ class Application(tk.Tk):
         #ajouter deux entrée texte pour l'abbreviation et pour le texte et le bouton "add"
 
     def switch_ui(self):
-
         for widget in self.winfo_children() :
             widget.destroy()
 
@@ -242,6 +241,19 @@ class Application(tk.Tk):
             self.build_main_ui()
 
         self.build_menu()
+
+    def refresh_ui(self):
+        for widget in self.winfo_children() :
+            widget.destroy()
+
+        if self.current_menu == "main":
+            self.build_main_ui()
+
+        elif self.current_menu == "abb":
+            self.build_abb_ui()
+
+        self.refresh_menu()
+
 
     def build_menu(self):
         self.menu_bar = tk.Menu(self)

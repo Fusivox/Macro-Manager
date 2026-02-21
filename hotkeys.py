@@ -39,7 +39,8 @@ class Hotkeys():
             for nb in data:
                 keys = data[nb]["keys"]
                 actions = data[nb]["actions"]
-                keyboard.add_hotkey(keys, utils.make_callback, args=(actions,))
+                callback = utils.make_callback(actions)
+                keyboard.add_hotkey(keys, callback)
                 print(f">Debug : new hotkey {keys}, do {actions}.")
 
             for nb in abbreviation:
@@ -69,7 +70,7 @@ class Hotkeys():
                     "keys" : "ctrl+alt+q",
                     "actions" : [
                         ("open", {"window": "cmd"}),
-                        ("wait", 1),
+                        ("wait", {"time": 1}),
                         ("write", {"text": "This is a hotkey exemple"})
                     ],
                     "comment" : "This is a hotkey example and don't really do something"

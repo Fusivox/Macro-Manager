@@ -1,4 +1,4 @@
-import json, os, shutil, pyautogui, time
+import json, os, shutil, pyautogui, time, ui, subprocess
 from pathlib import Path
 
 def make_callback(actions: list):
@@ -7,23 +7,20 @@ def make_callback(actions: list):
             if action == "open":
 
                 if params.get("window") == "gui": #("open", {"window":"gui"})
-                    import ui
                     app = ui.Application()
                     app.mainloop()
 
                 elif params.get("window") == "cmd": #("open", {"window":"cmd", "folder":"Dossier dans lequel le cmd est ouvert si spécifié sinon celui par default"})
-                    from subprocess import Popen
-                    Popen(["cmd.exe"], cwd=params.get("folder", None))         
+                    subprocess.Popen(["cmd.exe"], cwd=params.get("folder", None))         
 
                 elif params.get("window") == "explorer": #("open", {"window":"explorer", "folder":"Dossier dans lequel le navigateur de fichier est ouvert si spécifié sinon celui par default"})
-                    from subprocess import Popen
-                    Popen(["Explorer", params.get("folder", None)], shell=True)
+                    subprocess.Popen(["Explorer", params.get("folder", None)], shell=True)
 
             elif action == "wait": #("wait", #temps en secondes)
-                time.sleep(params)
+                time.sleep(params["time"])
 
             elif action == "write": #("write", {"text":"texte a ecrire", "interval":attente entre chaque lettre})
-                pyautogui.write(message=params["text"], interval=params.get("interval", 0))
+                pyautogui.write(params["text"], interval=params.get("interval", 0))
 
             elif action == "click": #("click", {"x":si rien x curseur, "y":si rien y curseur, "clicks":par default 1, "interval":par default 0, "button":"primary(default) ou secondary ou middle" , "duration":temps pour aller au cos spécifié 0 par default})
                 pyautogui.click(x=params.get("x", None), y=params.get("y", None), clicks=params.get("clicks", 1), interval=params.get("interval", 0), button=params.get("button", "primary"), duration=params.get("duration", 0))
