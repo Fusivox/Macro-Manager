@@ -46,7 +46,8 @@ class Hotkeys():
                 for nb in abbreviation:
                     source = abbreviation[nb]["source"]
                     text = abbreviation[nb]["text"]
-                    keyboard.add_abbreviation(source, text)
+                    callback = utils.make_callback(actions)
+                    keyboard.add_hotkey(keys, callback)
                     print(f">Debug : New abbreviation {source}, replaced by {text}")
 
                 keyboard.wait()
@@ -70,7 +71,7 @@ class Hotkeys():
                         "keys" : "ctrl+alt+q",
                         "actions" : [
                             ("open", {"window": "cmd"}),
-                            ("wait", 1),
+                            ("wait", {"time": 1}),
                             ("write", {"text": "This is a hotkey exemple"})
                         ],
                         "comment" : "This is a hotkey example and don't really do something"
