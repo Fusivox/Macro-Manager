@@ -28,7 +28,7 @@ class Hotkeys():
             print(f">Debug : {self.appdata}")           
             with open(f"{self.appdata}\\Macro Manager\\data.json", "r") as f:
                 data = json.load(f)
-            with open(f"{self.appdata}\\Macro Manager\\abbreviation.hson", "r") as f:
+            with open(f"{self.appdata}\\Macro Manager\\abbreviation.json", "r") as f:
                 abbreviation = json.load(f)
             with open(f"{self.appdata}\\Macro Manager\\settings.json", "r") as f:
                 settings = json.load(f)
@@ -122,4 +122,5 @@ class Hotkeys():
         shortcut.save()
 
 if __name__ == "__main__":
+
     hotkeys = Hotkeys()
