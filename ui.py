@@ -74,6 +74,7 @@ class Application(tk.Tk):
     def close(self):
         utils.actualise(self.data, self.settings)
         self.destroy()
+        exit()
 
     def confirm(self):
         sure = messagebox.askokcancel(
@@ -290,4 +291,5 @@ class Application(tk.Tk):
 
     def ressource_path(self, path):
         base = getattr(sys, '_MEIPASS', os.path.abspath("."))
+
         return os.path.join(base, path)
