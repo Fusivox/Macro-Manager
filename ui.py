@@ -72,7 +72,7 @@ class Application(tk.Tk):
             self.abb_selected.config(text=f"{source} : {self.abbreviation[self.abb_index]["source"]} \n\n{text} : {self.abbreviation[self.abb_index]["text"]}")
         
     def close(self):
-        utils.actualise(self.data, self.settings)
+        utils.actualise(self.data, self.settings, self.abbreviation)
         self.destroy()
         exit()
 
@@ -171,7 +171,7 @@ class Application(tk.Tk):
         for abb in self.abbreviation:
             self.abb_listbox.insert(abb, self.abbreviation[abb]["source"])
 
-        self.abb_selected = tk.Label(self, text="", height=10, wraplength=300, justify="left")
+        self.abb_selected = tk.Label(self, text="", height=10, wraplength=300, justify=tk.LEFT)
         self.abb_selected.grid(row=1, column=3, padx=5)
 
         self.abb_listbox.bind("<<ListboxSelect>>", self.abb_on_select)
@@ -190,7 +190,7 @@ class Application(tk.Tk):
     def abb_refresh_listbox(self):
         self.abb_listbox.delete(0, tk.END)
         for abb in self.abbreviation:
-            self.abb_listbox.insert(abb, self.abbreviation[abb]["text"])
+            self.abb_listbox.insert(abb, self.abbreviation[abb]["source"])
 
     def remove(self, source : str, nb):
         if source == "data" :
@@ -234,7 +234,30 @@ class Application(tk.Tk):
         self.nabb_menu.transient(self)
         self.nabb_menu.resizable(False, False)
 
-        #ajouter deux entrée texte pour l'abbreviation et pour le texte et le bouton "add"
+        source_txt = f"{self._("ui.source")} : "
+        source_lbl = tk.Label(self.nabb_menu, text=source_txt, justify=tk.LEFT)
+        source_lbl.grid(row=0, column=0, padx=10, pady=10)
+
+        source = tk.StringVar()
+        source_entry = tk.Entry(self.nabb_menu, justify=tk.CENTER, exportselection=0, textvariable=source)
+        source_entry.grid(row=0, column=1, padx=20, pady=10)
+
+        abb_txt = f"{self._("ui.text")} : "
+        abb_lbl = tk.Label(self.nabb_menu, text=abb_txt, justify=tk.LEFT)
+        abb_lbl.grid(row=1, column=0, padx=10, pady=10)
+
+        abb = tk.StringVar()
+        abb_entry = tk.Entry(self.nabb_menu, justify=tk.CENTER, exportselection=0, textvariable=abb)
+        abb_entry.grid(row=1, column=1, padx=10, pady=10)
+
+        def add_act():
+            utils.add_abb(self.abbreviation, source.get(), abb.get())
+            utils.actualise(abbreviation=self.abbreviation)
+            self.abb_refresh_listbox()
+            self.nabb_menu.destroy()
+        
+        add_button = tk.Button(self.nabb_menu, text=self._("ui.nabb"), command=add_act)
+        add_button.grid(row=3, column=0, padx=10, pady=10)
 
     def switch_ui(self):
         for widget in self.winfo_children() :

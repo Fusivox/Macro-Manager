@@ -63,14 +63,14 @@ def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: 
 
 
 def add_mcr(data: dict, keys: str, actions: list, comment: str = None):
-    data[len(data)] = {
+    data[str(len(data))] = {
         "keys": keys,
         "actions": actions,
         "comment": comment
     }
 
 def add_abb(data: dict, source: str, text: str):
-    data[len(data)] = {
+    data[str(len(data))] = {
         "source": source,
         "text": text
     }
