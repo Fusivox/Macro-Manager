@@ -31,3 +31,9 @@ fr:
     new: nouvelle Macro
     rmv: supprimer
     nmcr_title: Macro Manager - Nouvelle Macro
+    abb: abbreviations
+    htk: macros
+    source: abbreviation
+    text: texte
+    abb_new: nouvelle Abreviation
+    nabb_title: Macro Manager - Nouvelle Abreviation
