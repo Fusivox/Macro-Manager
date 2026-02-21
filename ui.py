@@ -129,8 +129,11 @@ class Application(tk.Tk):
         self.help_running = False
         self.help_menu.destroy()
 
-    def set_lang(self, lang):
+    def set_lang(self, lang, fallback):
         i18n.set("locale", lang)
+        self.settings["lang"] = lang
+        self.settings["fallback"] = fallback
+        utils.actualise(settings=self.settings)
         self.title(self._("ui.title"))
         self.refresh_ui()
 
@@ -295,8 +298,8 @@ class Application(tk.Tk):
         self.menu_lang = tk.Menu(self.menu, tearoff=0)
 
         self.menu.add_cascade(label=self._("ui.lang"), menu=self.menu_lang)
-        self.menu_lang.add_command(label=self._("ui.en"), command=lambda: self.set_lang("en"))
-        self.menu_lang.add_command(label=self._("ui.fr"), command=lambda: self.set_lang("fr"))
+        self.menu_lang.add_command(label=self._("ui.en"), command=lambda: self.set_lang("en", "fr"))
+        self.menu_lang.add_command(label=self._("ui.fr"), command=lambda: self.set_lang("fr", "en"))
 
         self.menu.add_command(label=self._("ui.key"), command=self.gui_keys)
         self.menu.add_command(label=self._("ui.help"), command=self.help)
