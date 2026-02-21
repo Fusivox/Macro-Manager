@@ -20,6 +20,8 @@ class Application(tk.Tk):
         
         with open(f"{self.appdata}\\Macro Manager\\data.json", "r") as f:
             self.data = json.load(f)
+        with open(f"{self.appdata}\\Macro Manager\\abbreviation.json", "r") as f:
+            self.abbreviation = json.load(f)
 
         monitor = screeninfo.get_monitors()
 
@@ -39,6 +41,7 @@ class Application(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.close)
 
         self.help_running = False
+        self.current_menu = "main"
         
         self.build_menu()
         self.build_main_ui()
@@ -51,6 +54,15 @@ class Application(tk.Tk):
         if self.selection:
             self.index = str(self.selection[0])
             self.selected.config(text=f"{Keys} : {self.data[self.index]["keys"]} \n\n{comment} : {self.data[self.index]["comment"]}" if self.data[self.index]["comment"] is not None else f"{Keys} : {self.data[self.index]["keys"]}\n\n")
+
+    def abb_on_select(self, event):
+        self.abb_selection = self.abb_listbox.curselection()
+        source = self._("ui.source")
+        text = self._("ui.text")
+        self.abb_rmv_button.config(state="normal", bg="SystemButtonFace")
+        if self.abb_selection:
+            self.abb_index = str(self.abb_selection[0])
+            self.abb_selected.config(text=f"{source} : {self.abbreviation[self.abb_index]["source"]} \n\n{text} : {self.abbreviation[self.abb_index]["text"]}")
         
     def close(self):
         utils.actualise(self.data, self.settings)
@@ -132,30 +144,68 @@ class Application(tk.Tk):
 
         self.listbox.bind("<<ListboxSelect>>", self.on_select)
 
-        self.rmv_button = tk.Button(self, text=self._("ui.rmv"), command=lambda: self.remove(self.index), state="disabled", bg="lightgray")
+        self.rmv_button = tk.Button(self, text=self._("ui.rmv"), command=lambda: self.remove("data", self.index), state="disabled", bg="lightgray")
         self.rmv_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.E)
 
         self.add_button = tk.Button(self, text=self._("ui.new"), command=self.new_macro)
         self.add_button.grid(row= 2, column=3, pady=10, sticky=tk.W)
 
+    def build_abb_ui(self):
+        self.abb_yScroll = tk.Scrollbar(self, orient=tk.VERTICAL)
+        self.abb_yScroll.grid(row=1, column=1, sticky=tk.N+tk.S, padx=10, pady=10)
+
+        self.abb_txt = tk.StringVar()
+
+        self.abb_listbox = tk.Listbox(self, bg='white', exportselection=0, yscrollcommand=self.abb_yScroll.set, activestyle="dotbox", listvariable=self.abb_txt)
+        self.abb_listbox.grid(row=1, column=2, sticky=tk.N+tk.S+tk.E+tk.W, padx=5, pady=10)
+        self.abb_yScroll['command'] = self.abb_listbox.yview
+
+        for abb in self.abbreviation:
+            self.abb_listbox.insert(abb, self.abbreviation[abb]["source"])
+
+        self.abb_selected = tk.Label(self, text="", height=10, wraplength=300, justify="left")
+        self.abb_selected.grid(row=1, column=3, padx=5)
+
+        self.abb_listbox.bind("<<ListboxSelect>>", self.abb_on_select)
+
+        self.abb_rmv_button = tk.Button(self, text=self._("ui.rmv"), command=lambda: self.remove("abb", self.abb_index), state="disabled", bg="lightgray")
+        self.abb_rmv_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.E)
+
+        self.abb_add_button = tk.Button(self, text=self._("ui.abb_new"), command=self.new_abbreviation)
+        self.abb_add_button.grid(row= 2, column=3, pady=10, sticky=tk.W)
+
     def refresh_listbox(self):
         self.listbox.delete(0, tk.END)
-        print(f">Debug : {self.data}")
         for macro in self.data:
             self.listbox.insert(macro, self.data[macro]["keys"])
 
-    def remove(self, nb):
-        rmv = utils.remove(self.data, nb)
-        self.data = {str(i): self.data[keys] for i, keys in enumerate(sorted(self.data.keys()))}
-        print(f">Debug : {self.data}")
-        if rmv:
-            self.refresh_listbox()
-            self.listbox.select_clear(0, tk.END)
-            self.selected.config(text="")
-            self.rmv_button.config(state="disabled", bg="lightgray")
+    def abb_refresh_listbox(self):
+        self.abb_listbox.delete(0, tk.END)
+        for abb in self.abbreviation:
+            self.abb_listbox.insert(abb, self.abbreviation[abb]["text"])
+
+    def remove(self, source : str, nb):
+        if source == "data" :
+            rmv = utils.remove(self.data, nb)
+            self.data = {str(i): self.data[keys] for i, keys in enumerate(sorted(self.data.keys()))}
+            print(f">Debug : {self.data}")
+            if rmv:
+                self.refresh_listbox()
+                self.listbox.select_clear(0, tk.END)
+                self.selected.config(text="")
+                self.rmv_button.config(state="disabled", bg="lightgray")
+
+        elif source == "abb" :
+            rmv = utils.remove(self.abbreviation, nb)
+            self.abbreviation = {str(i): self.abbreviation[keys] for i, keys in enumerate(sorted(self.abbreviation.keys()))}
+            print(f">Debug : {self.abbreviation}")
+            if rmv:
+                self.abb_refresh_listbox()
+                self.abb_listbox.select_clear(0, tk.END)
+                self.abb_selected.config(text="")
+                self.abb_rmv_button.config(state="disabled", bg="lightgray")
 
     def new_macro(self):
-        print("Rien pour l'instant")
         # creer une fenetre avec une entrée texte pour les touches (ou appuyer dessus ?)
         # faire une listebox ou les instructions a faire sont rangé dans l'ordre d'execution avec un boutton "add action" qui ouvre une fentre de selection d'une action avec ses parametres a choisir
         # et une derniere entrée texte pour le commentaire (par default égal a None) 
@@ -166,6 +216,32 @@ class Application(tk.Tk):
         self.nmcr_menu.focus_set()
         self.nmcr_menu.transient(self)
         self.nmcr_menu.resizable(False, False)
+
+    def new_abbreviation(self):
+        self.nabb_menu = tk.Toplevel(self, width=300, height=400)
+        self.nabb_menu.title(self._("ui.nabb_title"))
+
+        self.nabb_menu.grab_set()
+        self.nabb_menu.focus_set()
+        self.nabb_menu.transient(self)
+        self.nabb_menu.resizable(False, False)
+
+        #ajouter deux entrée texte pour l'abbreviation et pour le texte et le bouton "add"
+
+    def switch_ui(self):
+
+        for widget in self.winfo_children() :
+            widget.destroy()
+
+        if self.current_menu == "main":
+            self.current_menu = "abb"
+            self.build_abb_ui()
+
+        elif self.current_menu == "abb":
+            self.current_menu = "main"
+            self.build_main_ui()
+
+        self.build_menu()
 
     def build_menu(self):
         self.menu_bar = tk.Menu(self)
@@ -183,6 +259,11 @@ class Application(tk.Tk):
         self.menu.add_command(label=self._("ui.help"), command=self.help)
         self.menu.add_separator()
         self.menu.add_command(label=self._("ui.uninstall"), command=self.confirm)
+
+        if self.current_menu == "main":
+            self.menu_bar.add_command(label=self._("ui.abb"), command=self.switch_ui)
+        elif self.current_menu == "abb":
+            self.menu_bar.add_command(label=self._("ui.htk"), command=self.switch_ui)
 
     def refresh_menu(self):
         self.menu_bar.delete(0, tk.END)

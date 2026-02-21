@@ -39,7 +39,7 @@ def make_callback(actions: list):
                 
     return callback
 
-def actualise(data: dict|None = None, settings: dict|None = None):
+def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None):
     appdata = os.getenv("APPDATA")
     if data:
         with open(f"{appdata}\\Macro Manager\\data.json", "w+") as f:
@@ -47,6 +47,9 @@ def actualise(data: dict|None = None, settings: dict|None = None):
     if settings:
         with open(f"{appdata}\\Macro Manager\\settings.json", "w+") as f:
             json.dump(settings, f, indent=4)
+    if abbreviation:
+        with open(f"{appdata}\\Macro Manager\\abbreviation.json", "w+") as f:
+            json.dump(abbreviation, f, indent=4)
 
 
 def add(data: dict, keys: str, actions: list, comment: str = None):

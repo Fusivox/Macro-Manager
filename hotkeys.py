@@ -28,6 +28,8 @@ class Hotkeys():
             print(f">Debug : {self.appdata}")           
             with open(f"{self.appdata}\\Macro Manager\\data.json", "r") as f:
                 data = json.load(f)
+            with open(f"{self.appdata}\\Macro Manager\\abbreviation.hson", "r") as f:
+                abbreviation = json.load(f)
             with open(f"{self.appdata}\\Macro Manager\\settings.json", "r") as f:
                 settings = json.load(f)
 
@@ -41,6 +43,12 @@ class Hotkeys():
                 keyboard.add_hotkey(keys, utils.make_callback, args=(actions,))
                 print(f">Debug : new hotkey {keys}, do {actions}.")
 
+            for nb in abbreviation:
+                source = abbreviation[nb]["source"]
+                text = abbreviation[nb]["text"]
+                keyboard.add_abbreviation(source, text)
+                print(f">Debug : New abbreviation {source}, replaced by {text}")
+
             keyboard.wait()
 
         else: 
@@ -51,14 +59,14 @@ class Hotkeys():
             print(f">Debug : {self.appdata}")
             os.mkdir(f"{self.appdata}\\Macro Manager")
             data = {
-                0 : {
+                0: {
                     "keys" : "ctrl+alt+a",
                     "actions" : [
                         ("open", {"window":"gui"})
                     ],
                     "comment" : None
                 },
-                1 : {
+                1: {
                     "keys" : "ctrl+alt+q",
                     "actions" : [
                         ("open", {"window": "cmd"}),
@@ -72,7 +80,13 @@ class Hotkeys():
                 "lang": "en",
                 "fallback": "fr"
             }
-            utils.actualise(data, settings)
+            abbreviation = {
+                0: {
+                    "source": "@@",
+                    "text": "example.mail@gmail.com"
+                }
+            }
+            utils.actualise(data, settings, abbreviation)
             
             app = ui.Application()
             ask_confirm = ui.messagebox.askokcancel(
