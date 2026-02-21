@@ -1,9 +1,5 @@
-import tkinter as tk , os, json, utils, i18n, sys, screeninfo
+import tkinter as tk , os, json, utils, i18n, sys, screeninfo, keyboard
 from tkinter import messagebox, simpledialog
-if sys.platform == "linux":
-    from lib import keyboard_linux as keyboard
-if sys.platform == "win32":
-    import keyboard
 
 
 class Application(tk.Tk):
