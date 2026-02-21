@@ -1,11 +1,6 @@
 import sys
-if sys.platform == "win32":
-    from win32com.client import Dispatch
-elif sys.platform == "linux":
-    from lib.linux32com import Dispatch
-else:
-    raise Exception("This app sadly only works on Windows and linux (for now hopefully :D)")
-
+if sys.platform == "win32": from win32com.client import Dispatch
+elif sys.platform != "linux":raise Exception("This app sadly only works on Windows and linux (for now hopefully :D)")
 import json, os, ui, utils, i18n, keyboard
 
 def ressource_path(path):
