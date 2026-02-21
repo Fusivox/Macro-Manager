@@ -5,3 +5,4 @@ __pycache__/
 test.py
 MacroManager
 env/
+*.spec
