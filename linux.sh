@@ -11,7 +11,8 @@ case "$option" in
                 --icon=logo.ico \
                 hotkeys.py \
                 --add-data "locales:locales" \
-                --add-data "logo.ico:."
+                --add-data "logo.ico:." \
+                --add-data "logo.png:." 
         ln -s 'dist/Macro Manager v2' MacroManager
         ;;
     2)

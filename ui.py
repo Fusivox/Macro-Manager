@@ -1,8 +1,12 @@
 import tkinter as tk , os, json, utils, i18n, sys, screeninfo, keyboard
 from tkinter import messagebox, simpledialog
 
-if sys.platform == "win32": name = "Main Page"
-if sys.platform == "linux": name = None
+if sys.platform == "win32": 
+    name = "Main Page"
+    macro_appdata = f"{os.getenv("APPDATA")}\\Macro Manager\\"
+if sys.platform == "linux": 
+    name = None
+    macro_appdata = f"{os.getenv("HOME")}/.config/Macro_Manager/"
 
 class Application(tk.Tk):
     def __init__(self, screenName = name, baseName = None, className = "Tk", useTk = True, sync = False, use = None):
@@ -12,7 +16,7 @@ class Application(tk.Tk):
         i18n.set("filename_format", "{locale}.yml")
 
         self.appdata = os.getenv("APPDATA")
-        with open(f"{self.appdata}\\Macro Manager\\settings.json", "r") as f:
+        with open(f"{macro_appdata}settings.json", "r") as f:
             self.settings = json.load(f)
 
         i18n.set('locale', self.settings["lang"])
@@ -20,9 +24,9 @@ class Application(tk.Tk):
 
         self._ = i18n.t
         
-        with open(f"{self.appdata}\\Macro Manager\\data.json", "r") as f:
+        with open(f"{macro_appdata}data.json", "r") as f:
             self.data = json.load(f)
-        with open(f"{self.appdata}\\Macro Manager\\abbreviation.json", "r") as f:
+        with open(f"{macro_appdata}abbreviation.json", "r") as f:
             self.abbreviation = json.load(f)
 
         monitor = screeninfo.get_monitors()
@@ -255,7 +259,7 @@ class Application(tk.Tk):
         elif self.current_menu == "abb":
             self.build_abb_ui()
 
-        self.refresh_menu()
+        self.build_menu()
 
 
     def build_menu(self):

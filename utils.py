@@ -36,17 +36,30 @@ def make_callback(actions: list):
                 
     return callback
 
-def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None):
-    appdata = os.getenv("APPDATA")
-    if data:
-        with open(f"{appdata}\\Macro Manager\\data.json", "w+") as f:
-            json.dump(data, f, indent=4)
-    if settings:
-        with open(f"{appdata}\\Macro Manager\\settings.json", "w+") as f:
-            json.dump(settings, f, indent=4)
-    if abbreviation:
-        with open(f"{appdata}\\Macro Manager\\abbreviation.json", "w+") as f:
-            json.dump(abbreviation, f, indent=4)
+def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None, os_name="win32"):
+    if os_name == "win32":
+        appdata = os.getenv("APPDATA")
+        if data:
+            with open(f"{appdata}\\Macro Manager\\data.json", "w+") as f:
+                json.dump(data, f, indent=4)
+        if settings:
+            with open(f"{appdata}\\Macro Manager\\settings.json", "w+") as f:
+                json.dump(settings, f, indent=4)
+        if abbreviation:
+            with open(f"{appdata}\\Macro Manager\\abbreviation.json", "w+") as f:
+                json.dump(abbreviation, f, indent=4)
+    else:
+        home = os.getenv("HOME")
+        config = f"{home}/.config/Macro_Manager"
+        if data:
+            with open(f"{config}/data.json", "w+") as f:
+                json.dump(data, f, indent=4)
+        if settings:
+            with open(f"{config}/settings.json", "w+") as f:
+                json.dump(settings, f, indent=4)
+        if abbreviation:
+            with open(f"{config}/abbreviation.json", "w+") as f:
+                json.dump(abbreviation, f, indent=4)
 
 
 def add_mcr(data: dict, keys: str, actions: list, comment: str = None):

@@ -124,6 +124,7 @@ class Hotkeys():
     elif sys.platform == "linux":
         def __init__(self):
             self.home = os.getenv("HOME")
+            if self.home != "/root": print("You have to be root to run this program"); exit(1)
             self.config = f"{self.home}/.config/Macro_Manager"
 
             if os.path.exists(f"{self.config}/data.json"):
@@ -163,6 +164,8 @@ class Hotkeys():
 
                 print(">Debug : First time oppening")
                 print(f">Debug : {self.home}")
+                os.mkdir(f"{self.config}")
+
                 data = {
                     0: {
                         "keys" : "ctrl+alt+a",
@@ -191,7 +194,7 @@ class Hotkeys():
                         "text": "example.mail@gmail.com"
                     }
                 }
-                utils.actualise(data, settings, abbreviation)
+                utils.actualise(data, settings, abbreviation, os_name="linux")
                 
                 app = ui.Application()
                 ask_confirm = ui.messagebox.askokcancel(
@@ -214,7 +217,6 @@ class Hotkeys():
                 app.mainloop()
                 
         def create_service_linux(self):
-            os.mkdir(f"{self.config}")
             return 0
 
 
