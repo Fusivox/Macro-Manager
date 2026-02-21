@@ -52,11 +52,17 @@ def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: 
             json.dump(abbreviation, f, indent=4)
 
 
-def add(data: dict, keys: str, actions: list, comment: str = None):
+def add_mcr(data: dict, keys: str, actions: list, comment: str = None):
     data[len(data)] = {
-        "keys" : keys,
-        "actions" : actions,
-        "comment" : comment
+        "keys": keys,
+        "actions": actions,
+        "comment": comment
+    }
+
+def add_abb(data: dict, source: str, text: str):
+    data[len(data)] = {
+        "source": source,
+        "text": text
     }
 
 def remove(data: dict, nb: str|int, id=True):
