@@ -167,6 +167,7 @@ class Hotkeys():
                 print(">Debug : First time oppening")
                 print(f">Debug : {self.home}")
                 os.mkdir(f"{self.config}")
+                lang = os.environ['LANG'][:2]
 
                 data = {
                     0: {
@@ -179,7 +180,7 @@ class Hotkeys():
                     1: {
                         "keys" : "ctrl+alt+q",
                         "actions" : [
-                            ("open", {"window": "cmd"}),
+                            ("open", {"window": "shell"}),
                             ("wait", 1),
                             ("write", {"text": "This is a hotkey exemple"})
                         ],
@@ -187,7 +188,7 @@ class Hotkeys():
                     }
                 }
                 settings = {
-                    "lang": "en",
+                    "lang": f"{lang if lang in ['en', 'fr'] else 'en'}",
                     "fallback": "fr"
                 }
                 abbreviation = {

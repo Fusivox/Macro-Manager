@@ -14,7 +14,8 @@ def make_callback(actions: list):
                     subprocess.Popen(["cmd.exe"], cwd=params.get("folder", None))         
 
                 elif params.get("window") == "shell":#("open", {"window":"shell", "command":"commande a executer dans le shell"})
-                    subprocess.Popen(["bash"], shell=True)
+                    subprocess.Popen(["xterm"], shell=True)
+
                 elif params.get("window") == "explorer": #("open", {"window":"explorer", "folder":"Dossier dans lequel le navigateur de fichier est ouvert si spécifié sinon celui par default"})
                     subprocess.Popen(["Explorer", params.get("folder", None)], shell=True)
 
