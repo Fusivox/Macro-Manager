@@ -228,6 +228,31 @@ class Application(tk.Tk):
         self.nmcr_menu.transient(self)
         self.nmcr_menu.resizable(False, False)
 
+        keys_txt = f"{self._("ui.keys")} : "
+        keys_lbl = tk.Label(self.nmcr_menu, text=keys_txt, justify=tk.RIGHT)
+        keys_lbl.grid(row=0, column=0, padx=10, pady=10)
+
+        keys = tk.StringVar()
+        act = tk.Entry(self.nmcr_menu, justify=tk.CENTER, exportselection=0, textvariable=keys)
+        act.grid(row=0, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
+        
+        mcr_yScroll = tk.Scrollbar(self.nmcr_menu, orient=tk.VERTICAL)
+        mcr_yScroll.grid(row=1, column=0, sticky=tk.N+tk.S, padx=10, pady=10)
+
+        mcr_txt = tk.StringVar()
+
+        mcr_listbox = tk.Listbox(self.nmcr_menu, bg='white', exportselection=0, yscrollcommand=mcr_yScroll.set, activestyle="dotbox", listvariable=mcr_txt)
+        mcr_listbox.grid(row=1, column=1, sticky=tk.N+tk.S+tk.E+tk.W, padx=5, pady=10)
+        mcr_yScroll['command'] = mcr_listbox.yview
+
+        com_txt = f"{self._("ui.comment")} : "
+        com_lbl = tk.Label(self.nmcr_menu, text=com_txt, justify=tk.RIGHT)
+        com_lbl.grid(row=2, column=0, padx=10, pady=10)
+
+        comment = tk.StringVar()
+        com = tk.Entry(self.nmcr_menu, exportselection=0, textvariable=comment)
+        com.grid(row=2, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
+
     def new_abbreviation(self):
         self.nabb_menu = tk.Toplevel(self, width=300, height=400)
         self.nabb_menu.title(self._("ui.nabb_title"))
@@ -238,7 +263,7 @@ class Application(tk.Tk):
         self.nabb_menu.resizable(False, False)
 
         source_txt = f"{self._("ui.source")} : "
-        source_lbl = tk.Label(self.nabb_menu, text=source_txt, justify=tk.LEFT)
+        source_lbl = tk.Label(self.nabb_menu, text=source_txt, justify=tk.RIGHT)
         source_lbl.grid(row=0, column=0, padx=10, pady=10)
 
         source = tk.StringVar()
@@ -246,7 +271,7 @@ class Application(tk.Tk):
         source_entry.grid(row=0, column=1, padx=20, pady=10)
 
         abb_txt = f"{self._("ui.text")} : "
-        abb_lbl = tk.Label(self.nabb_menu, text=abb_txt, justify=tk.LEFT)
+        abb_lbl = tk.Label(self.nabb_menu, text=abb_txt, justify=tk.RIGHT)
         abb_lbl.grid(row=1, column=0, padx=10, pady=10)
 
         abb = tk.StringVar()
