@@ -1,9 +1,11 @@
 import tkinter as tk , os, json, utils, i18n, sys, screeninfo, keyboard
 from tkinter import messagebox, simpledialog
 
+if sys.platform == "win32": name = "Main Page"
+if sys.platform == "linux": name = None
 
 class Application(tk.Tk):
-    def __init__(self, screenName = "Main page", baseName = None, className = "Tk", useTk = True, sync = False, use = None):
+    def __init__(self, screenName = name, baseName = None, className = "Tk", useTk = True, sync = False, use = None):
         super().__init__(screenName, baseName, className, useTk, sync, use)
 
         i18n.load_path.append(self.ressource_path("locales"))
@@ -37,7 +39,8 @@ class Application(tk.Tk):
         self.resizable(False, False)
         
         self.title(self._("ui.title"))
-        self.iconbitmap(default=self.ressource_path("logo.ico"))
+        if sys.platform == "win32": self.iconbitmap(default=self.ressource_path("logo.ico"))
+        else: self.iconphoto(False, tk.PhotoImage(file="logo.png"))
         self.protocol("WM_DELETE_WINDOW", self.close)
 
         self.help_running = False
