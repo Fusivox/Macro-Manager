@@ -4,9 +4,11 @@ from tkinter import messagebox, simpledialog
 if sys.platform == "win32": 
     name = "Main Page"
     macro_appdata = f"{os.getenv("APPDATA")}\\Macro Manager\\"
+    platform = "win32"
 if sys.platform == "linux": 
     name = None
     macro_appdata = f"{os.getenv("HOME")}/.config/Macro_Manager/"
+    platform = "linux"
 
 class Application(tk.Tk):
     def __init__(self, screenName = name, baseName = None, className = "Tk", useTk = True, sync = False, use = None):
@@ -43,7 +45,7 @@ class Application(tk.Tk):
         self.resizable(False, False)
         
         self.title(self._("ui.title"))
-        if sys.platform == "win32": self.iconbitmap(default=self.ressource_path("logo.ico"))
+        if platform == "win32": self.iconbitmap(default=self.ressource_path("logo.ico"))
         else: self.iconphoto(False, tk.PhotoImage(file="logo.png"))
         self.protocol("WM_DELETE_WINDOW", self.close)
 
@@ -72,7 +74,7 @@ class Application(tk.Tk):
             self.abb_selected.config(text=f"{source} : {self.abbreviation[self.abb_index]["source"]} \n\n{text} : {self.abbreviation[self.abb_index]["text"]}")
         
     def close(self):
-        utils.actualise(self.data, self.settings, self.abbreviation, os_name=sys.platform)
+        utils.actualise(self.data, self.settings, self.abbreviation, os_name=platform)
         self.destroy()
         exit()
 
@@ -133,7 +135,7 @@ class Application(tk.Tk):
         i18n.set("locale", lang)
         self.settings["lang"] = lang
         self.settings["fallback"] = fallback
-        utils.actualise(settings=self.settings, os_name=sys.platform)
+        utils.actualise(settings=self.settings, os_name=platform)
         self.title(self._("ui.title"))
         self.refresh_ui()
 
@@ -287,7 +289,7 @@ class Application(tk.Tk):
             else:
                 utils.add_abb(self.abbreviation, source.get(), abb.get())
 
-            utils.actualise(abbreviation=self.abbreviation, os_name=sys.platform)
+            utils.actualise(abbreviation=self.abbreviation, os_name=platform)
             keyboard.add_abbreviation(source.get(), abb.get())
             self.abb_refresh_listbox()
             self.nabb_menu.destroy()
