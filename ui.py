@@ -38,7 +38,7 @@ class Application(tk.Tk):
                     self.geometry("550x350")
                 else : 
                     self.tk.call("tk", "scaling", 1.5)
-                    self.geometry("400x200")
+                    self.geometry("550x350")
 
         self.resizable(False, False)
         
@@ -57,7 +57,7 @@ class Application(tk.Tk):
         self.selection = self.listbox.curselection()
         Keys = self._("ui.keys")
         comment = self._("ui.comment")
-        self.rmv_button.config(state="normal", bg="SystemButtonFace")
+        self.rmv_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
         if self.selection:
             self.index = str(self.selection[0])
             self.selected.config(text=f"{Keys} : {self.data[self.index]["keys"]} \n\n{comment} : {self.data[self.index]["comment"]}" if self.data[self.index]["comment"] is not None else f"{Keys} : {self.data[self.index]["keys"]}\n\n")
@@ -66,13 +66,13 @@ class Application(tk.Tk):
         self.abb_selection = self.abb_listbox.curselection()
         source = self._("ui.source")
         text = self._("ui.text")
-        self.abb_rmv_button.config(state="normal", bg="SystemButtonFace")
+        self.abb_rmv_button.config(state="normal", bg=self.abb_rmv_button.master.cget("bg"))
         if self.abb_selection:
             self.abb_index = str(self.abb_selection[0])
             self.abb_selected.config(text=f"{source} : {self.abbreviation[self.abb_index]["source"]} \n\n{text} : {self.abbreviation[self.abb_index]["text"]}")
         
     def close(self):
-        utils.actualise(self.data, self.settings, self.abbreviation)
+        utils.actualise(self.data, self.settings, self.abbreviation, os_name=sys.platform)
         self.destroy()
         exit()
 
@@ -133,7 +133,7 @@ class Application(tk.Tk):
         i18n.set("locale", lang)
         self.settings["lang"] = lang
         self.settings["fallback"] = fallback
-        utils.actualise(settings=self.settings)
+        utils.actualise(settings=self.settings, os_name=sys.platform)
         self.title(self._("ui.title"))
         self.refresh_ui()
 
@@ -287,9 +287,8 @@ class Application(tk.Tk):
             else:
                 utils.add_abb(self.abbreviation, source.get(), abb.get())
 
-            utils.actualise(abbreviation=self.abbreviation)
+            utils.actualise(abbreviation=self.abbreviation, os_name=sys.platform)
             keyboard.add_abbreviation(source.get(), abb.get())
-
             self.abb_refresh_listbox()
             self.nabb_menu.destroy()
         
