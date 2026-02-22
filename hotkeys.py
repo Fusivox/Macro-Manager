@@ -97,6 +97,7 @@ class Hotkeys():
                     app.destroy()
 
                 app.mainloop()
+                keyboard.remove_all_hotkeys()
                 self.init_background()
                 keyboard.wait()
 
@@ -195,6 +196,7 @@ class Hotkeys():
                     app.destroy()
 
                 app.mainloop()
+                keyboard.remove_all_hotkeys()
                 self.init_background()
                 keyboard.wait()
                 
@@ -215,14 +217,12 @@ class Hotkeys():
         return 0
     
     def init_background(self):
-        keyboard.remove_all_hotkeys()
-
         for nb in self.data:
-                    keys = self.data[nb]["keys"]
-                    actions = self.data[nb]["actions"]
-                    callback = utils.make_callback(actions)
-                    keyboard.add_hotkey(keys, callback)
-                    print(f">Debug : new hotkey {keys}, do {actions}.")
+            keys = self.data[nb]["keys"]
+            actions = self.data[nb]["actions"]
+            callback = utils.make_callback(actions)
+            keyboard.add_hotkey(keys, callback)
+            print(f">Debug : new hotkey {keys}, do {actions}.")
 
         for nb in self.abbreviation:
             source = self.abbreviation[nb]["source"]
