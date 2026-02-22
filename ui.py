@@ -4,9 +4,11 @@ from tkinter import messagebox, simpledialog
 if sys.platform == "win32": 
     name = "Main Page"
     macro_appdata = f"{os.getenv("APPDATA")}\\Macro Manager\\"
+    platform = "win32"
 if sys.platform == "linux": 
     name = None
     macro_appdata = f"{os.getenv("HOME")}/.config/Macro_Manager/"
+    platform = "linux"
 
 class Application(tk.Tk):
     def __init__(self, screenName = name, baseName = None, className = "Tk", useTk = True, sync = False, use = None):
@@ -72,7 +74,7 @@ class Application(tk.Tk):
             self.abb_selected.config(text=f"{source} : {self.abbreviation[self.abb_index]["source"]} \n\n{text} : {self.abbreviation[self.abb_index]["text"]}")
         
     def close(self):
-        utils.actualise(self.data, self.settings, self.abbreviation)
+        utils.actualise(self.data, self.settings, self.abbreviation, os_name=platform)
         self.destroy()
 
     def confirm(self):
@@ -132,7 +134,7 @@ class Application(tk.Tk):
         i18n.set("locale", lang)
         self.settings["lang"] = lang
         self.settings["fallback"] = fallback
-        utils.actualise(settings=self.settings)
+        utils.actualise(settings=self.settings, os_name=platform)
         self.title(self._("ui.title"))
         self.refresh_ui()
 
@@ -286,7 +288,7 @@ class Application(tk.Tk):
             else:
                 utils.add_abb(self.abbreviation, source.get(), abb.get())
 
-            utils.actualise(abbreviation=self.abbreviation)
+            utils.actualise(abbreviation=self.abbreviation, os_name=platform)
             keyboard.add_abbreviation(source.get(), abb.get())
 
             self.abb_refresh_listbox()
