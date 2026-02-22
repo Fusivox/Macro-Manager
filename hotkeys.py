@@ -15,8 +15,8 @@ i18n.set("fallback", "fr")
 _ = i18n.t
 
 class Hotkeys():
-    if sys.platform == "win32":
-        def __init__(self):
+    def __init__(self):
+        if sys.platform == "win32":
             
             self.appdata = os.getenv("APPDATA")
 
@@ -27,28 +27,17 @@ class Hotkeys():
                 print(">Debug : Not first time oppening") 
                 print(f">Debug : {self.appdata}")           
                 with open(f"{self.appdata}\\Macro Manager\\data.json", "r") as f:
-                    data = json.load(f)
+                    self.data = json.load(f)
                 with open(f"{self.appdata}\\Macro Manager\\abbreviation.json", "r") as f:
-                    abbreviation = json.load(f)
+                    self.abbreviation = json.load(f)
                 with open(f"{self.appdata}\\Macro Manager\\settings.json", "r") as f:
-                    settings = json.load(f)
+                    self.settings = json.load(f)
 
-                i18n.set('locale', settings["lang"])
-                i18n.set("fallback", settings["fallback"])
+                i18n.set('locale', self.settings["lang"])
+                i18n.set("fallback", self.settings["fallback"])
 
-                print(data)
-                for nb in data:
-                    keys = data[nb]["keys"]
-                    actions = data[nb]["actions"]
-                    callback = utils.make_callback(actions)
-                    keyboard.add_hotkey(keys, callback)
-                    print(f">Debug : new hotkey {keys}, do {actions}.")
-
-                for nb in abbreviation:
-                    source = abbreviation[nb]["source"]
-                    text = abbreviation[nb]["text"]
-                    keyboard.add_abbreviation(source, text)
-                    print(f">Debug : New abbreviation {source}, replaced by {text}")
+                print(self.data)
+                self.init_background()
 
                 keyboard.wait()
 
@@ -59,7 +48,7 @@ class Hotkeys():
                 print(">Debug : First time oppening")
                 print(f">Debug : {self.appdata}")
                 os.mkdir(f"{self.appdata}\\Macro Manager")
-                data = {
+                self.data = {
                     0: {
                         "keys" : "ctrl+alt+a",
                         "actions" : [
@@ -77,17 +66,17 @@ class Hotkeys():
                         "comment" : "This is a hotkey example and don't really do something"
                     }
                 }
-                settings = {
+                self.settings = {
                     "lang": "en",
                     "fallback": "fr"
                 }
-                abbreviation = {
+                self.abbreviation = {
                     0: {
                         "source": "@@",
                         "text": "example.mail@gmail.com"
                     }
                 }
-                utils.actualise(data, settings, abbreviation)
+                utils.actualise(self.data, self.settings, self.abbreviation)
                 
                 app = ui.Application()
                 ask_confirm = ui.messagebox.askokcancel(
@@ -108,22 +97,10 @@ class Hotkeys():
                     app.destroy()
 
                 app.mainloop()
-                
-        def create_shortcut_win32(self):
+                self.init_background()
+                keyboard.wait()
 
-            shortcut_path = f"{self.appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"
-            path = sys.executable
-            dir = f"{self.appdata}\\Macro Manager"
-
-            shell = Dispatch("WScript.Shell")
-            shortcut = shell.CreateShortCut(shortcut_path)
-            shortcut.Targetpath = path
-            shortcut.WorkingDirectory = dir
-            shortcut.IconLocation = path
-            shortcut.save()
-
-    elif sys.platform == "linux":
-        def __init__(self):
+        elif sys.platform == "linux":
             self.home = os.getenv("HOME")
             if self.home != "/root": print("You have to be root to run this program"); exit(1)
             self.config = f"{self.home}/.config/Macro_Manager"
@@ -135,26 +112,26 @@ class Hotkeys():
                 print(">Debug : Not first time oppening") 
                 print(f">Debug : {self.home}")           
                 with open(f"{self.config}/data.json", "r") as f:
-                    data = json.load(f)
+                    self.data = json.load(f)
                 with open(f"{self.config}/abbreviation.json", "r") as f:
-                    abbreviation = json.load(f)
+                    self.abbreviation = json.load(f)
                 with open(f"{self.config}/settings.json", "r") as f:
-                    settings = json.load(f)
+                    self.settings = json.load(f)
 
-                i18n.set('locale', settings["lang"])
-                i18n.set("fallback", settings["fallback"])
+                i18n.set('locale', self.settings["lang"])
+                i18n.set("fallback", self.settings["fallback"])
 
-                print(data)
-                for nb in data:
-                    keys = data[nb]["keys"]
-                    actions = data[nb]["actions"]
+                print(self.data)
+                for nb in self.data:
+                    keys = self.data[nb]["keys"]
+                    actions = self.data[nb]["actions"]
                     callback = utils.make_callback(actions)
                     keyboard.add_hotkey(keys, callback)
                     print(f">Debug : new hotkey {keys}, do {actions}.")
 
-                for nb in abbreviation:
-                    source = abbreviation[nb]["source"]
-                    text = abbreviation[nb]["text"]
+                for nb in self.abbreviation:
+                    source = self.abbreviation[nb]["source"]
+                    text = self.abbreviation[nb]["text"]
                     keyboard.add_abbreviation(source, text)
                     print(f">Debug : New abbreviation {source}, replaced by {text}")
 
@@ -169,7 +146,7 @@ class Hotkeys():
                 os.mkdir(f"{self.config}")
                 lang = os.environ['LANG'][:2]
 
-                data = {
+                self.data = {
                     0: {
                         "keys" : "ctrl+alt+a",
                         "actions" : [
@@ -187,17 +164,17 @@ class Hotkeys():
                         "comment" : "This is a hotkey example and don't really do something"
                     }
                 }
-                settings = {
+                self.settings = {
                     "lang": f"{lang if lang in ['en', 'fr'] else 'en'}",
                     "fallback": "fr"
                 }
-                abbreviation = {
+                self.abbreviation = {
                     0: {
                         "source": "@@",
                         "text": "example.mail@gmail.com"
                     }
                 }
-                utils.actualise(data, settings, abbreviation, os_name="linux")
+                utils.actualise(self.data, self.settings, self.abbreviation, os_name="linux")
                 
                 app = ui.Application()
                 ask_confirm = ui.messagebox.askokcancel(
@@ -218,11 +195,41 @@ class Hotkeys():
                     app.destroy()
 
                 app.mainloop()
+                self.init_background()
+                keyboard.wait()
                 
-        def create_service_linux(self):
-            return 0
+    def create_shortcut_win32(self):
+
+        shortcut_path = f"{self.appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"
+        path = sys.executable
+        dir = f"{self.appdata}\\Macro Manager"
+
+        shell = Dispatch("WScript.Shell")
+        shortcut = shell.CreateShortCut(shortcut_path)
+        shortcut.Targetpath = path
+        shortcut.WorkingDirectory = dir
+        shortcut.IconLocation = path
+        shortcut.save()
+                
+    def create_service_linux(self):
+        return 0
+    
+    def init_background(self):
+        keyboard.remove_all_hotkeys()
+
+        for nb in self.data:
+                    keys = self.data[nb]["keys"]
+                    actions = self.data[nb]["actions"]
+                    callback = utils.make_callback(actions)
+                    keyboard.add_hotkey(keys, callback)
+                    print(f">Debug : new hotkey {keys}, do {actions}.")
+
+        for nb in self.abbreviation:
+            source = self.abbreviation[nb]["source"]
+            text = self.abbreviation[nb]["text"]
+            keyboard.add_abbreviation(source, text)
+            print(f">Debug : New abbreviation {source}, replaced by {text}")
 
 
 if __name__ == "__main__":
-
     hotkeys = Hotkeys()
