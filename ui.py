@@ -1,4 +1,4 @@
-import tkinter as tk , os, json, utils, i18n, sys, screeninfo, keyboard
+import tkinter as tk , os, json, utils, i18n, sys, keyboard
 from tkinter import messagebox, simpledialog
 
 if sys.platform == "win32": 
@@ -31,17 +31,9 @@ class Application(tk.Tk):
         with open(f"{macro_appdata}abbreviation.json", "r") as f:
             self.abbreviation = json.load(f)
 
-        monitor = screeninfo.get_monitors()
-
-        for m in monitor:
-            if m.is_primary:
-                if m.width > 1920 and m.height > 1080 :
-                    self.tk.call("tk", "scaling", 1.75)
-                    self.geometry("550x350")
-                else : 
-                    self.tk.call("tk", "scaling", 1.5)
-                    self.geometry("400x200")
-
+        self.tk.call("tk", "scaling", 1.75)
+        self.geometry("550x350")
+                
         self.resizable(False, False)
         
         self.title(self._("ui.title"))
