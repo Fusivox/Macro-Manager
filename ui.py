@@ -237,7 +237,7 @@ class Application(tk.Tk):
         act.grid(row=0, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
         
         mcr_yScroll = tk.Scrollbar(self.nmcr_menu, orient=tk.VERTICAL)
-        mcr_yScroll.grid(row=1, column=0, sticky=tk.N+tk.S, padx=10, pady=10)
+        mcr_yScroll.grid(row=1, column=0, sticky=tk.N+tk.S+tk.E, padx=10, pady=10)
 
         mcr_txt = tk.StringVar()
 
@@ -279,8 +279,17 @@ class Application(tk.Tk):
         abb_entry.grid(row=1, column=1, padx=10, pady=10)
 
         def add_act():
-            utils.add_abb(self.abbreviation, source.get(), abb.get())
+
+            if source.get() in self.abbreviation :
+                self.abbreviation[source.get()] = abb.get()
+                keyboard.remove_abbreviation(source.get())
+
+            else:
+                utils.add_abb(self.abbreviation, source.get(), abb.get())
+
             utils.actualise(abbreviation=self.abbreviation)
+            keyboard.add_abbreviation(source.get(), abb.get())
+
             self.abb_refresh_listbox()
             self.nabb_menu.destroy()
         
