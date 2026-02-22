@@ -1,4 +1,6 @@
 #!/bin/bash
+# Fix PyInstaller warning: force output in English
+export LANG=C
 
 if [ -d "env" ]; then
     source env/bin/activate
@@ -15,10 +17,8 @@ case "$option" in
                 --clean \
                 --noconsole \
                 -n "Macro Manager v2" \
-                --icon=logo.ico \
                 hotkeys.py \
                 --add-data "locales:locales" \
-                --add-data "logo.ico:." \
                 --add-data "logo.png:." 
         ln -s 'dist/Macro Manager v2' MacroManager
         ;;
