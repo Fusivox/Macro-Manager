@@ -51,7 +51,7 @@ class Application(tk.Tk):
         self.selection = self.listbox.curselection()
         Keys = self._("ui.keys")
         comment = self._("ui.comment")
-        self.rmv_button.config(state="normal", bg="SystemButtonFace")
+        self.rmv_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
         if self.selection:
             self.index = str(self.selection[0])
             self.selected.config(text=f"{Keys} : {self.data[self.index]["keys"]} \n\n{comment} : {self.data[self.index]["comment"]}" if self.data[self.index]["comment"] is not None else f"{Keys} : {self.data[self.index]["keys"]}\n\n")
@@ -60,7 +60,7 @@ class Application(tk.Tk):
         self.abb_selection = self.abb_listbox.curselection()
         source = self._("ui.source")
         text = self._("ui.text")
-        self.abb_rmv_button.config(state="normal", bg="SystemButtonFace")
+        self.abb_rmv_button.config(state="normal", bg=self.abb_rmv_button.master.cget("bg"))
         if self.abb_selection:
             self.abb_index = str(self.abb_selection[0])
             self.abb_selected.config(text=f"{source} : {self.abbreviation[self.abb_index]["source"]} \n\n{text} : {self.abbreviation[self.abb_index]["text"]}")
