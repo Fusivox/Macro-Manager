@@ -97,7 +97,7 @@ class Hotkeys():
                     app.destroy()
 
                 app.mainloop()
-                keyboard.remove_all_hotkeys()
+                keyboard.unhook_all()
                 self.init_background()
                 keyboard.wait()
 
@@ -196,7 +196,7 @@ class Hotkeys():
                     app.destroy()
 
                 app.mainloop()
-                keyboard.remove_all_hotkeys()
+                keyboard.unhook_all()
                 self.init_background()
                 keyboard.wait()
                 

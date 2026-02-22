@@ -2,7 +2,7 @@ en:
   htk:
     title: Macro Manager
     info_title: Macro Manager Information
-    startup_msg: "This app monitor the keyboard until it is uninstalled,\nit also create a shortcut in the windows startup folder, do you agree ?"
+    startup_msg: "This app monitor the keyboard until it is uninstalled,\nit also create a shortcut in the windows/linux startup folder, do you agree ?"
     thx_msg: Thanks for downloading Macro Manager !
     cancelled_msg : The app installation was cancelled
     err_title: Something went wrong
