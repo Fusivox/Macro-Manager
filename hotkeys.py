@@ -18,19 +18,19 @@ class Hotkeys():
     def __init__(self):
         if sys.platform == "win32":
             
-            self.appdata = os.getenv("APPDATA")
+            self.appdata = f"{os.getenv("APPDATA")}\\Macro Manager"
 
-            if os.path.exists(f"{self.appdata}\\Macro Manager\\data.json"):
+            if os.path.exists(f"{self.appdata}\\data.json"):
 
                 ############ Not first launch ######################
 
                 print(">Debug : Not first time oppening") 
                 print(f">Debug : {self.appdata}")           
-                with open(f"{self.appdata}\\Macro Manager\\data.json", "r") as f:
+                with open(f"{self.appdata}\\data.json", "r") as f:
                     self.data = json.load(f)
-                with open(f"{self.appdata}\\Macro Manager\\abbreviation.json", "r") as f:
+                with open(f"{self.appdata}\\abbreviation.json", "r") as f:
                     self.abbreviation = json.load(f)
-                with open(f"{self.appdata}\\Macro Manager\\settings.json", "r") as f:
+                with open(f"{self.appdata}\\settings.json", "r") as f:
                     self.settings = json.load(f)
 
                 i18n.set('locale', self.settings["lang"])
@@ -47,7 +47,7 @@ class Hotkeys():
 
                 print(">Debug : First time oppening")
                 print(f">Debug : {self.appdata}")
-                os.mkdir(f"{self.appdata}\\Macro Manager")
+                os.mkdir(f"{self.appdata}")
                 self.data = {
                     0: {
                         "keys" : "ctrl+alt+a",
@@ -216,7 +216,8 @@ class Hotkeys():
     def create_service_linux(self):
         return 0
     
-    def init_background(self):
+    def init_background(self): 
+
         for nb in self.data:
             keys = self.data[nb]["keys"]
             actions = self.data[nb]["actions"]

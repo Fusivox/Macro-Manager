@@ -4,11 +4,9 @@ from tkinter import messagebox, simpledialog
 if sys.platform == "win32": 
     name = "Main Page"
     macro_appdata = f"{os.getenv("APPDATA")}\\Macro Manager\\"
-    platform = "win32"
 if sys.platform == "linux": 
     name = None
     macro_appdata = f"{os.getenv("HOME")}/.config/Macro_Manager/"
-    platform = "linux"
 
 class Application(tk.Tk):
     def __init__(self, screenName = name, baseName = None, className = "Tk", useTk = True, sync = False, use = None):
@@ -38,7 +36,7 @@ class Application(tk.Tk):
         
         self.title(self._("ui.title"))
         if sys.platform == "win32": self.iconbitmap(default=self.ressource_path("logo.ico"))
-        else: self.iconphoto(False, tk.PhotoImage(file="logo.png"))
+        else: self.iconphoto(False, tk.PhotoImage(file=self.ressource_path("logo.png")))
         self.protocol("WM_DELETE_WINDOW", self.close)
 
         self.help_running = False
@@ -60,13 +58,13 @@ class Application(tk.Tk):
         self.abb_selection = self.abb_listbox.curselection()
         source = self._("ui.source")
         text = self._("ui.text")
-        self.abb_rmv_button.config(state="normal", bg=self.abb_rmv_button.master.cget("bg"))
+        self.abb_rmv_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
         if self.abb_selection:
             self.abb_index = str(self.abb_selection[0])
             self.abb_selected.config(text=f"{source} : {self.abbreviation[self.abb_index]["source"]} \n\n{text} : {self.abbreviation[self.abb_index]["text"]}")
         
     def close(self):
-        utils.actualise(self.data, self.settings, self.abbreviation, os_name=platform)
+        utils.actualise(self.data, self.settings, self.abbreviation)
         self.destroy()
 
     def confirm(self):
@@ -126,7 +124,7 @@ class Application(tk.Tk):
         i18n.set("locale", lang)
         self.settings["lang"] = lang
         self.settings["fallback"] = fallback
-        utils.actualise(settings=self.settings, os_name=platform)
+        utils.actualise(settings=self.settings)
         self.title(self._("ui.title"))
         self.refresh_ui()
 
@@ -272,16 +270,18 @@ class Application(tk.Tk):
         abb_entry.grid(row=1, column=1, padx=10, pady=10)
 
         def add_act():
+            src = source.get()
+            ab = abb.get()
 
-            if source.get() in self.abbreviation :
-                self.abbreviation[source.get()] = abb.get()
-                keyboard.remove_abbreviation(source.get())
+            if src in self.abbreviation :
+                self.abbreviation[src] = ab
+                keyboard.remove_abbreviation(src)
 
             else:
-                utils.add_abb(self.abbreviation, source.get(), abb.get())
+                utils.add_abb(self.abbreviation, src, ab)
 
-            utils.actualise(abbreviation=self.abbreviation, os_name=platform)
-            keyboard.add_abbreviation(source.get(), abb.get())
+            utils.actualise(abbreviation=self.abbreviation)
+            keyboard.add_abbreviation(src, ab)
 
             self.abb_refresh_listbox()
             self.nabb_menu.destroy()
