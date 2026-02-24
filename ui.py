@@ -114,9 +114,9 @@ class Application(tk.Tk):
             self.help_menu.resizable(False, False)
             self.help_menu.focus_set()
             self.help_menu.transient(self)
-            self.help_menu.protocol("WM_DELETE_WINDOW", self.help_false)
+            self.help_menu.protocol("WM_DELETE_WINDOW", self.close_help)
 
-    def help_false(self):
+    def close_help(self):
         self.help_running = False
         self.help_menu.destroy()
 
@@ -289,29 +289,19 @@ class Application(tk.Tk):
         add_button = tk.Button(self.nabb_menu, text=self._("ui.nabb"), command=add_act)
         add_button.grid(row=3, column=0, padx=10, pady=10)
 
-    def switch_ui(self):
-        for widget in self.winfo_children() :
-            widget.destroy()
-
-        if self.current_menu == "main":
-            self.current_menu = "abb"
-            self.build_abb_ui()
-
-        elif self.current_menu == "abb":
-            self.current_menu = "main"
-            self.build_main_ui()
-
         self.build_menu()
 
-    def refresh_ui(self):
+    def refresh_ui(self, switch: bool = False):
         for widget in self.winfo_children() :
             widget.destroy()
 
         if self.current_menu == "main":
             self.build_main_ui()
+            if switch: self.current_menu = "abb"
 
         elif self.current_menu == "abb":
             self.build_abb_ui()
+            if switch: self.current_menu = "main"
 
         self.build_menu()
 
@@ -334,9 +324,9 @@ class Application(tk.Tk):
         self.menu.add_command(label=self._("ui.uninstall"), command=self.confirm)
 
         if self.current_menu == "main":
-            self.menu_bar.add_command(label=self._("ui.abb"), command=self.switch_ui)
+            self.menu_bar.add_command(label=self._("ui.abb"), command=lambda: self.refresh_ui(switch=True))
         elif self.current_menu == "abb":
-            self.menu_bar.add_command(label=self._("ui.htk"), command=self.switch_ui)
+            self.menu_bar.add_command(label=self._("ui.htk"), command=lambda: self.refresh_ui(switch=True))
 
     def refresh_menu(self):
         self.menu_bar.delete(0, tk.END)
