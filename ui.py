@@ -298,14 +298,20 @@ class Application(tk.Tk):
             widget.destroy()
 
         if self.current_menu == "main":
-            self.build_main_ui()
-            if switch: self.current_menu = "abb"
+            
+            if switch: 
+                self.current_menu = "abb"
+                self.build_abb_ui()
+
+            else: self.build_main_ui()
 
         elif self.current_menu == "abb":
-            self.build_abb_ui()
-            if switch: self.current_menu = "main"
-
-        self.build_menu()
+            
+            if switch: 
+                self.current_menu = "main"
+                self.build_main_ui()
+                
+            else: self.build_abb_ui()
 
 
     def build_menu(self):
@@ -326,9 +332,9 @@ class Application(tk.Tk):
         self.menu.add_command(label=self._("ui.uninstall"), command=self.confirm)
 
         if self.current_menu == "main":
-            self.menu_bar.add_command(label=self._("ui.abb"), command=lambda: self.refresh_ui(switch=True))
-        elif self.current_menu == "abb":
             self.menu_bar.add_command(label=self._("ui.htk"), command=lambda: self.refresh_ui(switch=True))
+        elif self.current_menu == "abb":
+            self.menu_bar.add_command(label=self._("ui.abb"), command=lambda: self.refresh_ui(switch=True))
 
     def refresh_menu(self):
         self.menu_bar.delete(0, tk.END)
@@ -338,3 +344,4 @@ class Application(tk.Tk):
         base = getattr(sys, '_MEIPASS', os.path.abspath("."))
 
         return os.path.join(base, path)
+
