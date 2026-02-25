@@ -103,7 +103,9 @@ class Hotkeys():
 
         elif sys.platform == "linux":
             self.home = os.getenv("HOME")
-            if self.home != "/root": print("You have to be root to run this program"); exit(1)
+            if os.geteuid() != 0:
+                print("You have to be root to run this program")
+                exit(1)
             self.config = f"{self.home}/.config/Macro_Manager"
 
             if os.path.exists(f"{self.config}/data.json"):
@@ -176,7 +178,7 @@ class Hotkeys():
                     }
                 }
                 utils.actualise(self.data, self.settings, self.abbreviation, os_name="linux")
-                
+                self.create_service_linux()
                 app = ui.Application()
                 ask_confirm = ui.messagebox.askokcancel(
                     title=_("htk.info_title"),
@@ -214,6 +216,41 @@ class Hotkeys():
         shortcut.save()
                 
     def create_service_linux(self):
+        path = "/opt/Macro_Manager/"
+        service = """[Unit]
+Description=MacroManager
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/Macro_Manager/Macro_Manager
+WorkingDirectory=/opt/Macro_Manager
+Restart=always
+RestartSec=5
+User=root
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=multi-user.target"""
+        service_file = "/etc/systemd/system/macro_manager.service"
+        if not os.path.exists(path): os.mkdir(path)
+        os.system(f"cp '{sys.executable}' '{path}Macro_Manager' && chmod +x '{path}Macro_Manager'")
+        with open(service_file, 'w') as f:
+            f.write(service)
+        os.system("systemctl enable macro_manager.service")
+        # Ajout permanent de l'autorisation X pour root
+        xprofile_path = os.path.expanduser("~/.xprofile")
+        xhost_cmd = "xhost +SI:localuser:root\n"
+        # On ajoute la ligne seulement si elle n'existe pas déjà
+        if os.path.exists(xprofile_path):
+            with open(xprofile_path, "r") as f:
+                lines = f.readlines()
+            if not any("xhost +SI:localuser:root" in line for line in lines):
+                with open(xprofile_path, "a") as f:
+                    f.write("\n" + xhost_cmd)
+        else:
+            with open(xprofile_path, "w") as f:
+                f.write(xhost_cmd)
         return 0
     
     def init_background(self): 

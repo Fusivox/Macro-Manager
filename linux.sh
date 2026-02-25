@@ -23,7 +23,8 @@ case "$option" in
         ln -s 'dist/Macro Manager v2' MacroManager
         ;;
     2)
-        sudo rm -rf build *.spec dist MacroManager __pycache__ /root/.config/Macro_Manager
+        sudo systemctl stop macro_manager.service
+        sudo rm -rf build *.spec dist MacroManager __pycache__ /root/.config/Macro_Manager /etc/systemd/system/macro_manager.service /opt/Macro_Manager
         rm -rf None*
         ;;
     *)
