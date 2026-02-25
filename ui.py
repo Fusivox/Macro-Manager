@@ -4,9 +4,11 @@ from tkinter import messagebox, simpledialog
 if sys.platform == "win32": 
     name = "Main Page"
     macro_appdata = f"{os.getenv("APPDATA")}\\Macro Manager\\"
+    platform = "win32"
 if sys.platform == "linux": 
     name = None
     macro_appdata = f"{os.getenv("HOME")}/.config/Macro_Manager/"
+    platform = "linux"
 
 class Application(tk.Tk):
     def __init__(self, screenName = name, baseName = None, className = "Tk", useTk = True, sync = False, use = None):
@@ -15,7 +17,7 @@ class Application(tk.Tk):
         i18n.load_path.append(self.ressource_path("locales"))
         i18n.set("filename_format", "{locale}.yml")
 
-        self.appdata = os.getenv("APPDATA")
+        self.appdata = os.getenv("APPDATA") if platform == "win32" else os.getenv("HOME")
         with open(f"{macro_appdata}settings.json", "r") as f:
             self.settings = json.load(f)
 
@@ -35,7 +37,7 @@ class Application(tk.Tk):
         self.resizable(False, False)
         
         self.title(self._("ui.title"))
-        if sys.platform == "win32": self.iconbitmap(default=self.ressource_path("logo.ico"))
+        if platform == "win32": self.iconbitmap(default=self.ressource_path("logo.ico"))
         else: self.iconphoto(False, tk.PhotoImage(file=self.ressource_path("logo.png")))
         self.protocol("WM_DELETE_WINDOW", self.close)
 
@@ -73,7 +75,7 @@ class Application(tk.Tk):
             message=self._("ui.dlt_confirm")
         )
         if sure :
-            dlt = utils.delete_win32()
+            dlt = utils.delete_win32() if platform == "win32" else utils.delete_linux()
             if dlt:
                 messagebox.showinfo(
                     title=self._("ui.info"),

@@ -104,3 +104,16 @@ def delete_win32() -> bool:
         except Exception:
             return False
 
+def delete_linux() -> bool:
+        try:
+            
+            path = Path.home() / ".config" / "Macro_Manager"
+
+            if path.exists(): shutil.rmtree(path)
+
+            if not path.exists(): return True
+
+            else: return False
+
+        except Exception:
+            return False
