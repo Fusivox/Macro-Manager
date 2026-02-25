@@ -82,6 +82,7 @@ class Application(tk.Tk):
                     message=self._("ui.dlt_success")
                 )
                 self.destroy()
+                exit()
             else : 
                 messagebox.showerror(
                     title=self._("ui.info"),
@@ -344,4 +345,5 @@ class Application(tk.Tk):
         base = getattr(sys, '_MEIPASS', os.path.abspath("."))
 
         return os.path.join(base, path)
+
 
