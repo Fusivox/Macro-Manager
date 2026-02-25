@@ -238,19 +238,25 @@ WantedBy=multi-user.target"""
         with open(service_file, 'w') as f:
             f.write(service)
         os.system("systemctl enable macro_manager.service")
-        # Ajout permanent de l'autorisation X pour root
-        xprofile_path = os.path.expanduser("~/.xprofile")
-        xhost_cmd = "xhost +SI:localuser:root\n"
-        # On ajoute la ligne seulement si elle n'existe pas déjà
-        if os.path.exists(xprofile_path):
-            with open(xprofile_path, "r") as f:
-                lines = f.readlines()
-            if not any("xhost +SI:localuser:root" in line for line in lines):
-                with open(xprofile_path, "a") as f:
-                    f.write("\n" + xhost_cmd)
+
+        # Ajout permanent de l'autorisation X pour root (cote utilisateur)
+        sudo_user = os.environ.get("SUDO_USER")
+        if sudo_user:
+            user_home = os.path.expanduser(f"~{sudo_user}")
+            bashrc_path = os.path.join(user_home, ".bashrc")
+            xhost_cmd = "xhost +SI:localuser:root\n"
+
+            if os.path.exists(bashrc_path):
+                with open(bashrc_path, "r") as f:
+                    lines = f.readlines()
+                if not any("xhost +SI:localuser:root" in line for line in lines):
+                    with open(bashrc_path, "a") as f:
+                        f.write("\n" + xhost_cmd)
+            else:
+                with open(bashrc_path, "w") as f:
+                    f.write(xhost_cmd)
         else:
-            with open(xprofile_path, "w") as f:
-                f.write(xhost_cmd)
+            print("SUDO_USER non defini: impossible de modifier le .bashrc utilisateur.")
         return 0
     
     def init_background(self): 
