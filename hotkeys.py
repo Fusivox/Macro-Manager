@@ -103,8 +103,10 @@ class Hotkeys():
                     )
                     app.destroy()
 
+                self.init_background() # pour que les macros et abreviation test marchent des l'ouverture de l'ui
                 app.mainloop()
-                keyboard.unhook_all()
+
+                keyboard.unhook_all() # quand l'ui est fermé enleve puis remet toutes les macros et abreviations pour eviter les probleme et/ou bugs
                 self.init_background()
                 keyboard.wait()
 

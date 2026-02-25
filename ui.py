@@ -184,7 +184,7 @@ class Application(tk.Tk):
     def build_listbox(self, refresh: bool = False):
         if refresh : self.listbox.delete(0, tk.END)
         for macro in self.data:
-            self.listbox.insert(macro, self.data[macro]["keys"]) if self.data[macro]["keys"] is not None else self.listbox.insert(macro, "No keys selected")
+            self.listbox.insert(macro, self.data[macro]["keys"]) if self.data[macro]["keys"] is not None else self.listbox.insert(macro, self._("ui.no_key"))
 
     def abb_build_listbox(self, refresh: bool = False):
         if refresh : self.abb_listbox.delete(0, tk.END)
@@ -214,7 +214,7 @@ class Application(tk.Tk):
                 self.abb_rmv_button.config(state="disabled", bg="lightgray")
 
     def new_macro(self):
-        # creer une fenetre avec une entrée texte pour les touches (ou appuyer dessus ?)
+        # creer une fenetre avec une entrée texte pour les touches (ou appuyer dessus ?) qui peut être mis a None dans le cas ou c'est une action utile dans le task scheduler (future ajout) mais qu'on ne veut pas sous forme de macro
         # faire une listebox ou les instructions a faire sont rangé dans l'ordre d'execution avec un boutton "add action" qui ouvre une fentre de selection d'une action avec ses parametres a choisir
         # et une derniere entrée texte pour le commentaire (par default égal a None) 
         self.nmcr_menu = tk.Toplevel(self, width=300, height=400)
@@ -249,14 +249,15 @@ class Application(tk.Tk):
         com.grid(row=2, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
 
         def create_macro():
-            _key = keys.get() if keys.get() != "" else None
-            _comment = comment.get() if comment.get() != "" else None   # mets a None si y'a rien d'ecrit (parce que sinon tkinter mets "" et c'est relou)
-            _actions = list(mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox (a voir si on les ecrit deja syntaxes faite ou si on stocke un syntaxe utilisateur plus simple pour la modifier en syntaxe utilisable par le programme)
-
+            _key = keys.get() or None
+            _comment = comment.get() or None                            # mets a None si y'a rien d'ecrit (parce que sinon tkinter renvoie "" et c'est relou)
+            _actions = list(mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox 
+                                                                        # ^ a voir si on les ecrit deja syntaxes programme ou si on stocke un syntaxe utilisateur plus simple a comprendre pour la convertir en syntaxe programme avec une autre fonction avant le callback (voir même dedans en vrai ?)
             utils.add_mcr(self.data, _key, _actions, _comment)
-            utils.actualise(data=self.data, os_name=platform) 
-            callback = utils.make_callback(_actions)                    # Initialise la macro si des touches sont définis
-            if _key is not None : keyboard.add_hotkey(_key, callback)   #
+            utils.actualise(data=self.data, os_name=platform)                      
+            if _key is not None :                                       # Initialise la macro si des touches sont définis
+                callback = utils.make_callback(_actions)
+                keyboard.add_hotkey(_key, callback)  
 
             self.build_listbox(refresh=True)
             self.nmcr_menu.destroy()
@@ -269,7 +270,8 @@ class Application(tk.Tk):
 
     def edit_macro(self):
         #creation de la même fenetre que pour le new_macro mais avec les cases prérempli avec les data associé a la macro séléctionné (a faire apres que le new_macro soit complétement fait)
-        return 0
+        # faut juste faire que les StringVar contiennet le data[id]["keys"] et data[id]["comment"] pour les Entry et faire un for act in actions mcr_listbox.insert(act, -Synthaxe choisi-)
+        print("En construction par ici !")
 
     def new_abbreviation(self):
         self.nabb_menu = tk.Toplevel(self, width=300, height=400)
@@ -299,14 +301,18 @@ class Application(tk.Tk):
         def add_act():
             src = source.get()
             ab = abb.get()
+            print(f">Debug : {src}\n>Debug : {self.abbreviation}")
 
-            if src in self.abbreviation :
-                self.abbreviation[src] = ab
-                keyboard.remove_abbreviation(src)
+            for id in self.abbreviation:
+                print(f">Debug : {self.abbreviation[id]}")
+                if src == self.abbreviation[id]["source"] :
+                    self.abbreviation[id]["text"] = ab          # si il existe deja une abreviations avec ce "declancheur" ça l'enleve 
+                    keyboard.remove_abbreviation(src)
+                    break
 
             else:
                 utils.add_abb(self.abbreviation, src, ab)
-
+                                                                                    # ajoute l'abreviations et actualise le json puis l'initialise pour l'utiliser direct
             utils.actualise(abbreviation=self.abbreviation, os_name=platform)
             keyboard.add_abbreviation(src, ab)
 
