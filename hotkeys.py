@@ -64,6 +64,13 @@ class Hotkeys():
                             ("write", {"text": "This is a hotkey exemple"})
                         ],
                         "comment" : "This is a hotkey example and don't really do something"
+                    },
+                    2: {
+                        "keys" : None,
+                        "actions" : [
+                            ("open", {"window": "cmd"})
+                        ],
+                        "comment" : "it's just a test"
                     }
                 }
                 self.settings = {
@@ -165,6 +172,13 @@ class Hotkeys():
                             ("write", {"text": "This is a hotkey exemple"})
                         ],
                         "comment" : "This is a hotkey example and don't really do something"
+                    },
+                    2: {
+                        "keys" : None,
+                        "actions" : [
+                            ("open", {"window": "shell"})
+                        ],
+                        "comment": "it's just a test"
                     }
                 }
                 self.settings = {

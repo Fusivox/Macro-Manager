@@ -141,8 +141,7 @@ class Application(tk.Tk):
         self.listbox.grid(row=1, column=2, sticky=tk.N+tk.S+tk.E+tk.W, padx=5, pady=10)
         self.yScorll['command'] = self.listbox.yview
 
-        for macro in self.data:
-            self.listbox.insert(macro, self.data[macro]["keys"])
+        self.build_listbox()
 
         self.selected = tk.Label(self, text="", height=10, wraplength=300, justify="left")
         self.selected.grid(row=1, column=3, padx=5)
@@ -165,8 +164,7 @@ class Application(tk.Tk):
         self.abb_listbox.grid(row=1, column=2, sticky=tk.N+tk.S+tk.E+tk.W, padx=5, pady=10)
         self.abb_yScroll['command'] = self.abb_listbox.yview
 
-        for abb in self.abbreviation:
-            self.abb_listbox.insert(abb, self.abbreviation[abb]["source"])
+        self.abb_build_listbox()
 
         self.abb_selected = tk.Label(self, text="", height=10, wraplength=300, justify=tk.LEFT)
         self.abb_selected.grid(row=1, column=3, padx=5)
@@ -179,13 +177,13 @@ class Application(tk.Tk):
         self.abb_add_button = tk.Button(self, text=self._("ui.abb_new"), command=self.new_abbreviation)
         self.abb_add_button.grid(row= 2, column=3, pady=10, sticky=tk.W)
 
-    def refresh_listbox(self):
-        self.listbox.delete(0, tk.END)
+    def build_listbox(self, refresh: bool = False):
+        if refresh : self.listbox.delete(0, tk.END)
         for macro in self.data:
-            self.listbox.insert(macro, self.data[macro]["keys"])
+            self.listbox.insert(macro, self.data[macro]["keys"]) if self.data[macro]["keys"] is not None else self.listbox.insert(macro, "No keys selected")
 
-    def abb_refresh_listbox(self):
-        self.abb_listbox.delete(0, tk.END)
+    def abb_build_listbox(self, refresh: bool = False):
+        if refresh : self.abb_listbox.delete(0, tk.END)
         for abb in self.abbreviation:
             self.abb_listbox.insert(abb, self.abbreviation[abb]["source"])
 
@@ -195,7 +193,7 @@ class Application(tk.Tk):
             self.data = {str(i): self.data[keys] for i, keys in enumerate(sorted(self.data.keys()))}
             print(f">Debug : {self.data}")
             if rmv:
-                self.refresh_listbox()
+                self.build_listbox(refresh=True)
                 self.listbox.select_clear(0, tk.END)
                 self.selected.config(text="")
                 self.rmv_button.config(state="disabled", bg="lightgray")
@@ -205,7 +203,7 @@ class Application(tk.Tk):
             self.abbreviation = {str(i): self.abbreviation[keys] for i, keys in enumerate(sorted(self.abbreviation.keys()))}
             print(f">Debug : {self.abbreviation}")
             if rmv:
-                self.abb_refresh_listbox()
+                self.abb_build_listbox(refresh=True)
                 self.abb_listbox.select_clear(0, tk.END)
                 self.abb_selected.config(text="")
                 self.abb_rmv_button.config(state="disabled", bg="lightgray")
@@ -247,6 +245,12 @@ class Application(tk.Tk):
         com = tk.Entry(self.nmcr_menu, exportselection=0, textvariable=comment)
         com.grid(row=2, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
 
+        add_button = tk.Button(self.nmcr_menu, text=self._("ui.naction"), justify=tk.LEFT, command=lambda: None)
+        add_button.grid(row=3, column=0, sticky=tk.W, padx=10, pady=10)
+
+        create_button = tk.Button(self.nmcr_menu, text=self._("ui.nmcr"), justify=tk.RIGHT, command=lambda: None)
+        create_button.grid(row=3, column=1, sticky=tk.E, padx=10, pady=10)
+
     def new_abbreviation(self):
         self.nabb_menu = tk.Toplevel(self, width=300, height=400)
         self.nabb_menu.title(self._("ui.nabb_title"))
@@ -286,7 +290,7 @@ class Application(tk.Tk):
             utils.actualise(abbreviation=self.abbreviation)
             keyboard.add_abbreviation(src, ab)
 
-            self.abb_refresh_listbox()
+            self.abb_build_listbox(refresh=True)
             self.nabb_menu.destroy()
         
         add_button = tk.Button(self.nabb_menu, text=self._("ui.nabb"), command=add_act)
@@ -313,6 +317,8 @@ class Application(tk.Tk):
                 self.build_main_ui()
                 
             else: self.build_abb_ui()
+
+        self.build_menu()
 
 
     def build_menu(self):
@@ -345,5 +351,3 @@ class Application(tk.Tk):
         base = getattr(sys, '_MEIPASS', os.path.abspath("."))
 
         return os.path.join(base, path)
-
-
