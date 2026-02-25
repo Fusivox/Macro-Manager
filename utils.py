@@ -6,7 +6,7 @@ def make_callback(actions: list):
         for action, params in actions:
             if action == "open":
 
-                if params.get("window") == "gui": #("open", {"window":"gui"})
+                if params.get("window") == "gui": #("open", {"window":"gui"}) sert a ouvrir l'ui pricipale
                     app = ui.Application()
                     app.mainloop()
 
@@ -65,7 +65,7 @@ def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: 
                 json.dump(abbreviation, f, indent=4)
 
 
-def add_mcr(data: dict, keys: str, actions: list, comment: str = None):
+def add_mcr(data: dict, keys: str|None, actions: list, comment: str|None = None):
     data[str(len(data))] = {
         "keys": keys,
         "actions": actions,
@@ -78,7 +78,7 @@ def add_abb(data: dict, source: str, text: str):
         "text": text
     }
 
-def remove(data: dict, nb: str|int, id=True):
+def remove(data: dict, nb: str|int, id=True) -> bool:
     try :
         if id: data.pop(nb)
         else: del data[nb]

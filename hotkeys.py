@@ -218,14 +218,13 @@ class Hotkeys():
                 
     def create_shortcut_win32(self):
 
-        shortcut_path = f"{self.appdata}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"
+        shortcut_path = f"{os.getenv("APPDATA")}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"
         path = sys.executable
-        dir = f"{self.appdata}\\Macro Manager"
 
         shell = Dispatch("WScript.Shell")
         shortcut = shell.CreateShortCut(shortcut_path)
         shortcut.Targetpath = path
-        shortcut.WorkingDirectory = dir
+        shortcut.WorkingDirectory = self.appdata
         shortcut.IconLocation = path
         shortcut.save()
                 

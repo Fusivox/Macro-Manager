@@ -52,6 +52,7 @@ class Application(tk.Tk):
         Keys = self._("ui.keys")
         comment = self._("ui.comment")
         self.rmv_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
+        self.edit_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
         if self.selection:
             self.index = str(self.selection[0])
             self.selected.config(text=f"{Keys} : {self.data[self.index]["keys"]} \n\n{comment} : {self.data[self.index]["comment"]}" if self.data[self.index]["comment"] is not None else f"{Keys} : {self.data[self.index]["keys"]}\n\n")
@@ -66,7 +67,7 @@ class Application(tk.Tk):
             self.abb_selected.config(text=f"{source} : {self.abbreviation[self.abb_index]["source"]} \n\n{text} : {self.abbreviation[self.abb_index]["text"]}")
         
     def close(self):
-        utils.actualise(self.data, self.settings, self.abbreviation)
+        utils.actualise(self.data, self.settings, self.abbreviation, platform)
         self.destroy()
 
     def confirm(self):
@@ -127,7 +128,7 @@ class Application(tk.Tk):
         i18n.set("locale", lang)
         self.settings["lang"] = lang
         self.settings["fallback"] = fallback
-        utils.actualise(settings=self.settings)
+        utils.actualise(settings=self.settings, os_name=platform)
         self.title(self._("ui.title"))
         self.refresh_ui()
 
@@ -152,7 +153,10 @@ class Application(tk.Tk):
         self.rmv_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.E)
 
         self.add_button = tk.Button(self, text=self._("ui.new"), command=self.new_macro)
-        self.add_button.grid(row= 2, column=3, pady=10, sticky=tk.W)
+        self.add_button.grid(row=2, column=3, pady=10, sticky=tk.W)
+
+        self.edit_button = tk.Button(self, text=self._("ui.edit"), command=self.edit_macro, state="disabled", bg="lightgray")
+        self.edit_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.W)
 
     def build_abb_ui(self):
         self.abb_yScroll = tk.Scrollbar(self, orient=tk.VERTICAL)
@@ -197,6 +201,7 @@ class Application(tk.Tk):
                 self.listbox.select_clear(0, tk.END)
                 self.selected.config(text="")
                 self.rmv_button.config(state="disabled", bg="lightgray")
+                self.edit_button.config(state="disabled", bg="lightgray")
 
         elif source == "abb" :
             rmv = utils.remove(self.abbreviation, nb)
@@ -231,9 +236,7 @@ class Application(tk.Tk):
         mcr_yScroll = tk.Scrollbar(self.nmcr_menu, orient=tk.VERTICAL)
         mcr_yScroll.grid(row=1, column=0, sticky=tk.N+tk.S+tk.E, padx=10, pady=10)
 
-        mcr_txt = tk.StringVar()
-
-        mcr_listbox = tk.Listbox(self.nmcr_menu, bg='white', exportselection=0, yscrollcommand=mcr_yScroll.set, activestyle="dotbox", listvariable=mcr_txt)
+        mcr_listbox = tk.Listbox(self.nmcr_menu, bg='white', exportselection=0, yscrollcommand=mcr_yScroll.set, activestyle="dotbox")
         mcr_listbox.grid(row=1, column=1, sticky=tk.N+tk.S+tk.E+tk.W, padx=5, pady=10)
         mcr_yScroll['command'] = mcr_listbox.yview
 
@@ -245,11 +248,28 @@ class Application(tk.Tk):
         com = tk.Entry(self.nmcr_menu, exportselection=0, textvariable=comment)
         com.grid(row=2, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
 
+        def create_macro():
+            _key = keys.get() if keys.get() != "" else None
+            _comment = comment.get() if comment.get() != "" else None   # mets a None si y'a rien d'ecrit (parce que sinon tkinter mets "" et c'est relou)
+            _actions = list(mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox (a voir si on les ecrit deja syntaxes faite ou si on stocke un syntaxe utilisateur plus simple pour la modifier en syntaxe utilisable par le programme)
+
+            utils.add_mcr(self.data, _key, _actions, _comment)
+            utils.actualise(data=self.data, os_name=platform) 
+            callback = utils.make_callback(_actions)                    # Initialise la macro si des touches sont définis
+            if _key is not None : keyboard.add_hotkey(_key, callback)   #
+
+            self.build_listbox(refresh=True)
+            self.nmcr_menu.destroy()
+
         add_button = tk.Button(self.nmcr_menu, text=self._("ui.naction"), justify=tk.LEFT, command=lambda: None)
         add_button.grid(row=3, column=0, sticky=tk.W, padx=10, pady=10)
 
-        create_button = tk.Button(self.nmcr_menu, text=self._("ui.nmcr"), justify=tk.RIGHT, command=lambda: None)
+        create_button = tk.Button(self.nmcr_menu, text=self._("ui.nmcr"), justify=tk.RIGHT, command=create_macro)
         create_button.grid(row=3, column=1, sticky=tk.E, padx=10, pady=10)
+
+    def edit_macro(self):
+        #creation de la même fenetre que pour le new_macro mais avec les cases prérempli avec les data associé a la macro séléctionné (a faire apres que le new_macro soit complétement fait)
+        return 0
 
     def new_abbreviation(self):
         self.nabb_menu = tk.Toplevel(self, width=300, height=400)
@@ -287,7 +307,7 @@ class Application(tk.Tk):
             else:
                 utils.add_abb(self.abbreviation, src, ab)
 
-            utils.actualise(abbreviation=self.abbreviation)
+            utils.actualise(abbreviation=self.abbreviation, os_name=platform)
             keyboard.add_abbreviation(src, ab)
 
             self.abb_build_listbox(refresh=True)
