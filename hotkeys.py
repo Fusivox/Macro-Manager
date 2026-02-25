@@ -221,9 +221,11 @@ class Hotkeys():
         for nb in self.data:
             keys = self.data[nb]["keys"]
             actions = self.data[nb]["actions"]
-            callback = utils.make_callback(actions)
-            keyboard.add_hotkey(keys, callback)
-            print(f">Debug : new hotkey {keys}, do {actions}.")
+            if keys is not None:
+                callback = utils.make_callback(actions)
+                keyboard.add_hotkey(keys, callback)
+                print(f">Debug : new hotkey {keys}, do {actions}.")
+            else : print(f">Debug : action that has no keys : {actions}")
 
         for nb in self.abbreviation:
             source = self.abbreviation[nb]["source"]
