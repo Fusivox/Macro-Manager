@@ -265,6 +265,7 @@ class Application(tk.Tk):
             self.nmcr_menu.destroy()
 
         def add_action():
+            actions = ["open", "wait", "write", "click", "moveto", "move", "press"]           # liste des actions possible (a actualiser en même temps que le fonction make_callback dans utils)
             add_action_menu = tk.Toplevel(self.nmcr_menu, width=300, height=400)
             add_action_menu.title(self._("ui.add_action"))
 
@@ -272,6 +273,18 @@ class Application(tk.Tk):
             add_action_menu.focus_set()
             add_action_menu.transient(self.nmcr_menu)
             add_action_menu.resizable(False, False)
+
+            actions_list_yScorll = tk.Scrollbar(add_action_menu, orient=tk.VERTICAL)
+            actions_list_yScorll.grid(row=0, column=0, sticky=tk.N+tk.S+tk.E, padx=10, pady=10)
+
+            actions_list = tk.Listbox(add_action_menu, bg='white', exportselection=0, yscrollcommand=actions_list_yScorll.set, activestyle="dotbox")
+            actions_list.grid(row=0, column=1, sticky=tk.N+tk.S+tk.E+tk.W, padx=5, pady=10)
+            actions_list_yScorll['command'] = actions_list.yview
+
+            for action in actions:
+                actions_list.insert(0, action)
+
+            add_action_menu.protocol("WM_DELETE_WINDOW", lambda: (self.nmcr_menu.focus_set(), self.nmcr_menu.grab_set(), add_action_menu.destroy()))
 
         add_button = tk.Button(self.nmcr_menu, text=self._("ui.naction"), justify=tk.LEFT, command=add_action)
         add_button.grid(row=3, column=0, sticky=tk.W, padx=10, pady=10)
