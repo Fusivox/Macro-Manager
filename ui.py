@@ -249,20 +249,31 @@ class Application(tk.Tk):
         com.grid(row=2, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
 
         def create_macro():
-            _key = keys.get() or None
-            _comment = comment.get() or None                            # mets a None si y'a rien d'ecrit (parce que sinon tkinter renvoie "" et c'est relou)
+            _key = keys.get() or None                                   # mets a None si y'a rien d'ecrit (parce que sinon tkinter renvoie "" et c'est relou)
+            _comment = comment.get() or None
             _actions = list(mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox 
-                                                                        # ^ a voir si on les ecrit deja syntaxes programme ou si on stocke un syntaxe utilisateur plus simple a comprendre pour la convertir en syntaxe programme avec une autre fonction avant le callback (voir même dedans en vrai ?)
-            utils.add_mcr(self.data, _key, _actions, _comment)
-            utils.actualise(data=self.data, os_name=platform)                      
-            if _key is not None :                                       # Initialise la macro si des touches sont définis
-                callback = utils.make_callback(_actions)
-                keyboard.add_hotkey(_key, callback)  
+                                                                        # ^ on stocke un syntaxe utilisateur plus simple a comprendre pour la convertir en syntaxe programme avec une autre fonction avant le callback (voir même dedans ?)*
+            print(f">Debug : {len(_actions)}")
+            if len(_actions) > 0:                                       # Si aucune actions ça fait rien et ferme juste la fenetre 
+                utils.add_mcr(self.data, _key, _actions, _comment)
+                utils.actualise(data=self.data, os_name=platform)                      
+                if _key is not None :                                   # Initialise la macro si des touches sont définis
+                    callback = utils.make_callback(_actions)
+                    keyboard.add_hotkey(_key, callback)  
 
-            self.build_listbox(refresh=True)
+                self.build_listbox(refresh=True)
             self.nmcr_menu.destroy()
 
-        add_button = tk.Button(self.nmcr_menu, text=self._("ui.naction"), justify=tk.LEFT, command=lambda: None)
+        def add_action():
+            add_action_menu = tk.Toplevel(self.nmcr_menu, width=300, height=400)
+            add_action_menu.title(self._("ui.add_action"))
+
+            add_action_menu.grab_set()
+            add_action_menu.focus_set()
+            add_action_menu.transient(self.nmcr_menu)
+            add_action_menu.resizable(False, False)
+
+        add_button = tk.Button(self.nmcr_menu, text=self._("ui.naction"), justify=tk.LEFT, command=add_action)
         add_button.grid(row=3, column=0, sticky=tk.W, padx=10, pady=10)
 
         create_button = tk.Button(self.nmcr_menu, text=self._("ui.nmcr"), justify=tk.RIGHT, command=create_macro)
