@@ -59,16 +59,16 @@ class Hotkeys():
                     1: {
                         "keys" : "ctrl+alt+q",
                         "actions" : [
-                            ("open", {"window": "cmd"}),
+                            ("open", {"window": "cmd", "folder": None}),
                             ("wait", {"time": 1}),
-                            ("write", {"text": "This is a hotkey exemple"})
+                            ("write", {"text": "This is a hotkey exemple", "interval": 0})
                         ],
                         "comment" : "This is a hotkey example and don't really do something"
                     },
                     2: {
                         "keys" : None,
                         "actions" : [
-                            ("open", {"window": "cmd"})
+                            ("open", {"window": "cmd", "folder": None})
                         ],
                         "comment" : "it's just a test"
                     }
@@ -158,16 +158,16 @@ class Hotkeys():
                     1: {
                         "keys" : "ctrl+alt+q",
                         "actions" : [
-                            ("open", {"window": "shell"}),
+                            ("open", {"window": "shell", "command": None}),
                             ("wait", 1),
-                            ("write", {"text": "This is a hotkey exemple"})
+                            ("write", {"text": "This is a hotkey exemple", "interval": 0})
                         ],
                         "comment" : "This is a hotkey example and don't really do something"
                     },
                     2: {
                         "keys" : None,
                         "actions" : [
-                            ("open", {"window": "shell"})
+                            ("open", {"window": "shell", "command": None})
                         ],
                         "comment": "it's just a test"
                     }

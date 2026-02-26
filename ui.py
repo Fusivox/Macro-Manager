@@ -251,9 +251,8 @@ class Application(tk.Tk):
         def create_macro() -> None:
             _key = keys.get() or None                                   # mets a None si y'a rien d'ecrit (parce que sinon tkinter renvoie "" et c'est relou)
             _comment = comment.get() or None
-            _actions = list(mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox 
-                                                                        # ^ on stocke un syntaxe utilisateur plus simple a comprendre pour la convertir en syntaxe programme avec une autre fonction avant le callback (voir même dedans ?)*
-            print(f">Debug : {len(_actions)}")
+            _actions = list(mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox, on stocke un syntaxe utilisateur plus simple a comprendre pour la convertir en syntaxe programme avec translate_callback
+            _actions = utils.translate_callback(_actions)               # transforme la syntaxe utilisateur en syntaxe programme
             if len(_actions) > 0:                                       # Si aucune actions ça fait rien et ferme juste la fenetre 
                 utils.add_mcr(self.data, _key, _actions, _comment)
                 utils.actualise(data=self.data, os_name=platform)                      
@@ -266,6 +265,28 @@ class Application(tk.Tk):
 
         def add_action() -> None:
             actions = ["open", "wait", "write", "click", "moveto", "move", "press"]           # liste des actions possible (a actualiser en même temps que le fonction make_callback dans utils)
+            
+            def close(): 
+                self.nmcr_menu.focus_set()
+                self.nmcr_menu.grab_set()
+                add_action_menu.destroy()
+
+            def ask_params():
+                selected_action = actions_list.get(actions_list.curselection()[0])
+
+                if selected_action == "wait":
+                    time = simpledialog.askfloat(title=self._("ui.wait_title"), prompt=self._("ui.wait"))
+                    mcr_listbox.insert(tk.END, f"{selected_action} : {time}")
+
+                if selected_action == "write": # type: ignore
+                    params_menu = tk.Toplevel(add_action_menu, width=300, height=400)
+                    params_menu.grab_set()
+                    params_menu.focus_set()
+
+                    text = tk.StringVar()
+                    text_entry = tk.Entry()
+                    # j'avance apres la j'ai une fleme de fouuuuuuuuuu
+
             add_action_menu = tk.Toplevel(self.nmcr_menu, width=300, height=400)
             add_action_menu.title(self._("ui.add_action"))
 
@@ -273,6 +294,7 @@ class Application(tk.Tk):
             add_action_menu.focus_set()
             add_action_menu.transient(self.nmcr_menu)
             add_action_menu.resizable(False, False)
+            add_action_menu.protocol("WM_DELETE_WINDOW", close)
 
             actions_list_yScorll = tk.Scrollbar(add_action_menu, orient=tk.VERTICAL)
             actions_list_yScorll.grid(row=0, column=0, sticky=tk.N+tk.S+tk.E, padx=10, pady=10)
@@ -284,7 +306,8 @@ class Application(tk.Tk):
             for action in actions:
                 actions_list.insert(0, action)
 
-            add_action_menu.protocol("WM_DELETE_WINDOW", lambda: (self.nmcr_menu.focus_set(), self.nmcr_menu.grab_set(), add_action_menu.destroy()))
+            choose_button = tk.Button(add_action_menu, text=self._("ui.choose_act"), command=lambda : (ask_params(), close()))
+            choose_button.grid(row=1, column=1, sticky=tk.E, padx=10, pady=10)
 
         add_button = tk.Button(self.nmcr_menu, text=self._("ui.naction"), justify=tk.LEFT, command=add_action)
         add_button.grid(row=3, column=0, sticky=tk.W, padx=10, pady=10)

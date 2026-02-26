@@ -43,3 +43,6 @@ en:
     edit: Edit
     no_key: No keys selected
     add_action: Macro Manager - Add action
+    choose_act: Add action
+    wait_title: Wait parameter
+    wait: How many seconds to wait ?

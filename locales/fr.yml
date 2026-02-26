@@ -43,3 +43,6 @@ fr:
     edit: Modifier
     no_key: Aucune touches 
     add_action: Macro Manager - Ajouter une action
+    choose_act: Ajouter action
+    wait_title: Parametres attendre
+    wait: Attendre combiens de secondes ?

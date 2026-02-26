@@ -1,7 +1,7 @@
 import json, os, shutil, pyautogui, time, ui, subprocess
 from pathlib import Path
 
-def make_callback(actions: list) -> function:
+def make_callback(actions: list):
     def callback():
         for action, params in actions:
             if action == "open":
@@ -11,33 +11,89 @@ def make_callback(actions: list) -> function:
                     app.mainloop()
 
                 elif params.get("window") == "cmd": #("open", {"window":"cmd", "folder":"Dossier dans lequel le cmd est ouvert si spécifié sinon celui par default"})
-                    subprocess.Popen(["cmd.exe"], cwd=params.get("folder", None))         
+                    subprocess.Popen(["cmd.exe"], cwd=params["folder"])         
 
                 elif params.get("window") == "shell":#("open", {"window":"shell", "command":"commande a executer dans le shell"})
                     subprocess.Popen(["xterm"], shell=True)
 
                 elif params.get("window") == "explorer": #("open", {"window":"explorer", "folder":"Dossier dans lequel le navigateur de fichier est ouvert si spécifié sinon celui par default"})
-                    subprocess.Popen(["Explorer", params.get("folder", None)], shell=True)
+                    subprocess.Popen(["Explorer", params["folder"]], shell=True)
 
             elif action == "wait": #("wait", #temps en secondes)
                 time.sleep(params["time"])
 
             elif action == "write": #("write", {"text":"texte a ecrire", "interval":attente entre chaque lettre})
-                pyautogui.write(params["text"], interval=params.get("interval", 0))
+                pyautogui.write(params["text"], interval=params["interval"])
 
             elif action == "click": #("click", {"x":si rien x curseur, "y":si rien y curseur, "clicks":par default 1, "interval":par default 0, "button":"primary(default) ou secondary ou middle" , "duration":temps pour aller au cos spécifié 0 par default})
-                pyautogui.click(x=params.get("x", None), y=params.get("y", None), clicks=params.get("clicks", 1), interval=params.get("interval", 0), button=params.get("button", "primary"), duration=params.get("duration", 0))
+                pyautogui.click(x=params["x"], y=params["y"], clicks=params["clicks"], interval=params["interval"], button=params["button"], duration=params["duration"])
 
             elif action == "moveto": #("moveto", {"x":..., "y":..., "duration":0 par default})
-                pyautogui.moveTo(x=params.get("x", None), y=params.get("y", None), duration=params.get("duration", 0))
+                pyautogui.moveTo(x=params["x"], y=params["y"], duration=params["duration"])
 
             elif action == "move": #("move", {"x":+relatif a la souris, "y":+relatif a la souris, "duration":0 par default})
-                pyautogui.move(xOffset=params.get("x", 0), yOffset=params.get("y", 0), duration=params.get("duration", 0))
+                pyautogui.move(xOffset=params["x"], yOffset=params["y"], duration=params["duration"])
 
             elif action == "press":  #("press", {"keys":touche a appuyer, presses=nb de fois appuyer, "interval":intervale entre les plusieurs presses}
-                pyautogui.press(keys=params["keys"], presses=params.get("presses", 1), interval=params.get("interval", 0))
+                pyautogui.press(keys=params["keys"], presses=params["presses"], interval=params["interval"])
                 
     return callback
+r"""
+exemples syntaxe utilisateur :
+
+wait : 10
+write : Salut comment ça va ;; interval : 0.1
+click : 1 ;; x : 10 ;; y : 500 ;; button : primary
+press : A ;; presses : 5 ;; interval : 1.5
+open : cmd ;; folder : C:\User
+moveto : 0.5 ;; x : 500 ;; y : None
+move : 0 ;; x : None ;; y : 100
+
+exemple liste actions:
+["write : Salut comment ça va ;; interval : 0.1", "press : A ;; presses : 5 ;; interval : 1.5", "wait : 10", "moveto : 0.5 ;; x : 500 ;; y : None"]
+"""
+
+def translate_callback(actions: list) -> list:
+    translated_actions = []
+    
+    def convert(value):         # convertis un nombre sotcké en str en int ou float et si c'est pas un nombre le renvoie normalement
+        try:
+            if "." in value:
+                return float(value)
+            return int(value)
+        except ValueError:
+            return value
+    
+    for action in actions:          
+        parts = {key: convert(value) for key, value in (part.split(" : ", 1) for part in action.split(" ;; "))} # transforme actions en un dictionnaire plus clair qui sépare comme il faut               
+    
+        if "wait" in parts:
+            translated_actions.append(("wait", {"time": parts["wait"]}))
+            
+        elif "press" in parts:
+            translated_actions.append(("press", {"keys": parts["press"], "presses": parts.get("presses", 1), "interval": parts.get("interval", 0)}))
+
+        elif "write" in parts:
+            translated_actions.append(("write", {"text": parts["write"], "interval": parts.get("interval", 0)}))
+
+        elif "click" in parts:
+            translated_actions.append(("click", {"x": parts.get("x", None), "y": parts.get("y", None), "clicks": parts["click"], "interval": parts.get("interval", 0), "button": parts.get("button", "primary"), "duration": parts.get("duration", 0)}))
+
+        elif "moveto" in parts:
+            translated_actions.append(("moveto", {"x": parts.get("x", None), "y": parts.get("y", None), "duration": parts["moveto"]}))
+
+        elif "move" in parts:
+            translated_actions.append(("move", {"x": parts.get("x", 0), "y": parts.get("y", 0), "duration": parts["move"]}))
+
+        elif "open" in parts:
+            if parts["open"] == "cmd":
+                translated_actions.append(("open", {"window": "cmd", "folder": parts.get("folder", None)}))
+            elif parts["open"] == "shell":
+                translated_actions.append(("open", {"window": "shell", "command": parts.get("command", None)}))
+            elif parts["open"] == "explorer":
+                translated_actions.append(("open", {"window": "explorer", "folder": parts.get("folder", None)}))
+
+    return translated_actions # return le dictionnaire en syntaxe programme
 
 def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None, os_name="win32") -> None:
     if os_name == "win32":
