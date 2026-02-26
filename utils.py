@@ -1,7 +1,7 @@
 import json, os, shutil, pyautogui, time, ui, subprocess
 from pathlib import Path
 
-def make_callback(actions: list):
+def make_callback(actions: list) -> function:
     def callback():
         for action, params in actions:
             if action == "open":
@@ -39,7 +39,7 @@ def make_callback(actions: list):
                 
     return callback
 
-def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None, os_name="win32"):
+def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None, os_name="win32") -> None:
     if os_name == "win32":
         appdata = os.getenv("APPDATA")
         if data:
@@ -65,14 +65,14 @@ def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: 
                 json.dump(abbreviation, f, indent=4)
 
 
-def add_mcr(data: dict, keys: str|None, actions: list, comment: str|None = None):
+def add_mcr(data: dict, keys: str|None, actions: list, comment: str|None = None) -> None:
     data[str(len(data))] = {
         "keys": keys,
         "actions": actions,
         "comment": comment
     }
 
-def add_abb(data: dict, source: str, text: str):
+def add_abb(data: dict, source: str, text: str) -> None:
     data[str(len(data))] = {
         "source": source,
         "text": text

@@ -47,7 +47,7 @@ class Application(tk.Tk):
         self.build_menu()
         self.build_main_ui()
 
-    def on_select(self, event):
+    def on_select(self, event) -> None:
         self.selection = self.listbox.curselection()
         Keys = self._("ui.keys")
         comment = self._("ui.comment")
@@ -57,7 +57,7 @@ class Application(tk.Tk):
             self.index = str(self.selection[0])
             self.selected.config(text=f"{Keys} : {self.data[self.index]["keys"]} \n\n{comment} : {self.data[self.index]["comment"]}" if self.data[self.index]["comment"] is not None else f"{Keys} : {self.data[self.index]["keys"]}\n\n")
 
-    def abb_on_select(self, event):
+    def abb_on_select(self, event) -> None:
         self.abb_selection = self.abb_listbox.curselection()
         source = self._("ui.source")
         text = self._("ui.text")
@@ -66,11 +66,11 @@ class Application(tk.Tk):
             self.abb_index = str(self.abb_selection[0])
             self.abb_selected.config(text=f"{source} : {self.abbreviation[self.abb_index]["source"]} \n\n{text} : {self.abbreviation[self.abb_index]["text"]}")
         
-    def close(self):
+    def close(self) -> None:
         utils.actualise(self.data, self.settings, self.abbreviation, platform)
         self.destroy()
 
-    def confirm(self):
+    def confirm(self) -> None:
         sure = messagebox.askokcancel(
             title=self._("ui.confirm"),
             message=self._("ui.dlt_confirm")
@@ -90,7 +90,7 @@ class Application(tk.Tk):
                     message=self._("ui.dlt_error")
                 )
 
-    def gui_keys(self):
+    def gui_keys(self) -> None:
         msg = self._("ui.key_msg")
 
         keys = simpledialog.askstring(
@@ -110,7 +110,7 @@ class Application(tk.Tk):
                     message=message
                 )
 
-    def help(self):
+    def help(self) -> None:
         if not self.help_running:
             self.help_running = True
             self.help_menu = tk.Toplevel(height=400, width=400)
@@ -120,11 +120,11 @@ class Application(tk.Tk):
             self.help_menu.transient(self)
             self.help_menu.protocol("WM_DELETE_WINDOW", self.close_help)
 
-    def close_help(self):
+    def close_help(self) -> None:
         self.help_running = False
         self.help_menu.destroy()
 
-    def set_lang(self, lang, fallback):
+    def set_lang(self, lang: str, fallback: str) -> None:
         i18n.set("locale", lang)
         self.settings["lang"] = lang
         self.settings["fallback"] = fallback
@@ -132,7 +132,7 @@ class Application(tk.Tk):
         self.title(self._("ui.title"))
         self.refresh_ui()
 
-    def build_main_ui(self):
+    def build_main_ui(self) -> None:
         self.yScorll = tk.Scrollbar(self, orient=tk.VERTICAL)
         self.yScorll.grid(row=1, column=1, sticky=tk.N+tk.S, padx=10, pady=10)
 
@@ -158,7 +158,7 @@ class Application(tk.Tk):
         self.edit_button = tk.Button(self, text=self._("ui.edit"), command=self.edit_macro, state="disabled", bg="lightgray")
         self.edit_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.W)
 
-    def build_abb_ui(self):
+    def build_abb_ui(self) -> None:
         self.abb_yScroll = tk.Scrollbar(self, orient=tk.VERTICAL)
         self.abb_yScroll.grid(row=1, column=1, sticky=tk.N+tk.S, padx=10, pady=10)
 
@@ -181,17 +181,17 @@ class Application(tk.Tk):
         self.abb_add_button = tk.Button(self, text=self._("ui.abb_new"), command=self.new_abbreviation)
         self.abb_add_button.grid(row= 2, column=3, pady=10, sticky=tk.W)
 
-    def build_listbox(self, refresh: bool = False):
+    def build_listbox(self, refresh: bool = False) -> None:
         if refresh : self.listbox.delete(0, tk.END)
         for macro in self.data:
             self.listbox.insert(macro, self.data[macro]["keys"]) if self.data[macro]["keys"] is not None else self.listbox.insert(macro, self._("ui.no_key"))
 
-    def abb_build_listbox(self, refresh: bool = False):
+    def abb_build_listbox(self, refresh: bool = False) -> None:
         if refresh : self.abb_listbox.delete(0, tk.END)
         for abb in self.abbreviation:
             self.abb_listbox.insert(abb, self.abbreviation[abb]["source"])
 
-    def remove(self, source : str, nb):
+    def remove(self, source: str, nb) -> None:
         if source == "data" :
             rmv = utils.remove(self.data, nb)
             self.data = {str(i): self.data[keys] for i, keys in enumerate(sorted(self.data.keys()))}
@@ -213,7 +213,7 @@ class Application(tk.Tk):
                 self.abb_selected.config(text="")
                 self.abb_rmv_button.config(state="disabled", bg="lightgray")
 
-    def new_macro(self):
+    def new_macro(self) -> None:
         # creer une fenetre avec une entrée texte pour les touches (ou appuyer dessus ?) qui peut être mis a None dans le cas ou c'est une action utile dans le task scheduler (future ajout) mais qu'on ne veut pas sous forme de macro
         # faire une listebox ou les instructions a faire sont rangé dans l'ordre d'execution avec un boutton "add action" qui ouvre une fentre de selection d'une action avec ses parametres a choisir
         # et une derniere entrée texte pour le commentaire (par default égal a None) 
@@ -248,7 +248,7 @@ class Application(tk.Tk):
         com = tk.Entry(self.nmcr_menu, exportselection=0, textvariable=comment)
         com.grid(row=2, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
 
-        def create_macro():
+        def create_macro() -> None:
             _key = keys.get() or None                                   # mets a None si y'a rien d'ecrit (parce que sinon tkinter renvoie "" et c'est relou)
             _comment = comment.get() or None
             _actions = list(mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox 
@@ -264,7 +264,7 @@ class Application(tk.Tk):
                 self.build_listbox(refresh=True)
             self.nmcr_menu.destroy()
 
-        def add_action():
+        def add_action() -> None:
             actions = ["open", "wait", "write", "click", "moveto", "move", "press"]           # liste des actions possible (a actualiser en même temps que le fonction make_callback dans utils)
             add_action_menu = tk.Toplevel(self.nmcr_menu, width=300, height=400)
             add_action_menu.title(self._("ui.add_action"))
@@ -292,12 +292,12 @@ class Application(tk.Tk):
         create_button = tk.Button(self.nmcr_menu, text=self._("ui.nmcr"), justify=tk.RIGHT, command=create_macro)
         create_button.grid(row=3, column=1, sticky=tk.E, padx=10, pady=10)
 
-    def edit_macro(self):
+    def edit_macro(self) -> None:
         #creation de la même fenetre que pour le new_macro mais avec les cases prérempli avec les data associé a la macro séléctionné (a faire apres que le new_macro soit complétement fait)
         # faut juste faire que les StringVar contiennet le data[id]["keys"] et data[id]["comment"] pour les Entry et faire un for act in actions mcr_listbox.insert(act, -Synthaxe choisi-)
         print("En construction par ici !")
 
-    def new_abbreviation(self):
+    def new_abbreviation(self) -> None:
         self.nabb_menu = tk.Toplevel(self, width=300, height=400)
         self.nabb_menu.title(self._("ui.nabb_title"))
 
@@ -322,7 +322,7 @@ class Application(tk.Tk):
         abb_entry = tk.Entry(self.nabb_menu, justify=tk.CENTER, exportselection=0, textvariable=abb)
         abb_entry.grid(row=1, column=1, padx=10, pady=10)
 
-        def add_act():
+        def add_act() -> None:
             src = source.get()
             ab = abb.get()
             print(f">Debug : {src}\n>Debug : {self.abbreviation}")
@@ -348,7 +348,7 @@ class Application(tk.Tk):
 
         self.build_menu()
 
-    def refresh_ui(self, switch: bool = False):
+    def refresh_ui(self, switch: bool = False) -> None:
         for widget in self.winfo_children() :
             widget.destroy()
 
@@ -371,7 +371,7 @@ class Application(tk.Tk):
         self.build_menu()
 
 
-    def build_menu(self):
+    def build_menu(self) -> None:
         self.menu_bar = tk.Menu(self)
         self.config(menu=self.menu_bar)
 
@@ -393,11 +393,11 @@ class Application(tk.Tk):
         elif self.current_menu == "abb":
             self.menu_bar.add_command(label=self._("ui.abb"), command=lambda: self.refresh_ui(switch=True))
 
-    def refresh_menu(self):
+    def refresh_menu(self) -> None:
         self.menu_bar.delete(0, tk.END)
         self.build_menu()
 
-    def ressource_path(self, path):
+    def ressource_path(self, path: str) -> str:
         base = getattr(sys, '_MEIPASS', os.path.abspath("."))
 
         return os.path.join(base, path)

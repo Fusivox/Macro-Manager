@@ -134,18 +134,7 @@ class Hotkeys():
                 i18n.set("fallback", self.settings["fallback"])
 
                 print(self.data)
-                for nb in self.data:
-                    keys = self.data[nb]["keys"]
-                    actions = self.data[nb]["actions"]
-                    callback = utils.make_callback(actions)
-                    keyboard.add_hotkey(keys, callback)
-                    print(f">Debug : new hotkey {keys}, do {actions}.")
-
-                for nb in self.abbreviation:
-                    source = self.abbreviation[nb]["source"]
-                    text = self.abbreviation[nb]["text"]
-                    keyboard.add_abbreviation(source, text)
-                    print(f">Debug : New abbreviation {source}, replaced by {text}")
+                self.init_background()
 
                 keyboard.wait()
 
@@ -213,12 +202,14 @@ class Hotkeys():
                     )
                     app.destroy()
 
+                self.init_background()
                 app.mainloop()
+                
                 keyboard.unhook_all()
                 self.init_background()
                 keyboard.wait()
                 
-    def create_shortcut_win32(self):
+    def create_shortcut_win32(self) -> None:
 
         shortcut_path = f"{os.getenv("APPDATA")}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"
         path = sys.executable
@@ -230,7 +221,7 @@ class Hotkeys():
         shortcut.IconLocation = path
         shortcut.save()
                 
-    def create_service_linux(self):
+    def create_service_linux(self) -> None:
         path = "/opt/Macro_Manager/"
         service = """[Unit]
 Description=MacroManager
@@ -274,7 +265,7 @@ WantedBy=multi-user.target"""
             print("SUDO_USER non defini: impossible de modifier le .bashrc utilisateur.")
         return 0
     
-    def init_background(self): 
+    def init_background(self) -> None: 
 
         for nb in self.data:
             keys = self.data[nb]["keys"]
