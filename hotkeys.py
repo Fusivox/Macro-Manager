@@ -210,6 +210,7 @@ class Hotkeys():
                 keyboard.wait()
                 
     def create_shortcut_win32(self) -> None:
+        """creer le raccourci de l'app dans le dossier startup de windows pour que l'app se lance au démarage de windows pour ne pas avoir besoin de la lancer a chaque fois"""
 
         shortcut_path = f"{os.getenv("APPDATA")}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"
         path = sys.executable
@@ -222,6 +223,8 @@ class Hotkeys():
         shortcut.save()
                 
     def create_service_linux(self) -> None:
+        """creer le service linux de l'app pour que l'app se lance au démarage de linux pour ne pas avoir besoin de la lancer a chaque fois"""
+
         path = "/opt/Macro_Manager/"
         service = """[Unit]
 Description=MacroManager
@@ -266,6 +269,7 @@ WantedBy=multi-user.target"""
         return 0
     
     def init_background(self) -> None: 
+        """creer les macros et abreviations stockées dans les fichier json pour les utiliser"""
 
         for nb in self.data:
             keys = self.data[nb]["keys"]

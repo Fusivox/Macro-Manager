@@ -44,5 +44,22 @@ en:
     no_key: No keys selected
     add_action: Macro Manager - Add action
     choose_act: Add action
-    wait_title: Wait parameter
     wait: How many seconds to wait ?
+    interval: Interval
+    params_title: "{action} parameter"
+    press: key
+    presses: Number of presses
+    x: x coordinate
+    y: y coordinate
+    duration: duration
+    button: button
+    primary: primary
+    middle: middle
+    secondary: secondary
+    clicks: clicks
+    files: Select a file/programm
+    path: path
+    browse: browse
+    file_type: Every file type
+    add_param: additional parameter
+    folder: Select a folder

@@ -1,23 +1,35 @@
-import json, os, shutil, pyautogui, time, ui, subprocess
+import json, os, shutil, pyautogui, time, ui, subprocess, sys
 from pathlib import Path
 
+POSSIBLE_KEYS = pyautogui.KEY_NAMES
+
 def make_callback(actions: list):
+    """permet de transformer la syntaxe programme en code executable pour les macros"""
+
     def callback():
         for action, params in actions:
             if action == "open":
 
-                if params.get("window") == "gui": #("open", {"window":"gui"}) sert a ouvrir l'ui pricipale
+                if params["window"] == "gui": #("open", {"window":"gui"}) sert a ouvrir l'ui pricipale
                     app = ui.Application()
                     app.mainloop()
 
-                elif params.get("window") == "cmd": #("open", {"window":"cmd", "folder":"Dossier dans lequel le cmd est ouvert si spécifié sinon celui par default"})
+                elif params["window"] == "cmd": #("open", {"window":"cmd", "folder":"Dossier dans lequel le cmd est ouvert si spécifié sinon celui par default"})
                     subprocess.Popen(["cmd.exe"], cwd=params["folder"])         
 
-                elif params.get("window") == "shell":#("open", {"window":"shell", "command":"commande a executer dans le shell"})
+                elif params["window"] == "shell":#("open", {"window":"shell", "command":"commande a executer dans le shell"})
                     subprocess.Popen(["xterm"], shell=True)
 
-                elif params.get("window") == "explorer": #("open", {"window":"explorer", "folder":"Dossier dans lequel le navigateur de fichier est ouvert si spécifié sinon celui par default"})
+                elif params["window"] == "explorer": #("open", {"window":"explorer", "folder":"Dossier dans lequel le navigateur de fichier est ouvert si spécifié sinon celui par default"})
                     subprocess.Popen(["Explorer", params["folder"]], shell=True)
+
+                else:
+                    path = params["window"]
+                    if sys.platform == "win32":
+                            os.startfile(path)
+                    else:
+                        subprocess.run(["xdg-open", path])
+                    
 
             elif action == "wait": #("wait", #temps en secondes)
                 time.sleep(params["time"])
@@ -38,31 +50,36 @@ def make_callback(actions: list):
                 pyautogui.press(keys=params["keys"], presses=params["presses"], interval=params["interval"])
                 
     return callback
+
+def convert(value):
+    """convertis un nombre sotcké en str en int ou float et si c'est pas un nombre le renvoie normalement"""
+
+    try:
+        if "." in value:
+            return float(value)
+        return int(value)
+    except ValueError:
+        return value
+        
 r"""
 exemples syntaxe utilisateur :
 
 wait : 10
 write : Salut comment ça va ;; interval : 0.1
-click : 1 ;; x : 10 ;; y : 500 ;; button : primary
+click : primary ;; x : 10 ;; y : 500 ;; clicks : 1
 press : A ;; presses : 5 ;; interval : 1.5
 open : cmd ;; folder : C:\User
-moveto : 0.5 ;; x : 500 ;; y : None
-move : 0 ;; x : None ;; y : 100
+moveto : 0.5 ;; x : 500
+move : 0 ;; y : 100
 
 exemple liste actions:
 ["write : Salut comment ça va ;; interval : 0.1", "press : A ;; presses : 5 ;; interval : 1.5", "wait : 10", "moveto : 0.5 ;; x : 500 ;; y : None"]
 """
 
 def translate_callback(actions: list) -> list:
+    """traduis la syntaxe utilisateur en syntaxe programme"""
+
     translated_actions = []
-    
-    def convert(value):         # convertis un nombre sotcké en str en int ou float et si c'est pas un nombre le renvoie normalement
-        try:
-            if "." in value:
-                return float(value)
-            return int(value)
-        except ValueError:
-            return value
     
     for action in actions:          
         parts = {key: convert(value) for key, value in (part.split(" : ", 1) for part in action.split(" ;; "))} # transforme actions en un dictionnaire plus clair qui sépare comme il faut               
@@ -77,51 +94,55 @@ def translate_callback(actions: list) -> list:
             translated_actions.append(("write", {"text": parts["write"], "interval": parts.get("interval", 0)}))
 
         elif "click" in parts:
-            translated_actions.append(("click", {"x": parts.get("x", None), "y": parts.get("y", None), "clicks": parts["click"], "interval": parts.get("interval", 0), "button": parts.get("button", "primary"), "duration": parts.get("duration", 0)}))
+            translated_actions.append(("click", {"x": parts.get("x", None), "y": parts.get("y", None), "clicks": parts.get("clicks", 1), "interval": parts.get("interval", 0), "button": parts["button"], "duration": parts.get("duration", 0)}))
 
         elif "moveto" in parts:
             translated_actions.append(("moveto", {"x": parts.get("x", None), "y": parts.get("y", None), "duration": parts["moveto"]}))
 
         elif "move" in parts:
-            translated_actions.append(("move", {"x": parts.get("x", 0), "y": parts.get("y", 0), "duration": parts["move"]}))
+            translated_actions.append(("move", {"x": parts.get("x", None), "y": parts.get("y", None), "duration": parts["move"]}))
 
         elif "open" in parts:
-            if parts["open"] == "cmd":
-                translated_actions.append(("open", {"window": "cmd", "folder": parts.get("folder", None)}))
+            if parts["open"] == "cmd" or parts["open"] == "explorer":
+                translated_actions.append(("open", {"window": parts["open"], "folder": parts.get("param", None)}))
             elif parts["open"] == "shell":
-                translated_actions.append(("open", {"window": "shell", "command": parts.get("command", None)}))
-            elif parts["open"] == "explorer":
-                translated_actions.append(("open", {"window": "explorer", "folder": parts.get("folder", None)}))
+                translated_actions.append(("open", {"window": "shell", "command": parts.get("param", None)}))
+            else:
+                translated_actions.append(("open", {"window": parts["open"]}))
 
-    return translated_actions # return le dictionnaire en syntaxe programme
+    return translated_actions
 
 def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None, os_name="win32") -> None:
+    """actualise le fichier json associé (data, settings et/ou abbreviation)"""
+
     if os_name == "win32":
         appdata = os.getenv("APPDATA")
         if data:
-            with open(f"{appdata}\\Macro Manager\\data.json", "w+") as f:
+            with open(f"{appdata}\\Macro Manager\\data.json", "w") as f:
                 json.dump(data, f, indent=4)
         if settings:
-            with open(f"{appdata}\\Macro Manager\\settings.json", "w+") as f:
+            with open(f"{appdata}\\Macro Manager\\settings.json", "w") as f:
                 json.dump(settings, f, indent=4)
         if abbreviation:
-            with open(f"{appdata}\\Macro Manager\\abbreviation.json", "w+") as f:
+            with open(f"{appdata}\\Macro Manager\\abbreviation.json", "w") as f:
                 json.dump(abbreviation, f, indent=4)
     else:
         home = os.getenv("HOME")
         config = f"{home}/.config/Macro_Manager"
         if data:
-            with open(f"{config}/data.json", "w+") as f:
+            with open(f"{config}/data.json", "w") as f:
                 json.dump(data, f, indent=4)
         if settings:
-            with open(f"{config}/settings.json", "w+") as f:
+            with open(f"{config}/settings.json", "w") as f:
                 json.dump(settings, f, indent=4)
         if abbreviation:
-            with open(f"{config}/abbreviation.json", "w+") as f:
+            with open(f"{config}/abbreviation.json", "w") as f:
                 json.dump(abbreviation, f, indent=4)
 
 
 def add_mcr(data: dict, keys: str|None, actions: list, comment: str|None = None) -> None:
+    """ajoute une macro au fichier data.json (nécessite un utils.actualise pour le sauvegarder)"""
+
     data[str(len(data))] = {
         "keys": keys,
         "actions": actions,
@@ -129,12 +150,16 @@ def add_mcr(data: dict, keys: str|None, actions: list, comment: str|None = None)
     }
 
 def add_abb(data: dict, source: str, text: str) -> None:
+    """ajoute une abreviation au fichier abbreviation.json (nécessite un utils.actualise pour le sauvegarder)"""
+
     data[str(len(data))] = {
         "source": source,
         "text": text
     }
 
 def remove(data: dict, nb: str|int, id=True) -> bool:
+    """retire un élément d'un dictionnaire et renvoie True si réussit sinon envoie False"""
+
     try :
         if id: data.pop(nb)
         else: del data[nb]
@@ -144,32 +169,36 @@ def remove(data: dict, nb: str|int, id=True) -> bool:
     except Exception: return False
     
 def delete_win32() -> bool:
-        try:
-            
-            path = Path.home() / "AppData" / "Roaming" / "Macro Manager"
-            lnk = Path.home() / "AppData" / "Roaming" / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup" / "Macro Manager.lnk"
+    """Supprime toute l'arborescence des fichier Macro Manager, renvoie True si réussie sinon False"""
 
-            if path.exists(): shutil.rmtree(path)
-            
-            if lnk.exists(): os.remove(lnk)
+    try:
+        
+        path = Path.home() / "AppData" / "Roaming" / "Macro Manager"
+        lnk = Path.home() / "AppData" / "Roaming" / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup" / "Macro Manager.lnk"
 
-            if not path.exists() and not lnk.exists(): return True
+        if path.exists(): shutil.rmtree(path)
+        
+        if lnk.exists(): os.remove(lnk)
 
-            else: return False
+        if not path.exists() and not lnk.exists(): return True
 
-        except Exception:
-            return False
+        else: return False
+
+    except Exception:
+        return False
 
 def delete_linux() -> bool:
-        try:
-            
-            path = Path.home() / ".config" / "Macro_Manager"
+    """Supprime toute l'arborescence des fichier Macro Manager, renvoie True si réussie sinon False"""
 
-            if path.exists(): shutil.rmtree(path)
+    try:
+        
+        path = Path.home() / ".config" / "Macro_Manager"
 
-            if not path.exists(): return True
+        if path.exists(): shutil.rmtree(path)
 
-            else: return False
+        if not path.exists(): return True
 
-        except Exception:
-            return False
+        else: return False
+
+    except Exception:
+        return False

@@ -44,5 +44,22 @@ fr:
     no_key: Aucune touches 
     add_action: Macro Manager - Ajouter une action
     choose_act: Ajouter action
-    wait_title: Parametres attendre
     wait: Attendre combiens de secondes ?
+    interval: Intervale
+    params_title: "Parametres {action}"
+    press: touche
+    presses: nombre d'appuies
+    x: coordonée x
+    y: coordonée y
+    duration: durée
+    button: boutton
+    primary: principal
+    middle: milieu
+    secondary: secondaire
+    clicks: clicks
+    files: Choisissez un fichier/programme
+    path: chemin
+    browse: rechercher
+    file_type: tout les types de fichier
+    add_param: Parametre additionel
+    folder: Choisissez un dossier
