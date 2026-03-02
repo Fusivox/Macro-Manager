@@ -72,8 +72,10 @@ def make_callback(actions: list):
             elif action == "hotkey": #("hotkey", {"keys":touches})
                 pyautogui.hotkey(*params["keys"].split("+"))
 
-            elif action == "screenshot": #("screenshot, {"name": nom du screen}")
-                pyautogui.screenshot(f"{params["name"]}.png")
+            elif action == "screenshot": #("screenshot, {"name": nom du screen, "path":chemin ou la photo est sauvegarder}")
+                name = params["name"]
+                pyautogui.screenshot(f"{name}.png")
+                shutil.move(f"{name}.png", params["path"])
 
     return callback
 
@@ -155,7 +157,7 @@ def translate_to_callback(actions: list[str]) -> list[tuple]:
             translated_actions.append(("hotkey", {"keys": parts["keys"]}))
 
         elif "screenshot" in parts:
-            translated_actions.append(("screenshot", {"name": parts.get("name", None)}))
+            translated_actions.append(("screenshot", {"name": parts.get("name", None), "path": parts.get("path", None)}))
 
     return translated_actions
 
@@ -209,7 +211,7 @@ def translate_from_callback(actions: list[tuple]) -> list[str]:
             translated_actions.append(f"hotkey : {params["keys"]}")
 
         elif action == "screenshot":
-            translated_actions.append(f"screenshot : {params["name"]}")
+            translated_actions.append(f"screenshot : {params["name"]}, path : {params["path"]}")
 
     return translated_actions
 

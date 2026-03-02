@@ -372,10 +372,6 @@ class Application(tk.Tk):
                     except Exception:
                         messagebox.showerror(title=self._("ui.invalid_key"), message=self._("ui.key_eg"))
 
-                elif selected_action == "screenshot":
-                    name = simpledialog.askstring(title=title, prompt=self._("ui.screen"))
-                    if name is not None : self.mcr_listbox.insert(tk.END, f"{selected_action} : {name}")
-
                 else:
                     init_params_menu()
 
@@ -805,6 +801,49 @@ class Application(tk.Tk):
 
                         validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_drag)
                         validate_button.grid(row=2, column=3, padx=10, pady=10)
+
+                    elif selected_action == "screenshot":
+
+                        name_label = tk.Label(params_menu, text=f"{self._("ui.name")} :", justify=tk.RIGHT)
+                        name_label.grid(row=0, column=0, padx=10, pady=10)
+
+                        name_entry = tk.Entry(params_menu, exportselection=0)
+                        name_entry.grid(row=0, column=1, padx=10, pady=10)
+
+                        path_label = tk.Label(params_menu, text=f"{self._("ui.path")} :", justify=tk.RIGHT)
+                        path_label.grid(row=1, column=0, padx=10, pady=10)
+
+                        pathvar = tk.StringVar()
+                        path_entry = tk.Entry(params_menu, exportselection=0, textvariable=pathvar)
+                        path_entry.grid(row=1, column=1, padx=10, pady=10)
+
+                        def browse_folder():
+                            """ouvre une fenetre de recherche de dossier et mets son chemin dans l'entry"""
+
+                            path = filedialog.askdirectory(
+                                title=self._("ui.folder")
+                            )
+                            if path: paramvar.set(path)
+
+                        browseparam_button = tk.Button(params_menu, text=self._("ui.browse"), command=browse_folder)
+                        browseparam_button.grid(row=1, column=2, padx=10, pady=10)
+
+                        def add_screenshot() -> None:
+                            """ajoute aux actions la fonction ``screenshot`` avec les parametres renseigné"""
+
+                            path = pathvar.get().strip() or None
+
+                            screen_command = f"{selected_action} : {name_entry.get()}"
+
+                            if path is not None:
+                                screen_command += f" ;; path : {path}"
+
+                            self.mcr_listbox.insert(tk.END, screen_command)
+                                
+                            close_params_menu()
+
+                        validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_screenshot)
+                        validate_button.grid(row=2, column=2, padx=10, pady=10)
 
             add_action_menu = tk.Toplevel(self.nmcr_menu, width=300, height=400)
             add_action_menu.title(self._("ui.add_action"))

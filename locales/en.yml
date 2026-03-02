@@ -48,7 +48,7 @@ en:
     wait: How many seconds to wait ?
     hold: Key to hold down ?
     release: Key to release ?
-    screen: How to name the screenshot ?
+    name: name
     interval: Interval
     params_title: "{action} parameter"
     press: key

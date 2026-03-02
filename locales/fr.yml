@@ -48,7 +48,7 @@ fr:
     wait: Attendre combiens de secondes ?
     hold: Touche a maintenir ?
     release: Touche a lacher ?
-    screen: Comment appeller la capture d'ecran ?
+    name: name
     interval: Intervale
     params_title: "Parametres {action}"
     press: touche
