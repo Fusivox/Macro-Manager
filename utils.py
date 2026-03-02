@@ -6,7 +6,7 @@ POSSIBLE_KEYS = pyautogui.KEY_NAMES
 def make_callback(actions: list):
     """permet de transformer la syntaxe programme en code executable pour les macros"""
 
-    def callback():
+    def callback():   
         for action, params in actions:
             if action == "open":
 
@@ -37,7 +37,7 @@ def make_callback(actions: list):
             elif action == "write": #("write", {"text":"texte a ecrire", "interval":attente entre chaque lettre})
                 pyautogui.write(params["text"], interval=params["interval"])
 
-            elif action == "click": #("click", {"x":si rien x curseur, "y":si rien y curseur, "clicks":par default 1, "interval":par default 0, "button":"primary(default) ou secondary ou middle" , "duration":temps pour aller au cos spécifié 0 par default})
+            elif action == "click": #("click", {"x":si rien x curseur, "y":si rien y curseur, "clicks":par default 1, "interval":par default 0, "button":"primary"(default), "secondary" ou "middle" , "duration":temps pour aller au cos spécifié, 0 par default})
                 pyautogui.click(x=params["x"], y=params["y"], clicks=params["clicks"], interval=params["interval"], button=params["button"], duration=params["duration"])
 
             elif action == "moveto": #("moveto", {"x":..., "y":..., "duration":0 par default})
@@ -46,9 +46,35 @@ def make_callback(actions: list):
             elif action == "move": #("move", {"x":+relatif a la souris, "y":+relatif a la souris, "duration":0 par default})
                 pyautogui.move(xOffset=params["x"], yOffset=params["y"], duration=params["duration"])
 
-            elif action == "press":  #("press", {"keys":touche a appuyer, presses=nb de fois appuyer, "interval":intervale entre les plusieurs presses}
+            elif action == "press":  #("press", {"keys":touche a appuyer, presses=nb de fois appuyer, "interval":intervale entre les plusieurs presses})
                 pyautogui.press(keys=params["keys"], presses=params["presses"], interval=params["interval"])
+
+            elif action == "scroll": #("scroll", {"direction":"vertical" ou "horizontal", "amount": quantité a scroll (jsp), "x":..., "y":...})
+                direction = params["direction"]
+                if direction == "vertical":
+                    pyautogui.scroll(clicks=params["amount"], x=params["x"], y=params["y"])
+
+                elif direction == "horizontal":
+                    pyautogui.hscroll(clicks=params["amount"], x=params["x"], y=params["y"])
+
+            elif action == "dragto": #("dragto", {"x":..., "y":..., "duration":durée})
+                pyautogui.dragTo(x=params["x"], y=params["y"], duration=params["duration"])
+
+            elif action == "drag": #("drag", {"x":..., "y":..., "duration":durée})
+                pyautogui.drag(x=params["x"], y=params["y"], duration=params["duration"])
+
+            elif action == "hold": #("hold", {"key":touche})
+                pyautogui.keyDown(key=params["key"])
+
+            elif action == "release": #("release", {"key":touche})
+                pyautogui.keyUp(key=params["key"])
                 
+            elif action == "hotkey": #("hotkey", {"keys":touches})
+                pyautogui.hotkey(*params["keys"].split("+"))
+
+            elif action == "screenshot": #("screenshot, {"name": nom du screen}")
+                pyautogui.screenshot(f"{params["name"]}.png")
+
     return callback
 
 def convert(value):
@@ -76,8 +102,8 @@ exemple liste actions:
 ["write : Salut comment ça va ;; interval : 0.1", "press : A ;; presses : 5 ;; interval : 1.5", "wait : 10", "moveto : 0.5 ;; x : 500 ;; y : None"]
 """
 
-def translate_to_callback(actions: list[str]) -> list[tuple]:
-    """traduis la syntaxe utilisateur en syntaxe programme"""
+def translate_to_callback(actions: list[str]) -> list[tuple]: 
+    """traduis la syntaxe utilisateur en syntaxe programme, opposée de ``translate_from_callback``"""
 
     translated_actions = []
     
@@ -110,9 +136,31 @@ def translate_to_callback(actions: list[str]) -> list[tuple]:
             else:
                 translated_actions.append(("open", {"window": parts["open"]}))
 
+        elif "scroll" in parts:
+            translated_actions.append(("scroll", {"direction": parts["direction"], "amount": parts.get("amount", 1), "x": parts.get("x", None), "y": parts.get("y", None)}))
+
+        elif "dragto" in parts:
+            translated_actions.append(("dragto", {"x": parts.get("x", None), "y": parts.get("y", None), "duration": parts["duration"]}))
+
+        elif "drag" in parts:
+            translated_actions.append(("drag", {"x": parts.get("x", None), "y": parts.get("y", None), "duration": parts["duration"]}))
+
+        elif "hold" in parts:
+            translated_actions.append(("hold", {"key": parts["key"]}))
+
+        elif "release" in parts:
+            translated_actions.append(("release", {"key": parts["key"]}))
+
+        elif "hotkey" in parts:
+            translated_actions.append(("hotkey", {"keys": parts["keys"]}))
+
+        elif "screenshot" in parts:
+            translated_actions.append(("screenshot", {"name": parts.get("name", None)}))
+
     return translated_actions
 
 def translate_from_callback(actions: list[tuple]) -> list[str]:
+    """traduis la syntaxe programme en syntaxe utilisateur, opposée de ``translate_to_callback``"""
     translated_actions = []
 
     for action, params in actions:
@@ -142,10 +190,35 @@ def translate_from_callback(actions: list[tuple]) -> list[str]:
             else:
                 translated_actions.append(f"open : {params["window"]}")
 
+        elif action == "scroll":
+            translated_actions.append(f"scroll : {params["direction"]} ;; amount : {params["amount"]} ;; x : {params["x"]} ;; y : {params["y"]}")
+
+        elif action == "dragto":
+            translated_actions.append(f"dragto : {params["duration"]} ;; x : {params["x"]} ;; y : {params["y"]}")
+
+        elif action == "drag":
+            translated_actions.append(f"drag : {params["duration"]} ;; x : {params["x"]} ;; y : {params["y"]}")
+
+        elif action == "hold":
+            translated_actions.append(f"hold : {params["key"]}")
+
+        elif action == "release":
+            translated_actions.append(f"release : {params["key"]}")
+
+        elif action == "hotkey":
+            translated_actions.append(f"hotkey : {params["keys"]}")
+
+        elif action == "screenshot":
+            translated_actions.append(f"screenshot : {params["name"]}")
+
     return translated_actions
 
 def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None, os_name="win32") -> None:
-    """actualise le fichier json associé (data, settings et/ou abbreviation)"""
+    """actualise le fichier json associé :\n
+    ``data`` pour les macros,\n
+    ``settings`` pour les parametres (langue et version),\n
+    ``abbreviation`` pour les abreviations,\n
+    ``os_name`` sert a renseigner le systeme d'exploitation"""
 
     if os_name == "win32":
         appdata = os.getenv("APPDATA")
@@ -173,7 +246,7 @@ def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: 
 
 
 def add_mcr(data: dict, keys: str|None, actions: list, comment: str|None = None) -> None:
-    """ajoute une macro au fichier data.json (nécessite un utils.actualise pour le sauvegarder)"""
+    """ajoute une macro au fichier ``data.json`` (nécessite un ``utils.actualise`` pour le sauvegarder)"""
 
     data[str(len(data))] = {
         "keys": keys,
@@ -182,7 +255,7 @@ def add_mcr(data: dict, keys: str|None, actions: list, comment: str|None = None)
     }
 
 def add_abb(data: dict, source: str, text: str) -> None:
-    """ajoute une abreviation au fichier abbreviation.json (nécessite un utils.actualise pour le sauvegarder)"""
+    """ajoute une abreviation au fichier ``abbreviation.json`` (nécessite un ``utils.actualise`` pour le sauvegarder)"""
 
     data[str(len(data))] = {
         "source": source,

@@ -46,6 +46,9 @@ en:
     add_action: Macro Manager - Add action
     choose_act: Add action
     wait: How many seconds to wait ?
+    hold: Key to hold down ?
+    release: Key to release ?
+    screen: How to name the screenshot ?
     interval: Interval
     params_title: "{action} parameter"
     press: key
@@ -68,3 +71,7 @@ en:
     macro_exist: Macro with theses keys already exists, do you want to replace it ?
     no_actions_title: No actions defined
     no_actions: No actions are defined for this macro
+    direction: direction
+    horizontal: horizontal
+    vertical: vertical
+    amount: amount

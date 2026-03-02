@@ -46,6 +46,9 @@ fr:
     add_action: Macro Manager - Ajouter une action
     choose_act: Ajouter action
     wait: Attendre combiens de secondes ?
+    hold: Touche a maintenir ?
+    release: Touche a lacher ?
+    screen: Comment appeller la capture d'ecran ?
     interval: Intervale
     params_title: "Parametres {action}"
     press: touche
@@ -68,3 +71,7 @@ fr:
     macro_exist: Une macro avec ces touches existe deja, voulez-vous la remplacer ?
     no_actions_title: Aucune actions defini
     no_actions: Aucune actions n'a ete definie pour cette macro
+    direction: direction
+    horizontal: horizontale
+    vertical: verticale
+    amount: quantité

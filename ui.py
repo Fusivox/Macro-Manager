@@ -139,7 +139,7 @@ class Application(tk.Tk):
         self.help_menu.destroy()
 
     def set_lang(self, lang: str, fallback: str) -> None:
-        """change la langue de l'app"""
+        """change la langue de l'app, nécessite une langue de ``fallback`` en cas d'echec"""
 
         i18n.set("locale", lang)
         self.settings["lang"] = lang
@@ -198,7 +198,7 @@ class Application(tk.Tk):
         self.abb_add_button.grid(row= 2, column=3, pady=10, sticky=tk.W)
 
     def build_listbox(self, refresh: bool = False) -> None:
-        """creer la listhox des macro existante"""
+        """creer la listbox des macro existante"""
 
         if refresh : self.listbox.delete(0, tk.END)
         for macro in self.data:
@@ -213,7 +213,7 @@ class Application(tk.Tk):
             self.abb_listbox.insert(abb, self.abbreviation[abb]["source"])
 
     def remove(self, source: str, nb) -> None:
-        """retire un éléments du fichier json séléctionné (data ou abb pour abbreviation)"""
+        """retire un éléments du fichier json séléctionné, ``data`` pour les macros ou ``abb`` pour les abreviations"""
 
         if source == "data" :
             rmv = utils.remove(self.data, nb)
@@ -236,10 +236,8 @@ class Application(tk.Tk):
                 self.abb_selected.config(text="")
                 self.abb_rmv_button.config(state="disabled", bg="lightgray")
 
-    def new_macro(self, key:str = "", action:list = [], comment:str= "") -> None:
-        """creer une fenetre avec une entrée texte pour les touches qui peut être mis a None dans le cas ou c'est une action utile dans le task scheduler (future ajout) mais qu'on ne veut pas sous forme de macro
-        c'est une listebox ou les instructions a faire sont rangé dans l'ordre d'execution avec un boutton "add action" qui ouvre une fentre de selection d'une action avec ses parametres a choisir
-        et une derniere entrée texte pour le commentaire (par default égal a None) avec possibilité de préremplir les differentes entrée (dans le cas d'un edit)""" 
+    def new_macro(self, key:str = "", action:list = [], comment:str= "") -> None: # TODO : ajouter scroll (vertical/horizontal), dragto/drag, keydown/keyup, hotkey, screenshot
+        """creer la fenetre ou l'on peut renseigner des valeurs pour ``keys``, ``actions`` et ``comment`` avec possibilité de les préremplir dans le cas d'un ``edit_macro``""" 
 
         self.nmcr_menu = tk.Toplevel(self, width=300, height=400)
         self.nmcr_menu.title(self._("ui.nmcr_title"))
@@ -278,7 +276,7 @@ class Application(tk.Tk):
         if comment != "": comment_entry.insert(tk.END, comment)
 
         def create_macro() -> None:
-            """creer et sauvegarde dans le fichier json la macro a partir des parametres renseigné (keys, actions et comment)"""
+            """creer et sauvegarde dans le fichier json la macro en cours de création"""
 
             _key = keys_entry.get() or None                                   # mets a None si y'a rien d'ecrit (parce que sinon tkinter renvoie "" et c'est relou)
             _comment = comment_entry.get() or None
@@ -317,8 +315,8 @@ class Application(tk.Tk):
 
         def add_action() -> None:
             """permet d'ajouter une action a la macro actuellement en creation"""
-
-            actions = ["open", "wait", "write", "click", "moveto", "move", "press"]           # liste des actions possible (a actualiser en même temps que le fonction make_callback dans utils)
+            # liste des actions possible (a actualiser en même temps que les fonction make_callback et translate dans utils)
+            actions = ["open", "wait", "write", "click", "moveto", "move", "press", "scroll", "dragto", "drag", "hold", "release", "hotkey", "screenshot"]
             
             def close() -> None: 
                 """ferme le menu pour ajouter une action et rends le focus au menu de creation de macro"""
@@ -328,14 +326,14 @@ class Application(tk.Tk):
                 add_action_menu.destroy()
 
             def ask_params() -> None:
-                """demande les parametres de l'actions en train d'être creer"""
+                """demande les parametres de l'actions en train d'être ajouter"""
 
                 selected_action = actions_list.get(actions_list.curselection()[0])
                 title = self._("ui.params_title").format(action=selected_action)
                 print(f">Debug : {selected_action}")
 
                 def init_params_menu() -> None:
-                    """creer la fenetre de base pour renseigner les parametres de l'action en train d'être creer"""
+                    """creer la fenetre de base pour renseigner les parametres de l'action en train d'être ajouter"""
 
                     global params_menu
                     params_menu = tk.Toplevel(add_action_menu, width=300, height=400)
@@ -346,15 +344,37 @@ class Application(tk.Tk):
                     params_menu.resizable(False, False)
 
                 def close_params_menu() -> None:
-                    """ferme la fenetre pour renseigner les parametres de l'action en train d'être creer et rends le focus a la fenetre pour ajouter une action"""
+                    """ferme la fenetre pour renseigner les parametres de l'action en train d'être ajouter et rends le focus a la fenetre pour ajouter une action"""
 
                     add_action_menu.grab_set()
                     add_action_menu.focus_set()
                     params_menu.destroy()
 
                 if selected_action == "wait":
-                    time = simpledialog.askfloat(title=self._("ui.wait_title"), prompt=self._("ui.wait"))
+                    time = simpledialog.askfloat(title=title, prompt=self._("ui.wait"))
                     if time is not None : self.mcr_listbox.insert(tk.END, f"{selected_action} : {time}") 
+
+                elif selected_action == "hold":
+                    key = simpledialog.askstring(title=title, prompt=self._("ui.hold"))
+                    if key in utils.POSSIBLE_KEYS: self.mcr_listbox.insert(tk.END, f"{selected_action} : {key}")
+
+                elif selected_action == "release":
+                    key = simpledialog.askstring(title=title, prompt=self._("ui.release"))
+                    if key in utils.POSSIBLE_KEYS: self.mcr_listbox.insert(tk.END, f"{selected_action} : {key}")
+
+                elif selected_action == "hotkey":
+                    keys = simpledialog.askstring(title=title, prompt=self._("ui.release"))
+                    try :
+                        keyboard.add_hotkey(keys, lambda: None)
+                        keyboard.remove_hotkey(keys)
+                        self.mcr_listbox.insert(tk.END, f"{selected_action} : {keys}")
+
+                    except Exception:
+                        messagebox.showerror(title=self._("ui.invalid_key"), message=self._("ui.key_eg"))
+
+                elif selected_action == "screenshot":
+                    name = simpledialog.askstring(title=title, prompt=self._("ui.screen"))
+                    if name is not None : self.mcr_listbox.insert(tk.END, f"{selected_action} : {name}")
 
                 else:
                     init_params_menu()
@@ -374,7 +394,7 @@ class Application(tk.Tk):
                         interval_entry.grid(row=1, column=1, padx=10, pady=10)
 
                         def add_write() -> None:
-                            """ajoute aux actions la fonction write avec les parametres renseigné"""
+                            """ajoute aux actions la fonction ``write`` avec les parametres renseigné"""
 
                             interval = utils.convert(interval_entry.get() or 0)
                             if isinstance(interval, (int, float)) and len(text_entry.get()) > 0:
@@ -433,9 +453,8 @@ class Application(tk.Tk):
                         duration_entry.grid(row=3, column=1, padx=10, pady=10)
 
                         def add_click() -> None:
-                            """ajoute aux actions la fonction click avec les parametres renseigné"""
+                            """ajoute aux actions la fonction ``click`` avec les parametres renseigné"""
 
-                            button = buttonvar.get()
                             x, y = utils.convert(x_entry.get() or None) , utils.convert(y_entry.get() or None)
                             duration = utils.convert(duration_entry.get() or 0)
                             interval = utils.convert(interval_entry.get() or 0)
@@ -443,7 +462,7 @@ class Application(tk.Tk):
 
                             if isinstance(clicks, (int, float)) and isinstance(interval, (int, float)) and isinstance(duration, (int, float)) and (isinstance(x, (float, int)) or x is None) and (isinstance(y, (float, int)) or y is None) and (x is not None or y is not None): 
                                 
-                                click_command = f"{selected_action} : {button}"
+                                click_command = f"{selected_action} : {buttonvar.get()}"
                                 if x is not None:
                                     click_command += f" ;; x : {x}"
                                 if y is not None:
@@ -483,7 +502,7 @@ class Application(tk.Tk):
                         duration_entry.grid(row=1, column=1, padx=10, pady=10)
 
                         def add_moveto() -> None:
-                            """ajoute aux actions la fonction move avec les parametres renseigné"""
+                            """ajoute aux actions la fonction ``moveto`` avec les parametres renseigné"""
 
                             x, y = utils.convert(x_entry.get() or None), utils.convert(y_entry.get() or None)
                             duration = utils.convert(duration_entry.get() or 0)
@@ -524,7 +543,7 @@ class Application(tk.Tk):
                         duration_entry.grid(row=1, column=1, padx=10, pady=10)
 
                         def add_move() -> None:
-                            """ajoute aux actions la fonction move avec les parametres renseigné"""
+                            """ajoute aux actions la fonction ``move`` avec les parametres renseigné"""
 
                             x, y = utils.convert(x_entry.get() or None), utils.convert(y_entry.get() or None)
                             duration = utils.convert(duration_entry.get() or 0)
@@ -564,8 +583,8 @@ class Application(tk.Tk):
                         interval_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=0.1)
                         interval_entry.grid(row=2, column=1, padx=10, pady=10)
 
-                        def add_press():
-                            """ajoute aux actions la fonction press avec les parametres renseigné"""
+                        def add_press() -> None:
+                            """ajoute aux actions la fonction ``press`` avec les parametres renseigné"""
 
                             interval = utils.convert(interval_entry.get() or 0)
                             presses = utils.convert(presses_entry.get() or 1)
@@ -625,8 +644,8 @@ class Application(tk.Tk):
                         browseparam_button = tk.Button(params_menu, text=self._("ui.browse"), command=browse_folder)
                         browseparam_button.grid(row=1, column=2, padx=10, pady=10)
 
-                        def add_open():
-                            """ajoute aux actions la fonction open avec les parametres renseigné"""
+                        def add_open() -> None:
+                            """ajoute aux actions la fonction ``open`` avec les parametres renseigné"""
 
                             path = pathvar.get().strip() or None
                             additional_param = paramvar.get().strip() or None
@@ -651,6 +670,141 @@ class Application(tk.Tk):
 
                         validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_open)
                         validate_button.grid(row=2, column=2, padx=10, pady=10)
+
+                    elif selected_action == "scroll":
+
+                        direction_label = tk.Label(params_menu, text=f"{self._("ui.direction")} :", justify=tk.RIGHT)
+                        direction_label.grid(row=0, column=0, padx=10, pady=10)
+
+                        directionlist = (self._("ui.horizontal"), self._("ui.vertical"))
+                        directionvar = tk.StringVar()
+                        directionvar.set(directionlist[0])
+
+                        direction_entry = tk.OptionMenu(params_menu, directionvar, *directionlist)
+                        direction_entry.grid(row=0, column=1, padx=10, pady=10)
+
+                        amount_label = tk.Label(params_menu, text=f"{self._("ui.amount")} :", justify=tk.RIGHT)
+                        amount_label.grid(row=1, column=0, padx=10, pady=10)
+
+                        amount_entry = tk.Spinbox(params_menu, exportselection=0, from_=-1000000, to=1000000, increment=1)
+                        amount_entry.grid(row=1, column=1, padx=10, pady=10)
+
+                        x_label = tk.Label(params_menu, text=f"{self._("ui.x")} :", justify=tk.RIGHT)
+                        x_label.grid(row=2, column=0, padx=10, pady=10)
+
+                        x_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=1)
+                        x_entry.grid(row=2, column=1, padx=10, pady=10)
+
+                        y_label = tk.Label(params_menu, text=f"{self._("ui.y")} :", justify=tk.RIGHT)
+                        y_label.grid(row=2, column=2, padx=10, pady=10)
+
+                        y_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=1)
+                        y_entry.grid(row=2, column=3, padx=10, pady=10)
+
+                        def add_scroll() -> None:
+                            """ajoute aux actions la fonction ``scroll`` avec les parametres renseigné"""
+
+                            x, y = utils.convert(x_entry.get() or None) , utils.convert(y_entry.get() or None)
+                            amount = utils.convert(amount_entry.get() or 0)
+
+                            if isinstance(x, (int, float)) and isinstance(y, (int, float)):
+
+                                scroll_command = f"{selected_action} : {directionvar.get()}"
+                                if x is not None:
+                                    scroll_command += f" ;; x : {x}"
+                                if y is not None:
+                                    scroll_command += f" ;; y : {y}"
+                                if amount != 0:
+                                    scroll_command += f" ;; amount : {amount}"
+
+                                self.mcr_listbox.insert(tk.END, scroll_command)
+
+                                close_params_menu()
+
+                        validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_scroll)
+                        validate_button.grid(row=3, column=3, padx=10, pady=10)
+
+                    elif selected_action == "dragto":
+
+                        x_label = tk.Label(params_menu, text=f"{self._("ui.x")} :", justify=tk.RIGHT)
+                        x_label.grid(row=0, column=0, padx=10, pady=10)
+
+                        x_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=1)
+                        x_entry.grid(row=0, column=1, padx=10, pady=10)
+
+                        y_label = tk.Label(params_menu, text=f"{self._("ui.y")} :", justify=tk.RIGHT)
+                        y_label.grid(row=0, column=2, padx=10, pady=10)
+
+                        y_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=1)
+                        y_entry.grid(row=0, column=3, padx=10, pady=10)
+
+                        duration_label = tk.Label(params_menu, text=f"{self.i("ui.duration")} :", justify=tk.RIGHT)
+                        duration_label.grid(row=1, column=0, padx=10, pady=10)
+
+                        duration_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=0.1)
+                        duration_entry.grid(row=1, column=1, padx=10, pady=10)
+
+                        def add_dragto() -> None:
+                            """ajoute aux actions la fonction ``dragto`` avec les parametres renseigné"""
+
+                            x, y = utils.convert(x_entry.get() or None), utils.convert(y_entry.get() or None)
+                            duration = utils.convert(duration_entry.get() or 0)
+
+                            if isinstance(duration, (int, float)) and (isinstance(x, (float, int)) or x is None) and (isinstance(y, (float, int)) or y is None) and (x is not None or y is not None): 
+
+                                dragto_command = f"{selected_action} : {duration}"
+                                if x is not None:
+                                    dragto_command += f" ;; x : {x}"
+                                if y is not None:
+                                    dragto_command += f" ;; y : {y}"
+
+                                self.mcr_listbox.insert(tk.END, dragto_command)
+
+                                close_params_menu()
+
+                        validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_dragto)
+                        validate_button.grid(row=2, column=3, padx=10, pady=10)
+
+                    elif selected_action == "drag":
+
+                        x_label = tk.Label(params_menu, text=f"{self._("ui.x")} :", justify=tk.RIGHT)
+                        x_label.grid(row=0, column=0, padx=10, pady=10)
+
+                        x_entry = tk.Spinbox(params_menu, exportselection=0, from_=-1000000, to=1000000, increment=1)
+                        x_entry.grid(row=0, column=1, padx=10, pady=10)
+
+                        y_label = tk.Label(params_menu, text=f"{self._("ui.y")} :", justify=tk.RIGHT)
+                        y_label.grid(row=0, column=2, padx=10, pady=10)
+
+                        y_entry = tk.Spinbox(params_menu, exportselection=0, from_=-1000000, to=1000000, increment=1)
+                        y_entry.grid(row=0, column=3, padx=10, pady=10)
+
+                        duration_label = tk.Label(params_menu, text=f"{self.i("ui.duration")} :", justify=tk.RIGHT)
+                        duration_label.grid(row=1, column=0, padx=10, pady=10)
+
+                        duration_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=0.1)
+                        duration_entry.grid(row=1, column=1, padx=10, pady=10)
+
+                        def add_drag() -> None:
+                            """ajoute aux actions la fonction ``drag`` avec les parametres renseigné"""
+
+                            x, y = utils.convert(x_entry.get() or None), utils.convert(y_entry.get() or None)
+                            duration = utils.convert(duration_entry.get() or 0)
+
+                            if isinstance(duration, (int, float)) and (isinstance(x, (float, int)) or x is None) and (isinstance(y, (float, int)) or y is None) and (x is not None or y is not None): 
+
+                                drag_command = f"{selected_action} : {duration}"
+                                if x is not None:
+                                    drag_command += f" ;; x : {x}"
+                                if y is not None:
+                                    drag_command += f" ;; y : {y}"
+
+                                self.mcr_listbox.insert(tk.END, drag_command)
+
+                                close_params_menu()
+
+                        validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_drag)
+                        validate_button.grid(row=2, column=3, padx=10, pady=10)
 
             add_action_menu = tk.Toplevel(self.nmcr_menu, width=300, height=400)
             add_action_menu.title(self._("ui.add_action"))
@@ -689,7 +843,7 @@ class Application(tk.Tk):
         create_button.grid(row=4, column=1, sticky=tk.E, padx=10, pady=10)
 
     def edit_macro(self) -> None:
-        """creation de la même fenetre que pour le new_macro mais avec les cases prérempli avec les data associé a la macro séléctionné"""
+        """creation de la même fenetre que pour le ``new_macro`` mais avec les cases prérempli avec les data associé a la macro séléctionné"""
 
         key = self.data[self.index]["keys"] or ""
         action = self.data[self.index]["actions"]
@@ -754,7 +908,7 @@ class Application(tk.Tk):
 
     def refresh_ui(self, switch: bool = False) -> None:
         """clear l'ui actuel et le reconstruit par default
-        l'argument switch permet de passer entre le main ui (pour les macros) et le abb ui (pour les abreviations)"""
+        l'argument switch permet de passer entre le ``main ui`` (pour les macros) et le ``abb ui`` (pour les abreviations)"""
 
         for widget in self.winfo_children() :
             widget.destroy()
