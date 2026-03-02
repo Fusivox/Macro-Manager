@@ -76,7 +76,7 @@ exemple liste actions:
 ["write : Salut comment ça va ;; interval : 0.1", "press : A ;; presses : 5 ;; interval : 1.5", "wait : 10", "moveto : 0.5 ;; x : 500 ;; y : None"]
 """
 
-def translate_callback(actions: list) -> list:
+def translate_to_callback(actions: list[str]) -> list[tuple]:
     """traduis la syntaxe utilisateur en syntaxe programme"""
 
     translated_actions = []
@@ -109,6 +109,38 @@ def translate_callback(actions: list) -> list:
                 translated_actions.append(("open", {"window": "shell", "command": parts.get("param", None)}))
             else:
                 translated_actions.append(("open", {"window": parts["open"]}))
+
+    return translated_actions
+
+def translate_from_callback(actions: list[tuple]) -> list[str]:
+    translated_actions = []
+
+    for action, params in actions:
+
+        if action == "wait":
+            translated_actions.append(f"wait : {params["time"]}")
+
+        elif action == "press":
+            translated_actions.append(f"press : {params["keys"]} ;; presses : {params["presses"]} ;; interval : {params["interval"]}")
+
+        elif action == "write":
+            translated_actions.append(f"write : {params["text"]} ;; interval : {params["interval"]}")
+
+        elif action == "click":
+            translated_actions.append(f"click : {params["button"]} ;; x : {params["x"]} ;; y : {params["y"]} ;; duration : {params["duration"]} ;; clicks : {params["clicks"]} ;; interval : {params["interval"]}")
+
+        elif action == "moveto":
+            translated_actions.append(f"moveto : {params["duration"]} ;; x : {params["x"]} ;; y : {params["y"]}")
+
+        elif action == "move":
+            translated_actions.append(f"move : {params["duration"]} ;; x : {params["x"]} ;; y : {params["y"]}")
+        
+        elif action == "open":
+            additionnal_param = params.get("command", None) or params.get("folder", None)
+            if additionnal_param is not None:
+                translated_actions.append(f"open : {params["window"]} ;; param : {additionnal_param}")
+            else:
+                translated_actions.append(f"open : {params["window"]}")
 
     return translated_actions
 

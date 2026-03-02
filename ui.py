@@ -56,7 +56,7 @@ class Application(tk.Tk):
         self.rmv_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
         self.edit_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
         if self.selection:
-            self.index = str(self.selection[0])
+            self.index = str(self.selection[0]+1)
             self.selected.config(text=f"{Keys} : {self.data[self.index]["keys"]} \n\n{comment} : {self.data[self.index]["comment"]}" if self.data[self.index]["comment"] is not None else f"{Keys} : {self.data[self.index]["keys"]}\n\n")
 
     def abb_on_select(self, event) -> None:
@@ -71,7 +71,7 @@ class Application(tk.Tk):
             self.abb_selected.config(text=f"{source} : {self.abbreviation[self.abb_index]["source"]} \n\n{text} : {self.abbreviation[self.abb_index]["text"]}")
         
     def close(self) -> None:
-        """ferme l'appli mais actualise tout les fichier json avant"""
+        """actualise tout les fichiers json avant de fermer l'appli"""
 
         utils.actualise(self.data, self.settings, self.abbreviation, platform)
         self.destroy()
@@ -202,7 +202,8 @@ class Application(tk.Tk):
 
         if refresh : self.listbox.delete(0, tk.END)
         for macro in self.data:
-            self.listbox.insert(macro, self.data[macro]["keys"]) if self.data[macro]["keys"] is not None else self.listbox.insert(macro, self._("ui.no_key"))
+            if macro != "0":
+                self.listbox.insert(macro, self.data[macro]["keys"]) if self.data[macro]["keys"] is not None else self.listbox.insert(macro, self._("ui.no_key"))
 
     def abb_build_listbox(self, refresh: bool = False) -> None:
         """creer la listbox des abbreviations existante"""
@@ -235,10 +236,10 @@ class Application(tk.Tk):
                 self.abb_selected.config(text="")
                 self.abb_rmv_button.config(state="disabled", bg="lightgray")
 
-    def new_macro(self) -> None:
+    def new_macro(self, key:str = "", action:list = [], comment:str= "") -> None:
         """creer une fenetre avec une entrée texte pour les touches qui peut être mis a None dans le cas ou c'est une action utile dans le task scheduler (future ajout) mais qu'on ne veut pas sous forme de macro
         c'est une listebox ou les instructions a faire sont rangé dans l'ordre d'execution avec un boutton "add action" qui ouvre une fentre de selection d'une action avec ses parametres a choisir
-        et une derniere entrée texte pour le commentaire (par default égal a None)""" 
+        et une derniere entrée texte pour le commentaire (par default égal a None) avec possibilité de préremplir les differentes entrée (dans le cas d'un edit)""" 
 
         self.nmcr_menu = tk.Toplevel(self, width=300, height=400)
         self.nmcr_menu.title(self._("ui.nmcr_title"))
@@ -252,40 +253,67 @@ class Application(tk.Tk):
         keys_lbl = tk.Label(self.nmcr_menu, text=keys_txt, justify=tk.RIGHT)
         keys_lbl.grid(row=0, column=0, padx=10, pady=10)
 
+        keys_entry = tk.Entry(self.nmcr_menu, justify=tk.CENTER, exportselection=0)
+        keys_entry.grid(row=0, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
+        if key != "": keys_entry.insert(tk.END, key)
 
-        keys = tk.Entry(self.nmcr_menu, justify=tk.CENTER, exportselection=0)
-        keys.grid(row=0, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
-        
         mcr_yScroll = tk.Scrollbar(self.nmcr_menu, orient=tk.VERTICAL)
         mcr_yScroll.grid(row=1, column=0, sticky=tk.N+tk.S+tk.E, padx=10, pady=10)
 
-        mcr_listbox = tk.Listbox(self.nmcr_menu, bg='white', exportselection=0, yscrollcommand=mcr_yScroll.set, activestyle="dotbox")
-        mcr_listbox.grid(row=1, column=1, sticky=tk.N+tk.S+tk.E+tk.W, padx=5, pady=10)
-        mcr_yScroll['command'] = mcr_listbox.yview
+        self.mcr_listbox = tk.Listbox(self.nmcr_menu, bg='white', exportselection=0, yscrollcommand=mcr_yScroll.set, activestyle="dotbox")
+        self.mcr_listbox.grid(row=1, column=1, sticky=tk.N+tk.S+tk.E+tk.W, padx=5, pady=10)
+        mcr_yScroll['command'] = self.mcr_listbox.yview
+
+        if len(action) > 0 : 
+            action = utils.translate_from_callback(action)
+            for act in action:
+                self.mcr_listbox.insert(tk.END, act)
 
         com_txt = f"{self._("ui.comment")} : "
         com_lbl = tk.Label(self.nmcr_menu, text=com_txt, justify=tk.RIGHT)
         com_lbl.grid(row=2, column=0, padx=10, pady=10)
 
-        comment = tk.Entry(self.nmcr_menu, exportselection=0)
-        comment.grid(row=2, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
+        comment_entry = tk.Entry(self.nmcr_menu, exportselection=0)
+        comment_entry.grid(row=2, column=1, sticky=tk.E+tk.W, padx=10, pady=10)
+        if comment != "": comment_entry.insert(tk.END, comment)
 
         def create_macro() -> None:
             """creer et sauvegarde dans le fichier json la macro a partir des parametres renseigné (keys, actions et comment)"""
 
-            _key = keys.get() or None                                   # mets a None si y'a rien d'ecrit (parce que sinon tkinter renvoie "" et c'est relou)
-            _comment = comment.get() or None
-            _actions = list(mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox, on stocke un syntaxe utilisateur plus simple a comprendre pour la convertir en syntaxe programme avec translate_callback
-            _actions = utils.translate_callback(_actions)               # transforme la syntaxe utilisateur en syntaxe programme
-            if len(_actions) > 0:                                       # Si aucune actions ça fait rien et ferme juste la fenetre 
-                utils.add_mcr(self.data, _key, _actions, _comment)
-                utils.actualise(data=self.data, os_name=platform)                    
+            _key = keys_entry.get() or None                                   # mets a None si y'a rien d'ecrit (parce que sinon tkinter renvoie "" et c'est relou)
+            _comment = comment_entry.get() or None
+            _actions = list(self.mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox, on stocke un syntaxe utilisateur plus simple a comprendre
+            _actions = utils.translate_to_callback(_actions)               # transforme la syntaxe utilisateur en syntaxe programme
+
+            keys_in_use = [key_data["keys"] for key_data in self.data.values() if key_data["keys"] is not None]
+
+            if len(_actions) > 0:                                   # Si aucune action est definie ça mets un message d'erreur
+                if _key in keys_in_use:    
+                    ask_replace = messagebox.askyesno(
+                        title=self._("macro_exist_title"),          #Si une macro existe deja, ça demande si ça la remplace
+                        message=self._("ui.macro_exist")
+                    )
+                    if ask_replace:
+                        print(f">Debug : {self.data}\n")
+                        self.data[str(keys_in_use.index(_key))] = {"keys":_key, "actions":_actions, "comment":_comment}
+                        print(f">Debug : {self.data}")
+                        if _key is not None : keyboard.remove_hotkey(_key)
+                
+                else:
+                    utils.add_mcr(self.data, _key, _actions, _comment)
+                    utils.actualise(data=self.data, os_name=platform)   
+
                 if _key is not None :                                   # Initialise la macro si des touches sont définis
                     callback = utils.make_callback(_actions)
-                    keyboard.add_hotkey(_key, callback)  
+                    keyboard.add_hotkey(_key, callback)
 
                 self.build_listbox(refresh=True)
-            self.nmcr_menu.destroy()
+                self.nmcr_menu.destroy()
+            else:
+                messagebox.showerror(
+                    title=self._("ui.no_actions_title"),
+                    message=self._("ui.no_actions")
+                )
 
         def add_action() -> None:
             """permet d'ajouter une action a la macro actuellement en creation"""
@@ -326,7 +354,7 @@ class Application(tk.Tk):
 
                 if selected_action == "wait":
                     time = simpledialog.askfloat(title=self._("ui.wait_title"), prompt=self._("ui.wait"))
-                    if time is not None : mcr_listbox.insert(tk.END, f"{selected_action} : {time}") 
+                    if time is not None : self.mcr_listbox.insert(tk.END, f"{selected_action} : {time}") 
 
                 else:
                     init_params_menu()
@@ -355,7 +383,7 @@ class Application(tk.Tk):
                                 if interval != 0:
                                     write_command += f" ;; interval : {interval}"
 
-                                mcr_listbox.insert(tk.END, write_command)
+                                self.mcr_listbox.insert(tk.END, write_command)
 
                                 close_params_menu()
                                 
@@ -422,12 +450,12 @@ class Application(tk.Tk):
                                     click_command += f" ;; y : {y}"
                                 if duration != 0:
                                     click_command += f" ;; duration : {duration}"
-                                if interval != 0:
-                                    click_command += f" ;; interval : {interval}"
                                 if clicks != 1:
                                     click_command += f" ;; clicks : {clicks}"
+                                if interval != 0:
+                                    click_command += f" ;; interval : {interval}"
 
-                                mcr_listbox.insert(tk.END, click_command)
+                                self.mcr_listbox.insert(tk.END, click_command)
 
                                 close_params_menu()
                             
@@ -468,7 +496,7 @@ class Application(tk.Tk):
                                 if y is not None:
                                     moveto_command += f" ;; y : {y}"
 
-                                mcr_listbox.insert(tk.END, moveto_command)
+                                self.mcr_listbox.insert(tk.END, moveto_command)
 
                                 close_params_menu()
 
@@ -509,7 +537,7 @@ class Application(tk.Tk):
                                 if y is not None:
                                     move_command += f" ;; y : {y}"
 
-                                mcr_listbox.insert(tk.END, move_command)
+                                self.mcr_listbox.insert(tk.END, move_command)
 
                                 close_params_menu()
 
@@ -550,7 +578,7 @@ class Application(tk.Tk):
                                     if interval != 0:
                                         press_command += f" ;; interval : {interval}"
 
-                                mcr_listbox.insert(tk.END, press_command)
+                                self.mcr_listbox.insert(tk.END, press_command)
 
                                 close_params_menu()
 
@@ -617,7 +645,7 @@ class Application(tk.Tk):
 
                                 else : open_command = f"{selected_action} : {path}"
 
-                                mcr_listbox.insert(tk.END, open_command)
+                                self.mcr_listbox.insert(tk.END, open_command)
                                 
                                 close_params_menu()
 
@@ -649,14 +677,25 @@ class Application(tk.Tk):
         add_button = tk.Button(self.nmcr_menu, text=self._("ui.naction"), justify=tk.LEFT, command=add_action)
         add_button.grid(row=3, column=0, sticky=tk.W, padx=10, pady=10)
 
+        def remove_action():
+           selected = self.mcr_listbox.curselection()
+           if selected: 
+               self.mcr_listbox.delete(selected[0])
+
+        remove_button = tk.Button(self.nmcr_menu, text=self._("ui.remove_action"), justify=tk.RIGHT, command=remove_action)
+        remove_button.grid(row=3, column=1, sticky=tk.E, padx=10, pady=10)
+
         create_button = tk.Button(self.nmcr_menu, text=self._("ui.nmcr"), justify=tk.RIGHT, command=create_macro)
-        create_button.grid(row=3, column=1, sticky=tk.E, padx=10, pady=10)
+        create_button.grid(row=4, column=1, sticky=tk.E, padx=10, pady=10)
 
     def edit_macro(self) -> None:
-        """creation de la même fenetre que pour le new_macro mais avec les cases prérempli avec les data associé a la macro séléctionné (a faire apres que le new_macro soit complétement fait)
-        faut juste faire que les StringVar contiennet le data[id]["keys"] et data[id]["comment"] pour les Entry et faire un for act in actions mcr_listbox.insert(act, -Synthaxe choisi-)"""
+        """creation de la même fenetre que pour le new_macro mais avec les cases prérempli avec les data associé a la macro séléctionné"""
 
-        return 0
+        key = self.data[self.index]["keys"] or ""
+        action = self.data[self.index]["actions"]
+        comment = self.data[self.index]["comment"] or ""
+
+        self.new_macro(key, action, comment)
     
     def new_abbreviation(self) -> None:
         """demande les parametres d'une nouvelle abreviation puis l'ajoute ou remplace si elle existe deja"""

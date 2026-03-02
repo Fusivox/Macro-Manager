@@ -39,6 +39,7 @@ en:
     nabb_title: Macro Manager - New Abbreviation
     nabb: Create new abbreviation
     naction: New action
+    remove_action: Remove action
     nmcr: Create new Macro
     edit: Edit
     no_key: No keys selected
@@ -63,3 +64,7 @@ en:
     file_type: Every file type
     add_param: additional parameter
     folder: Select a folder
+    macro_exist_title: Macro already exists
+    macro_exist: Macro with theses keys already exists, do you want to replace it ?
+    no_actions_title: No actions defined
+    no_actions: No actions are defined for this macro
