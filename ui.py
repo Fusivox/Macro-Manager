@@ -823,7 +823,7 @@ class Application(tk.Tk):
                             path = filedialog.askdirectory(
                                 title=self._("ui.folder")
                             )
-                            if path: paramvar.set(path)
+                            if path: pathvar.set(path)
 
                         browseparam_button = tk.Button(params_menu, text=self._("ui.browse"), command=browse_folder)
                         browseparam_button.grid(row=1, column=2, padx=10, pady=10)
