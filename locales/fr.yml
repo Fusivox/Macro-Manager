@@ -48,7 +48,7 @@ fr:
     wait: Attendre combiens de secondes ?
     hold: Touche a maintenir ?
     release: Touche a lacher ?
-    name: name
+    name: nom
     interval: Intervale
     params_title: "Parametres {action}"
     press: touche
@@ -75,3 +75,5 @@ fr:
     horizontal: horizontale
     vertical: verticale
     amount: quantité
+    path_err_title: le Chemin n'existe pas 
+    path_err: Le chemin choisis n'existe pas, entrez un chemin valide

@@ -75,3 +75,5 @@ en:
     horizontal: horizontal
     vertical: vertical
     amount: amount
+    path_err_title: Path doesn't exists
+    path_err: The selected path doesn't exist, please input a valid path

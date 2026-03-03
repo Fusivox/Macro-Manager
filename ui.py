@@ -393,6 +393,7 @@ class Application(tk.Tk):
                             """ajoute aux actions la fonction ``write`` avec les parametres renseigné"""
 
                             interval = utils.convert(interval_entry.get() or 0)
+
                             if isinstance(interval, (int, float)) and len(text_entry.get()) > 0:
 
                                 write_command = f"{selected_action} : {text_entry.get()}"
@@ -643,26 +644,28 @@ class Application(tk.Tk):
                         def add_open() -> None:
                             """ajoute aux actions la fonction ``open`` avec les parametres renseigné"""
 
-                            path = pathvar.get().strip() or None
-                            additional_param = paramvar.get().strip() or None
+                            path = pathvar.get().strip() or ""
+                            additional_param = paramvar.get().strip() or ""
 
-                            if path is not None:
+                            if path != "" and (path.lower() in ("shell", "cmd", "explorer") or os.path.exists(path)):
 
-                                if path.lower() == "cmd" or path.lower() == "shell":
+                                if path.lower() in ("cmd", "shell"):
                                     
                                     if platform == "win32":
                                         open_command = f"{selected_action} : cmd"
                                     else:
                                         open_command = f"{selected_action} : shell"
 
-                                    if additional_param is not None:
-                                        open_command += f" ;; param : {additional_param}"
-
                                 else : open_command = f"{selected_action} : {path}"
+
+                                if additional_param != "" and ("cmd" in open_command or "explorer" in open_command) and os.path.exists(additional_param):
+                                    open_command += f" ;; param : {additional_param}"
 
                                 self.mcr_listbox.insert(tk.END, open_command)
                                 
                                 close_params_menu()
+                            
+                            else: messagebox.showerror(title=self._("ui.path_err_title"), message=self._("ui.path_err")) 
 
                         validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_open)
                         validate_button.grid(row=2, column=2, padx=10, pady=10)
@@ -831,16 +834,18 @@ class Application(tk.Tk):
                         def add_screenshot() -> None:
                             """ajoute aux actions la fonction ``screenshot`` avec les parametres renseigné"""
 
-                            path = pathvar.get().strip() or None
+                            path = pathvar.get().strip() or ""
 
-                            screen_command = f"{selected_action} : {name_entry.get()}"
+                            screen_command = f"{selected_action} : {name_entry.get() or "Screenshot"}"
 
-                            if path is not None:
+                            if os.path.exists(path):
                                 screen_command += f" ;; path : {path}"
 
-                            self.mcr_listbox.insert(tk.END, screen_command)
+                                self.mcr_listbox.insert(tk.END, screen_command)
                                 
-                            close_params_menu()
+                                close_params_menu()
+
+                            else: messagebox.showerror(title=self._("ui.path_err_title"), message=self._("ui.path_err"))
 
                         validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_screenshot)
                         validate_button.grid(row=2, column=2, padx=10, pady=10)
