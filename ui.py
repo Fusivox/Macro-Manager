@@ -1,4 +1,4 @@
-import tkinter as tk , os, json, utils, i18n, sys, keyboard
+import tkinter as tk , os, json, utils, i18n, sys, keyboard, mouseinfo
 from tkinter import messagebox, simpledialog, filedialog
 
 if sys.platform == "win32": 
@@ -343,6 +343,39 @@ class Application(tk.Tk):
                     params_menu.transient(add_action_menu)
                     params_menu.resizable(False, False)
 
+                    def on_close():
+                        if 'update' in globals():
+                            try:
+                                params_menu.after_cancel(update)
+                            except:
+                                pass
+                        params_menu.destroy()
+
+                    params_menu.protocol("WM_DELETE_WINDOW", on_close)
+
+                def init_coordinate() -> None:
+
+                    coordinate_menu = tk.Toplevel(params_menu)
+                    coordinate_menu.geometry("200x100")
+                    coordinate_menu.title(self._("ui.cos"))
+                    coordinate_menu.resizable(False, False)
+
+                    cos_label = tk.Label(coordinate_menu, text="", font=("Arial", 14))
+                    cos_label.grid(padx=60, pady=20)
+
+                    def update_cos():
+                        global update
+                        try:
+                            x, y = mouseinfo.position()
+                            cos_label.config(text=f"X: {x}\nY: {y}")
+
+                            update = params_menu.after(50, update_cos)
+                            
+                        except:
+                            pass
+
+                    update_cos()
+
                 def close_params_menu() -> None:
                     """ferme la fenetre pour renseigner les parametres de l'action en train d'être ajouter et rends le focus a la fenetre pour ajouter une action"""
 
@@ -408,6 +441,7 @@ class Application(tk.Tk):
                         validate_button.grid(row=2, column=1, padx=10, pady=10)
 
                     elif selected_action == "click":
+                        init_coordinate()
                         
                         button_label = tk.Label(params_menu, text=f"{self._("ui.button")} :", justify=tk.RIGHT)
                         button_label.grid(row=0, column=0, padx=10, pady=10)
@@ -479,6 +513,7 @@ class Application(tk.Tk):
                         validate_button.grid(row=4, column=3, padx=10, pady=10)
 
                     elif selected_action == "moveto":
+                        init_coordinate()
 
                         x_label = tk.Label(params_menu, text=f"{self._("ui.x")} :", justify=tk.RIGHT)
                         x_label.grid(row=0, column=0, padx=10, pady=10)
@@ -492,7 +527,7 @@ class Application(tk.Tk):
                         y_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=1)
                         y_entry.grid(row=0, column=3, padx=10, pady=10)
 
-                        duration_label = tk.Label(params_menu, text=f"{self.i("ui.duration")} :", justify=tk.RIGHT)
+                        duration_label = tk.Label(params_menu, text=f"{self._("ui.duration")} :", justify=tk.RIGHT)
                         duration_label.grid(row=1, column=0, padx=10, pady=10)
 
                         duration_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=0.1)
@@ -533,7 +568,7 @@ class Application(tk.Tk):
                         y_entry = tk.Spinbox(params_menu, exportselection=0, from_=-1000000, to=1000000, increment=1)
                         y_entry.grid(row=0, column=3, padx=10, pady=10)
 
-                        duration_label = tk.Label(params_menu, text=f"{self.i("ui.duration")} :", justify=tk.RIGHT)
+                        duration_label = tk.Label(params_menu, text=f"{self._("ui.duration")} :", justify=tk.RIGHT)
                         duration_label.grid(row=1, column=0, padx=10, pady=10)
 
                         duration_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=0.1)
@@ -671,6 +706,7 @@ class Application(tk.Tk):
                         validate_button.grid(row=2, column=2, padx=10, pady=10)
 
                     elif selected_action == "scroll":
+                        init_coordinate()
 
                         direction_label = tk.Label(params_menu, text=f"{self._("ui.direction")} :", justify=tk.RIGHT)
                         direction_label.grid(row=0, column=0, padx=10, pady=10)
@@ -724,6 +760,7 @@ class Application(tk.Tk):
                         validate_button.grid(row=3, column=3, padx=10, pady=10)
 
                     elif selected_action == "dragto":
+                        init_coordinate()
 
                         x_label = tk.Label(params_menu, text=f"{self._("ui.x")} :", justify=tk.RIGHT)
                         x_label.grid(row=0, column=0, padx=10, pady=10)
@@ -737,7 +774,7 @@ class Application(tk.Tk):
                         y_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=1)
                         y_entry.grid(row=0, column=3, padx=10, pady=10)
 
-                        duration_label = tk.Label(params_menu, text=f"{self.i("ui.duration")} :", justify=tk.RIGHT)
+                        duration_label = tk.Label(params_menu, text=f"{self._("ui.duration")} :", justify=tk.RIGHT)
                         duration_label.grid(row=1, column=0, padx=10, pady=10)
 
                         duration_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=0.1)
@@ -778,7 +815,7 @@ class Application(tk.Tk):
                         y_entry = tk.Spinbox(params_menu, exportselection=0, from_=-1000000, to=1000000, increment=1)
                         y_entry.grid(row=0, column=3, padx=10, pady=10)
 
-                        duration_label = tk.Label(params_menu, text=f"{self.i("ui.duration")} :", justify=tk.RIGHT)
+                        duration_label = tk.Label(params_menu, text=f"{self._("ui.duration")} :", justify=tk.RIGHT)
                         duration_label.grid(row=1, column=0, padx=10, pady=10)
 
                         duration_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=0.1)

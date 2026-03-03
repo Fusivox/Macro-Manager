@@ -77,3 +77,4 @@ fr:
     amount: quantité
     path_err_title: le Chemin n'existe pas 
     path_err: Le chemin choisis n'existe pas, entrez un chemin valide
+    cos: Coordonnées souris
