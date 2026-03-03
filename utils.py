@@ -28,8 +28,7 @@ def make_callback(actions: list):
                     if sys.platform == "win32":
                             os.startfile(path)
                     else:
-                        subprocess.run(["xdg-open", path])
-                    
+                        subprocess.run(["xdg-open", path])        
 
             elif action == "wait": #("wait", #temps en secondes)
                 time.sleep(params["time"])

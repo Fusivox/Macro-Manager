@@ -139,7 +139,7 @@ class Application(tk.Tk):
         self.help_menu.destroy()
 
     def set_lang(self, lang: str, fallback: str) -> None:
-        """change la langue de l'app, nécessite une langue de ``fallback`` en cas d'echec"""
+        """change la langue de l'app, nécessite une langue ``fallback`` en cas d'echec"""
 
         i18n.set("locale", lang)
         self.settings["lang"] = lang
@@ -236,7 +236,7 @@ class Application(tk.Tk):
                 self.abb_selected.config(text="")
                 self.abb_rmv_button.config(state="disabled", bg="lightgray")
 
-    def new_macro(self, key:str = "", action:list = [], comment:str= "") -> None: # TODO : ajouter scroll (vertical/horizontal), dragto/drag, keydown/keyup, hotkey, screenshot
+    def new_macro(self, key:str = "", action:list = [], comment:str= "") -> None:
         """creer la fenetre ou l'on peut renseigner des valeurs pour ``keys``, ``actions`` et ``comment`` avec possibilité de les préremplir dans le cas d'un ``edit_macro``""" 
 
         self.nmcr_menu = tk.Toplevel(self, width=300, height=400)
@@ -315,7 +315,7 @@ class Application(tk.Tk):
 
         def add_action() -> None:
             """permet d'ajouter une action a la macro actuellement en creation"""
-            # liste des actions possible (a actualiser en même temps que les fonction make_callback et translate dans utils)
+            # v liste des actions possible (a actualiser en même temps que les fonction make_callback et translate dans utils) v
             actions = ["open", "wait", "write", "click", "moveto", "move", "press", "scroll", "dragto", "drag", "hold", "release", "hotkey", "screenshot"]
             
             def close() -> None: 
@@ -392,7 +392,7 @@ class Application(tk.Tk):
                         def add_write() -> None:
                             """ajoute aux actions la fonction ``write`` avec les parametres renseigné"""
 
-                            interval = utils.convert(interval_entry.get() or 0)
+                            interval = utils.convert(interval_entry.get().strip() or 0)
 
                             if isinstance(interval, (int, float)) and len(text_entry.get()) > 0:
 
@@ -412,7 +412,7 @@ class Application(tk.Tk):
                         button_label = tk.Label(params_menu, text=f"{self._("ui.button")} :", justify=tk.RIGHT)
                         button_label.grid(row=0, column=0, padx=10, pady=10)
 
-                        buttonlist = (self._("primary"), self._("secondary"), self._("middle"))
+                        buttonlist = (self._("ui.primary"), self._("ui.secondary"), self._("ui.middle"))
                         buttonvar = tk.StringVar()
                         buttonvar.set(buttonlist[0])
 
@@ -452,10 +452,10 @@ class Application(tk.Tk):
                         def add_click() -> None:
                             """ajoute aux actions la fonction ``click`` avec les parametres renseigné"""
 
-                            x, y = utils.convert(x_entry.get() or None) , utils.convert(y_entry.get() or None)
-                            duration = utils.convert(duration_entry.get() or 0)
-                            interval = utils.convert(interval_entry.get() or 0)
-                            clicks = utils.convert(clicks_entry.get() or 1)
+                            x, y = utils.convert(x_entry.get().strip() or None) , utils.convert(y_entry.get().strip() or None)
+                            duration = utils.convert(duration_entry.get().strip() or 0)
+                            interval = utils.convert(interval_entry.get().strip() or 0)
+                            clicks = utils.convert(clicks_entry.get().strip() or 1)
 
                             if isinstance(clicks, (int, float)) and isinstance(interval, (int, float)) and isinstance(duration, (int, float)) and (isinstance(x, (float, int)) or x is None) and (isinstance(y, (float, int)) or y is None) and (x is not None or y is not None): 
                                 
@@ -501,8 +501,8 @@ class Application(tk.Tk):
                         def add_moveto() -> None:
                             """ajoute aux actions la fonction ``moveto`` avec les parametres renseigné"""
 
-                            x, y = utils.convert(x_entry.get() or None), utils.convert(y_entry.get() or None)
-                            duration = utils.convert(duration_entry.get() or 0)
+                            x, y = utils.convert(x_entry.get().strip() or None), utils.convert(y_entry.get().strip() or None)
+                            duration = utils.convert(duration_entry.get().strip() or 0)
 
                             if isinstance(duration, (int, float)) and (isinstance(x, (float, int)) or x is None) and (isinstance(y, (float, int)) or y is None) and (x is not None or y is not None): 
 
@@ -542,8 +542,8 @@ class Application(tk.Tk):
                         def add_move() -> None:
                             """ajoute aux actions la fonction ``move`` avec les parametres renseigné"""
 
-                            x, y = utils.convert(x_entry.get() or None), utils.convert(y_entry.get() or None)
-                            duration = utils.convert(duration_entry.get() or 0)
+                            x, y = utils.convert(x_entry.get().strip() or None), utils.convert(y_entry.get().strip() or None)
+                            duration = utils.convert(duration_entry.get().strip() or 0)
 
                             if isinstance(duration, (int, float)) and (isinstance(x, (float, int)) or x is None) and (isinstance(y, (float, int)) or y is None) and (x is not None or y is not None): 
 
@@ -583,8 +583,8 @@ class Application(tk.Tk):
                         def add_press() -> None:
                             """ajoute aux actions la fonction ``press`` avec les parametres renseigné"""
 
-                            interval = utils.convert(interval_entry.get() or 0)
-                            presses = utils.convert(presses_entry.get() or 1)
+                            interval = utils.convert(interval_entry.get().strip() or 0)
+                            presses = utils.convert(presses_entry.get().strip() or 1)
                             key = press_entry.get().strip().lower()
                             if isinstance(interval, (float, int)) and isinstance(presses, (int, float)) and key in utils.POSSIBLE_KEYS:
 
@@ -703,8 +703,8 @@ class Application(tk.Tk):
                         def add_scroll() -> None:
                             """ajoute aux actions la fonction ``scroll`` avec les parametres renseigné"""
 
-                            x, y = utils.convert(x_entry.get() or None) , utils.convert(y_entry.get() or None)
-                            amount = utils.convert(amount_entry.get() or 0)
+                            x, y = utils.convert(x_entry.get().strip() or None) , utils.convert(y_entry.get().strip() or None)
+                            amount = utils.convert(amount_entry.get().strip() or 0)
 
                             if isinstance(x, (int, float)) and isinstance(y, (int, float)):
 
@@ -746,8 +746,8 @@ class Application(tk.Tk):
                         def add_dragto() -> None:
                             """ajoute aux actions la fonction ``dragto`` avec les parametres renseigné"""
 
-                            x, y = utils.convert(x_entry.get() or None), utils.convert(y_entry.get() or None)
-                            duration = utils.convert(duration_entry.get() or 0)
+                            x, y = utils.convert(x_entry.get().strip() or None), utils.convert(y_entry.get().strip() or None)
+                            duration = utils.convert(duration_entry.get().strip() or 0)
 
                             if isinstance(duration, (int, float)) and (isinstance(x, (float, int)) or x is None) and (isinstance(y, (float, int)) or y is None) and (x is not None or y is not None): 
 
@@ -787,8 +787,8 @@ class Application(tk.Tk):
                         def add_drag() -> None:
                             """ajoute aux actions la fonction ``drag`` avec les parametres renseigné"""
 
-                            x, y = utils.convert(x_entry.get() or None), utils.convert(y_entry.get() or None)
-                            duration = utils.convert(duration_entry.get() or 0)
+                            x, y = utils.convert(x_entry.get().strip() or None), utils.convert(y_entry.get().strip() or None)
+                            duration = utils.convert(duration_entry.get().strip() or 0)
 
                             if isinstance(duration, (int, float)) and (isinstance(x, (float, int)) or x is None) and (isinstance(y, (float, int)) or y is None) and (x is not None or y is not None): 
 
@@ -836,7 +836,7 @@ class Application(tk.Tk):
 
                             path = pathvar.get().strip() or ""
 
-                            screen_command = f"{selected_action} : {name_entry.get() or "Screenshot"}"
+                            screen_command = f"{selected_action} : {name_entry.get().strip() or "Screenshot"}"
 
                             if os.path.exists(path):
                                 screen_command += f" ;; path : {path}"
