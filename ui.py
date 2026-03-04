@@ -103,14 +103,16 @@ class Application(tk.Tk):
 
         msg = self._("ui.key_msg")
 
+        old_keys = self.data["0"]["keys"]
         keys = simpledialog.askstring(
             title=self._("ui.key_change"),
             prompt=f"{msg} : {self.data["0"]["keys"]}"
         )
         if keys is not None and keys != "":
             try :
-                test = keyboard.add_hotkey(keys, lambda : None)
-                keyboard.remove_hotkey(test)
+                open_gui = utils.make_callback([("open", {"window":"gui"})])
+                keyboard.add_hotkey(keys, open_gui)
+                keyboard.remove_hotkey(old_keys)
                 self.data["0"]["keys"] = keys
                 
             except Exception :
@@ -693,7 +695,7 @@ class Application(tk.Tk):
 
                                 else : open_command = f"{selected_action} : {path}"
 
-                                if additional_param != "" and ("cmd" in open_command or "explorer" in open_command) and os.path.exists(additional_param):
+                                if additional_param != "" and ("cmd" in open_command or "explorer" in open_command) and (os.path.exists(additional_param) or additional_param.lower().startswith("shell:")):
                                     open_command += f" ;; param : {additional_param}"
 
                                 self.mcr_listbox.insert(tk.END, open_command)
@@ -913,9 +915,9 @@ class Application(tk.Tk):
         add_button.grid(row=3, column=0, sticky=tk.W, padx=10, pady=10)
 
         def remove_action():
-           selected = self.mcr_listbox.curselection()
-           if selected: 
-               self.mcr_listbox.delete(selected[0])
+            selected = self.mcr_listbox.curselection()
+            if selected: 
+                self.mcr_listbox.delete(selected[0])
 
         remove_button = tk.Button(self.nmcr_menu, text=self._("ui.remove_action"), justify=tk.RIGHT, command=remove_action)
         remove_button.grid(row=3, column=1, sticky=tk.E, padx=10, pady=10)
@@ -975,7 +977,6 @@ class Application(tk.Tk):
             else:
                 utils.add_abb(self.abbreviation, source, abb)
                                                                                     # ajoute l'abreviations et actualise le json puis l'initialise pour l'utiliser direct     
-
             utils.actualise(abbreviation=self.abbreviation, os_name=platform)  
             keyboard.add_abbreviation(source, abb)
 
