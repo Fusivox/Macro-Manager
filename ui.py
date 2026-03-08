@@ -55,9 +55,10 @@ class Application(tk.Tk):
         comment = self._("ui.comment")
         self.rmv_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
         self.edit_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
+        data = self.data
         if self.selection:
             self.index = str(self.selection[0]+1)
-            self.selected.config(text=f"{Keys} : {self.data[self.index]["keys"]} \n\n{comment} : {self.data[self.index]["comment"]}" if self.data[self.index]["comment"] is not None else f"{Keys} : {self.data[self.index]["keys"]}\n\n")
+            self.selected.config(text=f"{Keys} : {data[self.index]["keys"]} \n\n{comment} : {data[self.index]["comment"]}" if data[self.index]["comment"] is not None else f"{Keys} : {data[self.index]["keys"]}\n\n")
 
     def abb_on_select(self, event) -> None:
         """change le texte basé sur l'elements selectionné pour le menu abbreviation"""
@@ -66,9 +67,10 @@ class Application(tk.Tk):
         source = self._("ui.source")
         text = self._("ui.text")
         self.abb_rmv_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
+        abbreviation = self.abbreviation
         if self.abb_selection:
             self.abb_index = str(self.abb_selection[0])
-            self.abb_selected.config(text=f"{source} : {self.abbreviation[self.abb_index]["source"]} \n\n{text} : {self.abbreviation[self.abb_index]["text"]}")
+            self.abb_selected.config(text=f"{source} : {abbreviation[self.abb_index]["source"]} \n\n{text} : {abbreviation[self.abb_index]["text"]}")
         
     def close(self) -> None:
         """actualise tout les fichiers json avant de fermer l'appli"""
@@ -203,16 +205,20 @@ class Application(tk.Tk):
         """creer la listbox des macro existante"""
 
         if refresh : self.listbox.delete(0, tk.END)
-        for macro in self.data:
+        insert = self.listbox.insert
+        data = self.data
+        for macro in data:
             if macro != "0":
-                self.listbox.insert(macro, self.data[macro]["keys"]) if self.data[macro]["keys"] is not None else self.listbox.insert(macro, self._("ui.no_key"))
+                insert(tk.END, data[macro]["keys"]) if data[macro]["keys"] is not None else insert(tk.END, self._("ui.no_key"))
 
     def abb_build_listbox(self, refresh: bool = False) -> None:
         """creer la listbox des abbreviations existante"""
 
         if refresh : self.abb_listbox.delete(0, tk.END)
-        for abb in self.abbreviation:
-            self.abb_listbox.insert(abb, self.abbreviation[abb]["source"])
+        insert = self.abb_listbox.insert
+        abbreviation = self.abbreviation
+        for abb in abbreviation:
+            insert(tk.END, abbreviation[abb]["source"])
 
     def remove(self, source: str, nb) -> None:
         """retire un éléments du fichier json séléctionné, ``data`` pour les macros ou ``abb`` pour les abreviations"""
@@ -684,9 +690,9 @@ class Application(tk.Tk):
                             path = pathvar.get().strip() or ""
                             additional_param = paramvar.get().strip() or ""
 
-                            if path != "" and (path.lower() in ("shell", "cmd", "explorer") or os.path.exists(path)):
+                            if path != "" and (path.lower() in {"shell", "cmd", "explorer"} or os.path.exists(path)):
 
-                                if path.lower() in ("cmd", "shell"):
+                                if path.lower() in {"cmd", "shell"}:
                                     
                                     if platform == "win32":
                                         open_command = f"{selected_action} : cmd"
@@ -695,7 +701,7 @@ class Application(tk.Tk):
 
                                 else : open_command = f"{selected_action} : {path}"
 
-                                if additional_param != "" and ("cmd" in open_command or "explorer" in open_command) and (os.path.exists(additional_param) or additional_param.lower().startswith("shell:")):
+                                if additional_param != "" and ("cmd" in open_command or "explorer" in open_command) and (os.path.exists(additional_param) or (additional_param.lower().startswith("shell:") and platform == "win32")):
                                     open_command += f" ;; param : {additional_param}"
 
                                 self.mcr_listbox.insert(tk.END, open_command)

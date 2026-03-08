@@ -17,8 +17,8 @@ def make_callback(actions: list):
                 elif params["window"] == "cmd": #("open", {"window":"cmd", "folder":"Dossier dans lequel le cmd est ouvert si spécifié sinon celui par default"})
                     subprocess.Popen(["cmd.exe"], cwd=params["folder"])         
 
-                elif params["window"] == "shell":#("open", {"window":"shell", "command":"commande a executer dans le shell"})
-                    subprocess.Popen(["xterm"], shell=True)
+                elif params["window"] == "shell":#("open", {"window":"shell", "folder":"Dossier dans lequel le shell est ouvert si spécifié sinon celui par default"})
+                    subprocess.Popen(["xterm"], cwd=params["folder"])
 
                 elif params["window"] == "explorer": #("open", {"window":"explorer", "folder":"Dossier dans lequel le navigateur de fichier est ouvert si spécifié sinon celui par default"})
                     subprocess.Popen(["Explorer", params["folder"]], shell=True)
@@ -130,10 +130,8 @@ def translate_to_callback(actions: list[str]) -> list[tuple]:
             translated_actions.append(("move", {"x": parts.get("x", None), "y": parts.get("y", None), "duration": parts["move"]}))
 
         elif "open" in parts:
-            if parts["open"] == "cmd" or parts["open"] == "explorer":
+            if parts["open"] in {"cmd", "shell", "explorer"}:
                 translated_actions.append(("open", {"window": parts["open"], "folder": parts.get("param", None)}))
-            elif parts["open"] == "shell":
-                translated_actions.append(("open", {"window": "shell", "command": parts.get("param", None)}))
             else:
                 translated_actions.append(("open", {"window": parts["open"]}))
 
@@ -185,11 +183,12 @@ def translate_from_callback(actions: list[tuple]) -> list[str]:
             translated_actions.append(f"move : {params["duration"]} ;; x : {params["x"]} ;; y : {params["y"]}")
         
         elif action == "open":
-            additionnal_param = params.get("command", None) or params.get("folder", None)
-            if additionnal_param is not None:
-                translated_actions.append(f"open : {params["window"]} ;; param : {additionnal_param}")
+            additionnal_param = params.get("folder", None)
+            path = params["window"]
+            if additionnal_param is not None and path in {"cmd", "shell", "explorer"}:
+                translated_actions.append(f"open : {path} ;; folder : {additionnal_param}")
             else:
-                translated_actions.append(f"open : {params["window"]}")
+                translated_actions.append(f"open : {path}")
 
         elif action == "scroll":
             translated_actions.append(f"scroll : {params["direction"]} ;; amount : {params["amount"]} ;; x : {params["x"]} ;; y : {params["y"]}")
