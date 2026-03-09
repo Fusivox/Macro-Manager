@@ -18,17 +18,22 @@ def make_callback(actions: list):
                     subprocess.Popen(["cmd.exe"], cwd=params["folder"])         
 
                 elif params["window"] == "shell":#("open", {"window":"shell", "folder":"Dossier dans lequel le shell est ouvert si spécifié sinon celui par default"})
-                    subprocess.Popen(["xterm"], cwd=params["folder"])
+                    try:
+                        subprocess.Popen(["xterm"], cwd=params["folder"])
+                    except Exception:
+                        subprocess.Popen(["konsole"], cwd=params["folder"])
 
                 elif params["window"] == "explorer": #("open", {"window":"explorer", "folder":"Dossier dans lequel le navigateur de fichier est ouvert si spécifié sinon celui par default"})
-                    subprocess.Popen(["Explorer", params["folder"]], shell=True)
+                    try: subprocess.Popen(["Explorer", params["folder"]], shell=True)
+                    except Exception: subprocess.Popen(["Dolphin", params["folder"]], shell=True)
 
                 else:
                     path = params["window"]
                     if sys.platform == "win32":
                             os.startfile(path)
                     else:
-                        subprocess.run(["xdg-open", path])        
+                        subprocess.run(["xdg-open", path])
+                        
 
             elif action == "wait": #("wait", #temps en secondes)
                 time.sleep(params["time"])

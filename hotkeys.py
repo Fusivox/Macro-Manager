@@ -158,8 +158,8 @@ class Hotkeys():
                     1: {
                         "keys" : "ctrl+alt+q",
                         "actions" : [
-                            ("open", {"window": "shell", "command": None}),
-                            ("wait", 1),
+                            ("open", {"window": "shell", "folder": None}),
+                            ("wait", {"time": 1}),
                             ("write", {"text": "This is a hotkey exemple", "interval": 0})
                         ],
                         "comment" : "This is a hotkey example and don't really do something"

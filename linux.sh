@@ -3,10 +3,10 @@
 export LANG=C
 
 if [ -d "env" ]; then
-    source env/bin/activate
+    source ../env/bin/activate
 else
     python3 -m venv env
-    source env/bin/activate
+    source ../env/bin/activate
     pip install -r requirement_linux.txt
 fi
 read -p "Choose an option: 1) build, 2) clean: " option
