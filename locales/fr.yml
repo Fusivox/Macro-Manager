@@ -78,3 +78,20 @@ fr:
     path_err_title: le Chemin n'existe pas 
     path_err: Le chemin choisis n'existe pas, entrez un chemin valide
     cos: Coordonnées souris
+
+  help:
+    main: "Ceci est le menu d'aide, vous pouvez choisir une action pour lire son manuel."
+    open: "Ouvre une interface, un terminal, un explorateur de fichiers ou un programme. Paramètre : 'window' indique ce qui doit être ouvert (gui, cmd, shell, explorer ou chemin vers un programme) et 'folder' peut définir le dossier de départ."
+    wait: "Met la macro en pause pendant un certain nombre de secondes. Paramètre : 'time' indique la durée de la pause en secondes."
+    write: "Simule la saisie de texte au clavier. Paramètres : 'text' est le texte à écrire et 'interval' le délai entre chaque caractère."
+    click: "Effectue un ou plusieurs clics de souris. Paramètres : 'x' et 'y' définissent la position (vous pouvez ne mettre qu'un seul des deux, l'autre restera sur la coordonnée actuelle), 'clicks' le nombre de clics, 'interval' le délai entre les clics, 'button' le bouton de la souris (primary, secondary, middle), et 'duration' le temps pour déplacer le curseur."
+    moveto: "Déplace le curseur de la souris vers une position spécifique à l'écran. Paramètres : 'x' et 'y' définissent la position cible (vous pouvez ne mettre qu'un seul des deux), 'duration' la durée du mouvement."
+    move: "Déplace le curseur de la souris relativement à sa position actuelle. Paramètres : 'x' et 'y' définissent le décalage horizontal et vertical (vous pouvez ne mettre qu'un seul des deux), 'duration' la durée du mouvement."
+    press: "Appuie sur une touche du clavier. Paramètres : 'keys' définit la touche, 'presses' le nombre de fois à appuyer, et 'interval' le délai entre chaque pression."
+    hotkey: "Exécute un raccourci clavier comme ctrl+c ou alt+tab. Paramètre : 'keys' contient la combinaison de touches séparées par '+'."
+    hold: "Maintient une touche du clavier enfoncée. Paramètre : 'key' indique la touche à maintenir."
+    release: "Relâche une touche précédemment maintenue avec 'hold'. Paramètre : 'key' indique la touche à relâcher."
+    scroll: "Fait défiler avec la molette de la souris. Paramètres : 'direction' peut être 'vertical' ou 'horizontal', 'amount' définit la quantité de scroll, et 'x' et 'y' définissent la position du curseur (vous pouvez ne mettre qu'un seul des deux)."
+    dragto: "Glisse la souris vers une position précise en maintenant le clic. Paramètres : 'x' et 'y' définissent la position cible, 'duration' le temps du glissement."
+    drag: "Glisse la souris relativement à sa position actuelle en maintenant le clic. Paramètres : 'x' et 'y' définissent le décalage (vous pouvez ne mettre qu'un seul des deux), 'duration' le temps du glissement."
+    screenshot: "Prend une capture d'écran et l'enregistre en fichier PNG. Paramètres : 'name' définit le nom du fichier et 'path' le dossier où il sera sauvegardé."

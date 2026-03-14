@@ -102,6 +102,8 @@ class Hotkeys():
                         message=_("htk.cancelled_msg")
                     )
                     app.destroy()
+                    utils.delete_win32()
+                    exit(1)
 
                 self.init_background() # pour que les macros et abreviation test marchent des l'ouverture de l'ui
                 app.mainloop()
@@ -201,6 +203,8 @@ class Hotkeys():
                         message=_("htk.cancelled_msg")
                     )
                     app.destroy()
+                    utils.delete_win32()
+                    exit(1)
 
                 self.init_background()
                 app.mainloop()

@@ -136,6 +136,23 @@ class Application(tk.Tk):
             self.help_menu.transient(self)
             self.help_menu.protocol("WM_DELETE_WINDOW", self.close_help)
 
+            def change(*args):
+                selected = choosevar.get()
+                help_label.config(text=self._(f"help.{selected}"))
+
+            # v liste des actions possible (a actualiser en même temps que les fonction make_callback et translate dans utils) v
+            chooselist = ("open", "wait", "write", "click", "moveto", "move", "press", "scroll", "dragto", "drag", "hold", "release", "hotkey", "screenshot")
+            choosevar = tk.StringVar()
+            choosevar.set(chooselist[0])
+
+            choose_button = tk.OptionMenu(self.help_menu, choosevar, *chooselist)
+            choose_button.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
+
+            help_label = tk.Label(self.help_menu, text=self._("help.main"), wraplength=300)
+            help_label.grid(row=1, column=0, columnspan=2, pady=10)
+
+            choosevar.trace_add("write", change)
+
     def close_help(self) -> None:
         "ferme le menu d'aide"
 
