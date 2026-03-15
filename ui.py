@@ -1018,6 +1018,8 @@ class Application(tk.Tk):
         for widget in self.winfo_children() :
             widget.destroy()
 
+        self.help_running = False
+
         if self.current_menu == "main":
             
             if switch: 

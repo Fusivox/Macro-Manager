@@ -185,7 +185,6 @@ class Hotkeys():
                     }
                 }
                 utils.actualise(self.data, self.settings, self.abbreviation, os_name="linux")
-                self.create_service_linux()
                 app = ui.Application()
                 ask_confirm = ui.messagebox.askokcancel(
                     title=_("htk.info_title"),
@@ -203,7 +202,7 @@ class Hotkeys():
                         message=_("htk.cancelled_msg")
                     )
                     app.destroy()
-                    utils.delete_win32()
+                    utils.delete_linux()
                     exit(1)
 
                 self.init_background()
@@ -270,7 +269,6 @@ WantedBy=multi-user.target"""
                     f.write(xhost_cmd)
         else:
             print("SUDO_USER non defini: impossible de modifier le .bashrc utilisateur.")
-        return 0
     
     def init_background(self) -> None: 
         """creer les macros et abreviations stockées dans les fichier json pour les utiliser"""
