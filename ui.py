@@ -707,7 +707,7 @@ class Application(tk.Tk):
                             path = pathvar.get().strip() or ""
                             additional_param = paramvar.get().strip() or ""
 
-                            if path != "" and (path.lower() in {"shell", "cmd", "explorer"} or os.path.exists(path)):
+                            if path != "" and (path.lower() in {"shell", "cmd", "explorer"} or (os.path.exists(path) or path.startswith("http" or "www."))):
 
                                 if path.lower() in {"cmd", "shell"}:
                                     

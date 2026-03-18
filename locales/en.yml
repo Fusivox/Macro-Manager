@@ -81,7 +81,7 @@ en:
 
   help:
     main: "This is the help menu, you can choose an action to read it's manual."
-    open: "Opens an interface, terminal, file explorer, or program. Parameter: 'window' specifies what to open (gui, cmd, shell, explorer, or a program path) and 'folder' can define the starting directory."
+    open: "Opens an interface, terminal, file explorer, or program. Parameter: 'window' specifies what to open (gui, cmd, shell, explorer, a program path or a URL) and 'folder' can define the starting directory."
     wait: "Pauses the macro for a given number of seconds. Parameter: 'time' specifies the duration of the pause in seconds."
     write: "Simulates typing text on the keyboard. Parameters: 'text' is the text to write and 'interval' is the delay between each character."
     click: "Performs one or multiple mouse clicks. Parameters: 'x' and 'y' define the position (you can only put one of them so the mouse will stay on the same coordinate for the non-specified axis), 'clicks' the number of clicks, 'interval' the delay between clicks, 'button' the mouse button (primary, secondary, middle), and 'duration' the time to move the cursor."

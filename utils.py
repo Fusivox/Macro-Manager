@@ -1,4 +1,4 @@
-import json, os, shutil, pyautogui, time, ui, subprocess, sys
+import json, os, shutil, pyautogui, time, ui, subprocess, sys, webbrowser
 from pathlib import Path
 
 POSSIBLE_KEYS = pyautogui.KEY_NAMES
@@ -30,7 +30,13 @@ def make_callback(actions: list):
                 else:
                     path = params["window"]
                     if sys.platform == "win32":
-                            os.startfile(path)
+                            
+                            try:
+                                os.startfile(path)
+
+                            except Exception:
+                                webbrowser.open(path)
+
                     else:
                         subprocess.run(["xdg-open", path])
                         

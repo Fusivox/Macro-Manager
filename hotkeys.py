@@ -218,7 +218,7 @@ class Hotkeys():
         shortcut_path = f"{os.getenv("APPDATA")}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"
         path = sys.executable
 
-        shell = Dispatch("WScript.Shell")
+        shell = Dispatch("WScript.Shell") # type: ignore
         shortcut = shell.CreateShortCut(shortcut_path)
         shortcut.Targetpath = path
         shortcut.WorkingDirectory = self.appdata

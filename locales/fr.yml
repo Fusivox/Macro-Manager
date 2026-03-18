@@ -81,7 +81,7 @@ fr:
 
   help:
     main: "Ceci est le menu d'aide, vous pouvez choisir une action pour lire son manuel."
-    open: "Ouvre une interface, un terminal, un explorateur de fichiers ou un programme. Paramètre : 'window' indique ce qui doit être ouvert (gui, cmd, shell, explorer ou chemin vers un programme) et 'folder' peut définir le dossier de départ."
+    open: "Ouvre une interface, un terminal, un explorateur de fichiers un programme ou une URL. Paramètre : 'window' indique ce qui doit être ouvert (gui, cmd, shell, explorer ou chemin vers un programme) et 'folder' peut définir le dossier de départ."
     wait: "Met la macro en pause pendant un certain nombre de secondes. Paramètre : 'time' indique la durée de la pause en secondes."
     write: "Simule la saisie de texte au clavier. Paramètres : 'text' est le texte à écrire et 'interval' le délai entre chaque caractère."
     click: "Effectue un ou plusieurs clics de souris. Paramètres : 'x' et 'y' définissent la position (vous pouvez ne mettre qu'un seul des deux, l'autre restera sur la coordonnée actuelle), 'clicks' le nombre de clics, 'interval' le délai entre les clics, 'button' le bouton de la souris (primary, secondary, middle), et 'duration' le temps pour déplacer le curseur."
