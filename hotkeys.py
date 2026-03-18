@@ -39,6 +39,10 @@ class Hotkeys():
                 print(self.data)
                 self.init_background()
 
+                if self.settings["GUI on launch"]:
+                    app = ui.Application()
+                    app.mainloop()
+
                 keyboard.wait()
 
             else: 
@@ -139,7 +143,7 @@ class Hotkeys():
                 print(self.data)
                 self.init_background()
 
-                if self.settings["GUI on launch"] == True:
+                if self.settings["GUI on launch"]:
                     app = ui.Application()
                     app.mainloop()
 
