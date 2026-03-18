@@ -42,6 +42,7 @@ class Application(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.close)
 
         self.help_running = False
+        self.task_running = False
         self.current_menu = "main"
         
         self.build_menu()
@@ -129,7 +130,7 @@ class Application(tk.Tk):
 
         if not self.help_running:
             self.help_running = True
-            self.help_menu = tk.Toplevel(height=400, width=400)
+            self.help_menu = tk.Toplevel(self, height=400, width=400)
             self.help_menu.title(self._("ui.help_title"))
             self.help_menu.resizable(False, False)
             self.help_menu.focus_set()
@@ -178,6 +179,26 @@ class Application(tk.Tk):
         utils.actualise(settings=self.settings)
 
         messagebox.showinfo(title=self._("htk.info_title"), message=self._(f"ui.launch_start_{param}"))
+
+    def task_scheduler(self):
+        """ouvre la fenetre du task scheduler"""
+
+        if not self.task_running:
+            self.task_running = True
+            self.task_menu = tk.Toplevel(self, height=400, width=300)
+            self.task_menu.title(self._("ui.task"))
+            self.help_menu.resizable(False, False)
+            self.help_menu.focus_set()
+            self.help_menu.transient(self)
+            self.help_menu.protocol("WM_DELETE_WINDOW", self.close_task)
+
+            # TODO : mettre des entry avec labels pour la date (OptionMenu + Spinbox) avec les yml (date.day.1 pour Lundi, date.month.1 pour janvier etc) puis un OptionMenu (?) avec les actions deja creer pour choisir laquel ça utilise 
+
+    def close_task(self):
+        """ferme le task scheduler"""
+
+        self.task_running = False
+        self.task_menu.destroy()
 
     def build_main_ui(self) -> None:
         """construit l'ui du menu macro"""
@@ -1065,6 +1086,7 @@ class Application(tk.Tk):
 
         self.menu.add_command(label=self._("ui.key"), command=self.gui_keys)
         self.menu.add_command(label=self._("ui.help"), command=self.help)
+        self.menu.add_command(label=self._("ui.task"), command=lambda: None)
 
         self.menu.add_command(label=self._("ui.launch_start"), command=self.toggle_gui_launch)
 

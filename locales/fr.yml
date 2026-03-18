@@ -81,6 +81,7 @@ fr:
     launch_start: GUI au démarrage
     launch_start_True: le GUI souvrira maintenant au démarrage de l'app (au lancement du pc)
     launch_start_False: Le GUI ne s'ouvrira plus au démarrage de l'app (au lancement du pc)
+    task: plannificateur de tâches
 
   help:
     main: "Ceci est le menu d'aide, vous pouvez choisir une action pour lire son manuel."
