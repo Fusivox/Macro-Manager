@@ -169,6 +169,16 @@ class Application(tk.Tk):
         self.title(self._("ui.title"))
         self.refresh_ui()
 
+    def toggle_gui_launch(self):
+        """toggle le lancement du GUI au démarrage de l'app"""
+
+        self.settings["GUI on launch"] = not self.settings["GUI on launch"]
+        param = self.settings["GUI on launch"]
+        
+        utils.actualise(settings=self.settings)
+
+        messagebox.showinfo(title=self._("htk.info_title"), message=self._(f"ui.launch_start_{param}"))
+
     def build_main_ui(self) -> None:
         """construit l'ui du menu macro"""
 
@@ -1055,6 +1065,9 @@ class Application(tk.Tk):
 
         self.menu.add_command(label=self._("ui.key"), command=self.gui_keys)
         self.menu.add_command(label=self._("ui.help"), command=self.help)
+
+        self.menu.add_command(label=self._("ui.launch_start"), command=self.toggle_gui_launch)
+
         self.menu.add_separator()
         self.menu.add_command(label=self._("ui.uninstall"), command=self.confirm)
 

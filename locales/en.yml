@@ -78,6 +78,9 @@ en:
     path_err_title: Path doesn't exists
     path_err: The selected path doesn't exist, please input a valid path
     cos: mouse coordinate
+    launch_start: GUI on launch
+    launch_start_True: GUI will now open upon start of the app (on pc startup)
+    launch_start_False: GUI no longer open upon start of the app (on pc startup)
 
   help:
     main: "This is the help menu, you can choose an action to read it's manual."

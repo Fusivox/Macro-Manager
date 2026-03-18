@@ -75,7 +75,8 @@ class Hotkeys():
                 }
                 self.settings = {
                     "lang": "en",
-                    "fallback": "fr"
+                    "fallback": "fr",
+                    "GUI on launch": True
                 }
                 self.abbreviation = {
                     0: {
@@ -138,6 +139,10 @@ class Hotkeys():
                 print(self.data)
                 self.init_background()
 
+                if self.settings["GUI on launch"] == True:
+                    app = ui.Application()
+                    app.mainloop()
+
                 keyboard.wait()
 
             else: 
@@ -176,7 +181,8 @@ class Hotkeys():
                 }
                 self.settings = {
                     "lang": f"{lang if lang in ['en', 'fr'] else 'en'}",
-                    "fallback": "fr"
+                    "fallback": "fr",
+                    "GUI on launch": True
                 }
                 self.abbreviation = {
                     0: {
