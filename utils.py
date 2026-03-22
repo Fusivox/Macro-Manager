@@ -224,7 +224,7 @@ def translate_from_callback(actions: list[tuple]) -> list[str]:
 
     return translated_actions
 
-def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None, os_name="win32") -> None:
+def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None,  os_name="win32") -> None:
     """actualise le fichier json associé :\n
     ``data`` pour les macros,\n
     ``settings`` pour les parametres (langue et version),\n
@@ -262,7 +262,8 @@ def add_mcr(data: dict, keys: str|None, actions: list, comment: str|None = None)
     data[str(len(data))] = {
         "keys": keys,
         "actions": actions,
-        "comment": comment
+        "comment": comment,
+        "tasked": False
     }
 
 def add_abb(data: dict, source: str, text: str) -> None:
@@ -273,7 +274,7 @@ def add_abb(data: dict, source: str, text: str) -> None:
         "text": text
     }
 
-def remove(data: dict, nb: str|int, id=True) -> bool:
+def remove(data: dict, nb: str|int, id: bool = True) -> bool:
     """retire un élément d'un dictionnaire et renvoie True si réussit sinon envoie False"""
 
     try :

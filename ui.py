@@ -27,7 +27,7 @@ class Application(tk.Tk):
         self._ = i18n.t
         
         with open(f"{macro_appdata}data.json", "r") as f:
-            self.data = json.load(f)
+            self.macros = json.load(f)
         with open(f"{macro_appdata}abbreviation.json", "r") as f:
             self.abbreviation = json.load(f)
 
@@ -54,12 +54,14 @@ class Application(tk.Tk):
         self.selection = self.listbox.curselection()
         Keys = self._("ui.keys")
         comment = self._("ui.comment")
+        task = self._("ui.task")
         self.rmv_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
         self.edit_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
-        data = self.data
+        data = self.macros
         if self.selection:
             self.index = str(self.selection[0]+1)
-            self.selected.config(text=f"{Keys} : {data[self.index]["keys"]} \n\n{comment} : {data[self.index]["comment"]}" if data[self.index]["comment"] is not None else f"{Keys} : {data[self.index]["keys"]}\n\n")
+            tasked = data[self.index]["tasked"]
+            self.selected.config(text=f"{Keys} : {data[self.index]["keys"]} \n\n{comment} : {data[self.index]["comment"]} \n\n{task} : {False if tasked is False else tasked["trigger"]}" if data[self.index]["comment"] is not None else f"{Keys} : {data[self.index]["keys"]} \n\n{task} : {False if tasked is False else tasked["trigger"]}")
 
     def abb_on_select(self, event) -> None:
         """change le texte basé sur l'elements selectionné pour le menu abbreviation"""
@@ -76,7 +78,7 @@ class Application(tk.Tk):
     def close(self) -> None:
         """actualise tout les fichiers json avant de fermer l'appli"""
 
-        utils.actualise(self.data, self.settings, self.abbreviation, platform)
+        utils.actualise(self.macros, self.settings, self.abbreviation ,platform)
         self.destroy()
 
     def confirm(self) -> None:
@@ -106,17 +108,17 @@ class Application(tk.Tk):
 
         msg = self._("ui.key_msg")
 
-        old_keys = self.data["0"]["keys"]
+        old_keys = self.macros["0"]["keys"]
         keys = simpledialog.askstring(
             title=self._("ui.key_change"),
-            prompt=f"{msg} : {self.data["0"]["keys"]}"
+            prompt=f"{msg} : {self.macros["0"]["keys"]}"
         )
         if keys is not None and keys != "":
             try :
                 open_gui = utils.make_callback([("open", {"window":"gui"})])
                 keyboard.add_hotkey(keys, open_gui)
                 keyboard.remove_hotkey(old_keys)
-                self.data["0"]["keys"] = keys
+                self.macros["0"]["keys"] = keys
                 
             except Exception :
                 message = self._("ui.key_eg").format(key=keys)
@@ -176,7 +178,7 @@ class Application(tk.Tk):
         self.settings["GUI on launch"] = not self.settings["GUI on launch"]
         param = self.settings["GUI on launch"]
         
-        utils.actualise(settings=self.settings)
+        utils.actualise(settings=self.settings, os_name=platform)
 
         messagebox.showinfo(title=self._("htk.info_title"), message=self._(f"ui.launch_start_{param}"))
 
@@ -190,15 +192,8 @@ class Application(tk.Tk):
             self.help_menu.resizable(False, False)
             self.help_menu.focus_set()
             self.help_menu.transient(self)
-            self.help_menu.protocol("WM_DELETE_WINDOW", self.close_task)
-
             # TODO : mettre des entry avec labels pour la date (OptionMenu + Spinbox) avec les yml (date.day.1 pour Lundi, date.month.1 pour janvier etc) puis un OptionMenu (?) avec les actions deja creer pour choisir laquel ça utilise 
 
-    def close_task(self):
-        """ferme le task scheduler"""
-
-        self.task_running = False
-        self.task_menu.destroy()
 
     def build_main_ui(self) -> None:
         """construit l'ui du menu macro"""
@@ -254,7 +249,7 @@ class Application(tk.Tk):
 
         if refresh : self.listbox.delete(0, tk.END)
         insert = self.listbox.insert
-        data = self.data
+        data = self.macros
         for macro in data:
             if macro != "0":
                 insert(tk.END, data[macro]["keys"]) if data[macro]["keys"] is not None else insert(tk.END, self._("ui.no_key"))
@@ -272,9 +267,9 @@ class Application(tk.Tk):
         """retire un éléments du fichier json séléctionné, ``data`` pour les macros ou ``abb`` pour les abreviations"""
 
         if source == "data" :
-            rmv = utils.remove(self.data, nb)
-            self.data = {str(i): self.data[keys] for i, keys in enumerate(sorted(self.data.keys()))}
-            print(f">Debug : {self.data}")
+            rmv = utils.remove(self.macros, nb)
+            self.macros = {str(i): self.macros[keys] for i, keys in enumerate(sorted(self.macros.keys()))}
+            print(f">Debug : {self.macros}")
             if rmv:
                 self.build_listbox(refresh=True)
                 self.listbox.select_clear(0, tk.END)
@@ -339,7 +334,7 @@ class Application(tk.Tk):
             _actions = list(self.mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox, on stocke un syntaxe utilisateur plus simple a comprendre
             _actions = utils.translate_to_callback(_actions)               # transforme la syntaxe utilisateur en syntaxe programme
 
-            keys_in_use = [key_data["keys"] for key_data in self.data.values() if key_data["keys"] is not None]
+            keys_in_use = [key_data["keys"] for key_data in self.macros.values() if key_data["keys"] is not None]
 
             if len(_actions) > 0:                                   # Si aucune action est definie ça mets un message d'erreur
                 if _key in keys_in_use:    
@@ -348,14 +343,14 @@ class Application(tk.Tk):
                         message=self._("ui.macro_exist")
                     )
                     if ask_replace:
-                        print(f">Debug : {self.data}\n")
-                        self.data[str(keys_in_use.index(_key))] = {"keys":_key, "actions":_actions, "comment":_comment}
-                        print(f">Debug : {self.data}")
+                        print(f">Debug : {self.macros}\n")
+                        self.macros[str(keys_in_use.index(_key))] = {"keys":_key, "actions":_actions, "comment":_comment}
+                        print(f">Debug : {self.macros}")
                         if _key is not None : keyboard.remove_hotkey(_key)
                 
                 else:
-                    utils.add_mcr(self.data, _key, _actions, _comment)
-                    utils.actualise(data=self.data, os_name=platform)   
+                    utils.add_mcr(self.macros, _key, _actions, _comment)
+                    utils.actualise(data=self.macros, os_name=platform)   
 
                 if _key is not None :                                   # Initialise la macro si des touches sont définis
                     callback = utils.make_callback(_actions)
@@ -982,9 +977,9 @@ class Application(tk.Tk):
     def edit_macro(self) -> None:
         """creation de la même fenetre que pour le ``new_macro`` mais avec les cases prérempli avec les data associé a la macro séléctionné"""
 
-        key = self.data[self.index]["keys"] or ""
-        action = self.data[self.index]["actions"]
-        comment = self.data[self.index]["comment"] or ""
+        key = self.macros[self.index]["keys"] or ""
+        action = self.macros[self.index]["actions"]
+        comment = self.macros[self.index]["comment"] or ""
 
         self.new_macro(key, action, comment)
     
@@ -1086,7 +1081,6 @@ class Application(tk.Tk):
 
         self.menu.add_command(label=self._("ui.key"), command=self.gui_keys)
         self.menu.add_command(label=self._("ui.help"), command=self.help)
-        self.menu.add_command(label=self._("ui.task"), command=lambda: None)
 
         self.menu.add_command(label=self._("ui.launch_start"), command=self.toggle_gui_launch)
 

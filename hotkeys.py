@@ -2,6 +2,9 @@ import sys
 if sys.platform == "win32": from win32com.client import Dispatch
 elif sys.platform != "linux":raise Exception("This app sadly only works on Windows and linux (for now hopefully :D)")
 import json, os, ui, utils, i18n, keyboard
+from apscheduler.schedulers.background import BackgroundScheduler
+
+sched = BackgroundScheduler()
 
 def ressource_path(path):
     base = getattr(sys, '_MEIPASS', os.path.abspath("."))
@@ -27,7 +30,7 @@ class Hotkeys():
                 print(">Debug : Not first time oppening") 
                 print(f">Debug : {self.appdata}")           
                 with open(f"{self.appdata}\\data.json", "r") as f:
-                    self.data = json.load(f)
+                    self.macros = json.load(f)
                 with open(f"{self.appdata}\\abbreviation.json", "r") as f:
                     self.abbreviation = json.load(f)
                 with open(f"{self.appdata}\\settings.json", "r") as f:
@@ -36,8 +39,9 @@ class Hotkeys():
                 i18n.set('locale', self.settings["lang"])
                 i18n.set("fallback", self.settings["fallback"])
 
-                print(self.data)
+                print(self.macros)
                 self.init_background()
+                sched.start()
 
                 if self.settings["GUI on launch"]:
                     app = ui.Application()
@@ -52,13 +56,14 @@ class Hotkeys():
                 print(">Debug : First time oppening")
                 print(f">Debug : {self.appdata}")
                 os.mkdir(f"{self.appdata}")
-                self.data = {
+                self.macros = {
                     0: {
                         "keys" : "ctrl+alt+a",
                         "actions" : [
                             ("open", {"window":"gui"})
                         ],
-                        "comment" : None
+                        "comment" : None,
+                        "tasked" : False
                     },
                     1: {
                         "keys" : "ctrl+alt+q",
@@ -67,14 +72,16 @@ class Hotkeys():
                             ("wait", {"time": 1}),
                             ("write", {"text": "This is a hotkey exemple", "interval": 0})
                         ],
-                        "comment" : "This is a hotkey example and don't really do something"
+                        "comment" : "This is a hotkey example and don't really do something",
+                        "tasked" : False
                     },
                     2: {
                         "keys" : None,
                         "actions" : [
                             ("open", {"window": "cmd", "folder": None})
                         ],
-                        "comment" : "it's just a test"
+                        "comment" : "it's just a test",
+                        "tasked" : False
                     }
                 }
                 self.settings = {
@@ -88,7 +95,7 @@ class Hotkeys():
                         "text": "example.mail@gmail.com"
                     }
                 }
-                utils.actualise(self.data, self.settings, self.abbreviation)
+                utils.actualise(self.macros, self.settings, self.abbreviation)
                 
                 app = ui.Application()
                 ask_confirm = ui.messagebox.askokcancel(
@@ -111,6 +118,7 @@ class Hotkeys():
                     exit(1)
 
                 self.init_background() # pour que les macros et abreviation test marchent des l'ouverture de l'ui
+                sched.start()
                 app.mainloop()
 
                 keyboard.unhook_all() # quand l'ui est fermé enleve puis remet toutes les macros et abreviations pour eviter les probleme et/ou bugs
@@ -131,7 +139,7 @@ class Hotkeys():
                 print(">Debug : Not first time oppening") 
                 print(f">Debug : {self.home}")           
                 with open(f"{self.config}/data.json", "r") as f:
-                    self.data = json.load(f)
+                    self.macros = json.load(f)
                 with open(f"{self.config}/abbreviation.json", "r") as f:
                     self.abbreviation = json.load(f)
                 with open(f"{self.config}/settings.json", "r") as f:
@@ -140,7 +148,7 @@ class Hotkeys():
                 i18n.set('locale', self.settings["lang"])
                 i18n.set("fallback", self.settings["fallback"])
 
-                print(self.data)
+                print(self.macros)
                 self.init_background()
 
                 if self.settings["GUI on launch"]:
@@ -158,13 +166,14 @@ class Hotkeys():
                 os.mkdir(f"{self.config}")
                 lang = os.environ['LANG'][:2]
 
-                self.data = {
+                self.macros = {
                     0: {
                         "keys" : "ctrl+alt+a",
                         "actions" : [
                             ("open", {"window":"gui"})
                         ],
-                        "comment" : None
+                        "comment" : None,
+                        "tasked" : False
                     },
                     1: {
                         "keys" : "ctrl+alt+q",
@@ -173,14 +182,16 @@ class Hotkeys():
                             ("wait", {"time": 1}),
                             ("write", {"text": "This is a hotkey exemple", "interval": 0})
                         ],
-                        "comment" : "This is a hotkey example and don't really do something"
+                        "comment" : "This is a hotkey example and don't really do something",
+                        "tasked" : False
                     },
                     2: {
                         "keys" : None,
                         "actions" : [
                             ("open", {"window": "shell", "command": None})
                         ],
-                        "comment": "it's just a test"
+                        "comment": "it's just a test",
+                        "tasked": False
                     }
                 }
                 self.settings = {
@@ -194,7 +205,7 @@ class Hotkeys():
                         "text": "example.mail@gmail.com"
                     }
                 }
-                utils.actualise(self.data, self.settings, self.abbreviation, os_name="linux")
+                utils.actualise(self.macros, self.settings, self.abbreviation, os_name="linux")
                 app = ui.Application()
                 ask_confirm = ui.messagebox.askokcancel(
                     title=_("htk.info_title"),
@@ -216,6 +227,7 @@ class Hotkeys():
                     exit(1)
 
                 self.init_background()
+                sched.start()
                 app.mainloop()
                 
                 keyboard.unhook_all()
@@ -278,26 +290,31 @@ WantedBy=multi-user.target"""
                 with open(bashrc_path, "w") as f:
                     f.write(xhost_cmd)
         else:
-            print("SUDO_USER non defini: impossible de modifier le .bashrc utilisateur.")
+            ui.messagebox.showerror(title=_("htk.err_title"), message=_("htk.sudo_usr"))
     
     def init_background(self) -> None: 
         """creer les macros et abreviations stockées dans les fichier json pour les utiliser"""
 
-        for nb in self.data:
-            keys = self.data[nb]["keys"]
-            actions = self.data[nb]["actions"]
+        for nb in self.macros:
+            keys = self.macros[nb]["keys"]
+            actions = self.macros[nb]["actions"]
+            task = self.macros[nb]["tasked"]
+            callback = utils.make_callback(actions)
+
             if keys is not None:
-                callback = utils.make_callback(actions)
                 keyboard.add_hotkey(keys, callback)
                 print(f">Debug : new hotkey {keys}, do {actions}.")
             else : print(f">Debug : action that has no keys : {actions}")
+
+            if isinstance(task, dict):
+                if task.get("active", False) is True:
+                    sched.add_job(callback, trigger=task["trigger"], args=task["args"], kwargs=["kwargs"], id=task["id"], max_instances=1, trigger_args=task["trigger_args"])
 
         for nb in self.abbreviation:
             source = self.abbreviation[nb]["source"]
             text = self.abbreviation[nb]["text"]
             keyboard.add_abbreviation(source, text)
             print(f">Debug : New abbreviation {source}, replaced by {text}")
-
 
 if __name__ == "__main__":
     hotkeys = Hotkeys()

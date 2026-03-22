@@ -6,6 +6,7 @@ en:
     thx_msg: Thanks for downloading Macro Manager !
     cancelled_msg : The app installation was cancelled
     err_title: Something went wrong
+    sudo_usr: "SUDO_USER undefined: unable to moodify the user .bashrc"
   
   ui:
     en: English
@@ -81,7 +82,7 @@ en:
     launch_start: GUI on launch
     launch_start_True: GUI will now open upon start of the app (on pc startup)
     launch_start_False: GUI no longer open upon start of the app (on pc startup)
-    task: Task scheduler
+    task: Task
 
   help:
     main: "This is the help menu, you can choose an action to read it's manual."
