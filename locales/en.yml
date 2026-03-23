@@ -83,6 +83,9 @@ en:
     launch_start_True: GUI will now open upon start of the app (on pc startup)
     launch_start_False: GUI no longer open upon start of the app (on pc startup)
     task: Task
+    export: export
+    import: import
+    name: name
 
   help:
     main: "This is the help menu, you can choose an action to read it's manual."

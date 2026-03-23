@@ -1,4 +1,4 @@
-import json, os, shutil, pyautogui, time, ui, subprocess, sys, webbrowser
+import json, os, shutil, pyautogui, time, ui, subprocess, sys, webbrowser, gzip
 from pathlib import Path
 
 POSSIBLE_KEYS = pyautogui.KEY_NAMES
@@ -319,3 +319,34 @@ def delete_linux() -> bool:
 
     except Exception:
         return False
+
+def export_mcr(input: list|dict, output_path: str = "macros.mcr") -> str:
+    """compresse un dictionnaire ou une liste en fichier .mcr (en réalité un fichier json.gz)"""
+
+    if not output_path.endswith('.mcr'):
+        output_path = f"{output_path}.mcr"
+
+    payload = json.dumps(input, ensure_ascii=False, indent=4).encode('utf-8')
+
+    with gzip.open(output_path, 'wb') as f_out:
+        f_out.write(payload)
+
+    return output_path
+
+def decompress_mcr_file(input_path: str, output_path: str = None) -> str:
+    """decompresse le fichier .mcr en json et renvoie son chemin"""
+
+    if output_path is None:
+        output_path = input_path.rstrip('.gz') if input_path.endswith('.gz') else f"{input_path}.mcr"
+
+    with gzip.open(input_path, 'rb') as f_in:
+        with open(output_path, 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
+
+    return output_path
+
+def import_mcr(input_path: str) -> list|dict:
+    """Lit directement un fichier .mcr (json.gz) et renvoie son contenu"""
+    
+    with gzip.open(input_path, 'rt', encoding='utf-8') as f:
+        return json.load(f)

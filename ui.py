@@ -182,6 +182,21 @@ class Application(tk.Tk):
 
         messagebox.showinfo(title=self._("htk.info_title"), message=self._(f"ui.launch_start_{param}"))
 
+    def export(self):
+        """ouvre le menu pour exporter une macro en fichier .mcr """
+
+        self.export_menu = tk.Toplevel(self, height=400, width=300)
+        self.export_menu.title(f"{self._("ui.title")} - {self._("ui.export")}")
+        self.export_menu.resizable(False, False)
+        self.export_menu.grab_set()
+        self.export_menu.focus_set()
+        self.export_menu.transient(self)
+
+        name_label = tk.Label(self.export_menu, text=f"{self._("ui.name")} :")
+        name_label.grid(row=0, column=0, padx=10, pady=10)
+
+        # TODO : mettre une entry pour le nom puis un label et entry pour le chemin avec un bouton browse pour le chemin (copier celui de screenshot)
+
     def task_scheduler(self):
         """ouvre la fenetre du task scheduler"""
 
@@ -220,6 +235,9 @@ class Application(tk.Tk):
 
         self.edit_button = tk.Button(self, text=self._("ui.edit"), command=self.edit_macro, state="disabled", bg="lightgray")
         self.edit_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.W)
+
+        self.export_button = tk.Button(self, text=self._("ui.export"), command=self.export, state="disabled", bg="lightgray")
+        self.export_button.grid(row=2, column=3, padx=10, pady=10, sticky=tk.E)
 
     def build_abb_ui(self) -> None:
         """construit l'ui du menu abbreviation"""
