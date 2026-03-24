@@ -1,4 +1,4 @@
-import tkinter as tk , os, json, utils, i18n, sys, keyboard, mouseinfo
+import tkinter as tk , os, json, utils, i18n, sys, keyboard, mouseinfo, time
 from tkinter import messagebox, simpledialog, filedialog
 
 if sys.platform == "win32": 
@@ -57,6 +57,7 @@ class Application(tk.Tk):
         task = self._("ui.task")
         self.rmv_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
         self.edit_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
+        self.export_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
         data = self.macros
         if self.selection:
             self.index = str(self.selection[0]+1)
@@ -195,7 +196,64 @@ class Application(tk.Tk):
         name_label = tk.Label(self.export_menu, text=f"{self._("ui.name")} :")
         name_label.grid(row=0, column=0, padx=10, pady=10)
 
-        # TODO : mettre une entry pour le nom puis un label et entry pour le chemin avec un bouton browse pour le chemin (copier celui de screenshot)
+        name_entry = tk.Entry(self.export_menu, exportselection=0)
+        name_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        path_label = tk.Label(self.export_menu, text=f"{self._("ui.path")} :", justify=tk.RIGHT)
+        path_label.grid(row=1, column=0, padx=10, pady=10)
+
+        pathvar = tk.StringVar()
+        path_entry = tk.Entry(self.export_menu, exportselection=0, textvariable=pathvar)
+        path_entry.grid(row=1, column=1, padx=10, pady=10)
+
+        def browse_folder():
+            """ouvre une fenetre de recherche de dossier et mets son chemin dans l'entry"""
+
+            path = filedialog.askdirectory(
+                title=self._("ui.folder")
+            )
+            if path: pathvar.set(path)
+
+        browseparam_button = tk.Button(self.export_menu, text=self._("ui.browse"), command=browse_folder)
+        browseparam_button.grid(row=1, column=2, padx=10, pady=10)
+
+        def export_file():
+            """exporte la macro avec le nom et le chemin choisi"""
+            path = pathvar.get()
+            if os.path.exists(path):
+
+                file = os.path.join(path, name_entry.get())
+                print(f">Debug: {file}")
+                utils.export_mcr(self.macros[self.index], file)
+
+                if os.path.exists(file + ".mcr" if not file.endswith(".mcr") else file):
+                    messagebox.showinfo(title=self._("htk.info_title"), message=self._("ui.export_succes"))
+                else:
+                    messagebox.showerror(title=self._("htk.err_title"), message=self._("ui.export_fail"))
+
+                self.export_menu.destroy()
+
+        export_button = tk.Button(self.export_menu, text=self._("ui.export"), command=export_file)
+        export_button.grid(row=2, column=3, padx=10, pady=10)
+
+    def _import(self):
+        """ouvre le menu pour importer une macro en .mcr"""
+
+        path = filedialog.askopenfilename(
+            title=self._("ui.files"),
+            filetypes=[(self._("ui.mcr_type"), "*.mcr")]
+        )
+        if path:
+            temp = utils.import_mcr(path)
+            print(temp)
+            keys_in_use = [key_data["keys"] for key_data in self.macros.values() if key_data["keys"] is not None]
+
+            if not temp["keys"] in keys_in_use:
+                utils.add_mcr(self.macros, keys=temp["keys"], actions=temp["actions"], comment=temp["comment"])
+                utils.actualise(self.macros, os_name=platform)
+                self.build_listbox(refresh=True)
+            else:
+                messagebox.showerror(title=self._("htk.err_title"), message=self._("ui.key_used").format(key=temp["keys"]))
 
     def task_scheduler(self):
         """ouvre la fenetre du task scheduler"""
@@ -223,7 +281,7 @@ class Application(tk.Tk):
         self.build_listbox()
 
         self.selected = tk.Label(self, text="", height=10, wraplength=300, justify="left")
-        self.selected.grid(row=1, column=3, padx=5)
+        self.selected.grid(row=1, column=3, columnspan=2, padx=5)
 
         self.listbox.bind("<<ListboxSelect>>", self.on_select)
 
@@ -237,7 +295,11 @@ class Application(tk.Tk):
         self.edit_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.W)
 
         self.export_button = tk.Button(self, text=self._("ui.export"), command=self.export, state="disabled", bg="lightgray")
-        self.export_button.grid(row=2, column=3, padx=10, pady=10, sticky=tk.E)
+        self.export_button.grid(row=3, column=3, padx=10, pady=10, sticky=tk.W)
+
+        self.import_button = tk.Button(self, text=self._("ui.import"), command=self._import)
+        self.import_button.grid(row=3, column=2, padx=10, pady=10, sticky=tk.E)
+
 
     def build_abb_ui(self) -> None:
         """construit l'ui du menu abbreviation"""
@@ -294,6 +356,7 @@ class Application(tk.Tk):
                 self.selected.config(text="")
                 self.rmv_button.config(state="disabled", bg="lightgray")
                 self.edit_button.config(state="disabled", bg="lightgray")
+                self.export_button.config(state="disabled", bg="lightgray")
 
         elif source == "abb" :
             rmv = utils.remove(self.abbreviation, nb)
@@ -332,9 +395,11 @@ class Application(tk.Tk):
         mcr_yScroll['command'] = self.mcr_listbox.yview
 
         if len(action) > 0 : 
+            edit = True
             action = utils.translate_from_callback(action)
             for act in action:
                 self.mcr_listbox.insert(tk.END, act)
+        else: edit = False
 
         com_txt = f"{self._("ui.comment")} : "
         com_lbl = tk.Label(self.nmcr_menu, text=com_txt, justify=tk.RIGHT)
@@ -367,6 +432,8 @@ class Application(tk.Tk):
                         if _key is not None : keyboard.remove_hotkey(_key)
                 
                 else:
+                    if edit:
+                        self.remove("data", self.index)
                     utils.add_mcr(self.macros, _key, _actions, _comment)
                     utils.actualise(data=self.macros, os_name=platform)   
 
@@ -412,7 +479,7 @@ class Application(tk.Tk):
                     params_menu.transient(add_action_menu)
                     params_menu.resizable(False, False)
 
-                    def on_close():
+                    def on_close(): 
                         if 'update' in globals():
                             try:
                                 params_menu.after_cancel(update)

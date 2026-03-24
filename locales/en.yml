@@ -85,8 +85,11 @@ en:
     task: Task
     export: export
     import: import
-    name: name
-
+    export_succes: File successfully exported
+    export_fail: "File couldn't be exported,\nmcr_titletry again later"
+    key_used: "{key} keys already in use couldn't import macro."
+    mcr_type: .mcr files
+    
   help:
     main: "This is the help menu, you can choose an action to read it's manual."
     open: "Opens an interface, terminal, file explorer, or program. Parameter: 'window' specifies what to open (gui, cmd, shell, explorer, a program path or a URL) and 'folder' can define the starting directory."

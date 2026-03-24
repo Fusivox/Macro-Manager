@@ -85,7 +85,10 @@ fr:
     task: Tâche
     export: exporter
     import: importer
-    name: nom
+    export_succes: Fichier exporter avec succes
+    export_fail: "Le fichier n'a pas pu être exporter,\nréessayer plus tard"
+    key_used: "{key} déjà utilisé, la macro n'a pas pu être importer"
+    mcr_type: fichiers .mcr
 
   help:
     main: "Ceci est le menu d'aide, vous pouvez choisir une action pour lire son manuel."
