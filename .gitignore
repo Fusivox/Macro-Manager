@@ -7,3 +7,4 @@ MacroManager
 env/
 *.spec
 None*
+*.mcr

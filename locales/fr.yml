@@ -87,7 +87,7 @@ fr:
     import: importer
     export_succes: Fichier exporter avec succes
     export_fail: "Le fichier n'a pas pu être exporter,\nréessayer plus tard"
-    key_used: "{key} déjà utilisé, la macro n'a pas pu être importer"
+    key_used: "{key} déjà utilisé, macro importé sans touches associés"
     mcr_type: fichiers .mcr
 
   help:

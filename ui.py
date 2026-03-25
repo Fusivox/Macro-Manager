@@ -32,7 +32,7 @@ class Application(tk.Tk):
             self.abbreviation = json.load(f)
 
         self.tk.call("tk", "scaling", 1.75)
-        self.geometry("550x350")
+        self.geometry("550x375")
                 
         self.resizable(False, False)
         
@@ -250,10 +250,13 @@ class Application(tk.Tk):
 
             if not temp["keys"] in keys_in_use:
                 utils.add_mcr(self.macros, keys=temp["keys"], actions=temp["actions"], comment=temp["comment"])
-                utils.actualise(self.macros, os_name=platform)
-                self.build_listbox(refresh=True)
+                
             else:
                 messagebox.showerror(title=self._("htk.err_title"), message=self._("ui.key_used").format(key=temp["keys"]))
+                utils.add_mcr(self.macros, keys=None, actions=temp["actions"], comment=temp["comment"])
+
+            utils.actualise(self.macros, os_name=platform)
+            self.build_listbox(refresh=True)
 
     def task_scheduler(self):
         """ouvre la fenetre du task scheduler"""
@@ -490,6 +493,7 @@ class Application(tk.Tk):
                     params_menu.protocol("WM_DELETE_WINDOW", on_close)
 
                 def init_coordinate() -> None:
+                    """ouvre une petite fenêtre qui affiche les cos de la souris"""
 
                     coordinate_menu = tk.Toplevel(params_menu)
                     coordinate_menu.geometry("200x100")
@@ -691,6 +695,7 @@ class Application(tk.Tk):
                         validate_button.grid(row=2, column=3, padx=10, pady=10)
 
                     elif selected_action == "move":
+                        init_coordinate()
                         
                         x_label = tk.Label(params_menu, text=f"{self._("ui.x")} :", justify=tk.RIGHT)
                         x_label.grid(row=0, column=0, padx=10, pady=10)
@@ -938,6 +943,7 @@ class Application(tk.Tk):
                         validate_button.grid(row=2, column=3, padx=10, pady=10)
 
                     elif selected_action == "drag":
+                        init_coordinate()
 
                         x_label = tk.Label(params_menu, text=f"{self._("ui.x")} :", justify=tk.RIGHT)
                         x_label.grid(row=0, column=0, padx=10, pady=10)

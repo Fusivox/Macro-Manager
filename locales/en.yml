@@ -87,7 +87,7 @@ en:
     import: import
     export_succes: File successfully exported
     export_fail: "File couldn't be exported,\nmcr_titletry again later"
-    key_used: "{key} keys already in use couldn't import macro."
+    key_used: "{key} keys already in use, macro imported without keys"
     mcr_type: .mcr files
     
   help:
