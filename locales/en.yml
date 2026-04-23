@@ -106,3 +106,13 @@ en:
     dragto: "Drags the mouse to a specific position while holding the click. Parameters: 'x' and 'y' define the target position and 'duration' the drag time."
     drag: "Drags the mouse relative to its current position while holding the click. Parameters: 'x' and 'y' define the offset (you can only put one of them so the mouse will stay on the same coordinate for the non-specified axis) and 'duration' the drag time."
     screenshot: "Takes a screenshot and saves it as a PNG file. Parameters: 'name' defines the file name and 'path' the folder where it will be saved."
+
+  tsk:
+    mon: monday
+    tue: tuesday
+    wed: wednesday
+    thu: thursday
+    fri: friday
+    sat: saturday
+    sun: sunday
+    days: monday tuesday wednesday thursday friday saturday sunday

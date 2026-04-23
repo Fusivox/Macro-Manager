@@ -79,7 +79,7 @@ class Application(tk.Tk):
     def close(self) -> None:
         """actualise tout les fichiers json avant de fermer l'appli"""
 
-        utils.actualise(self.macros, self.settings, self.abbreviation ,platform)
+        utils.actualise(self.macros, self.settings, self.abbreviation, platform)
         self.destroy()
 
     def confirm(self) -> None:
@@ -258,18 +258,25 @@ class Application(tk.Tk):
             utils.actualise(self.macros, os_name=platform)
             self.build_listbox(refresh=True)
 
-    def task_scheduler(self):
+    def task_scheduler(self) -> None:
         """ouvre la fenetre du task scheduler"""
 
         if not self.task_running:
             self.task_running = True
             self.task_menu = tk.Toplevel(self, height=400, width=300)
+            self.task_menu.protocol("WM_DELETE_WINDOW", self.close_task)
             self.task_menu.title(self._("ui.task"))
-            self.help_menu.resizable(False, False)
-            self.help_menu.focus_set()
-            self.help_menu.transient(self)
+            self.task_menu.resizable(False, False)
+            self.task_menu.focus_set()
+            self.task_menu.transient(self)
             # TODO : mettre des entry avec labels pour la date (OptionMenu + Spinbox) avec les yml (date.day.1 pour Lundi, date.month.1 pour janvier etc) puis un OptionMenu (?) avec les actions deja creer pour choisir laquel ça utilise 
 
+            day_label = tk.Label(self.task_menu, text=self._("tsk.days"))
+            day_label.grid(row=0, column=0, columnspan=7)
+
+    def close_task(self):
+        self.task_running = False
+        self.task_menu.destroy()
 
     def build_main_ui(self) -> None:
         """construit l'ui du menu macro"""
@@ -297,12 +304,14 @@ class Application(tk.Tk):
         self.edit_button = tk.Button(self, text=self._("ui.edit"), command=self.edit_macro, state="disabled", bg="lightgray")
         self.edit_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.W)
 
+        test = tk.Button(self, text=self._("ui.task"), command=self.task_scheduler)
+        test.grid(row=3, column=2, pady=10, padx=10, sticky=tk.W)
+
         self.export_button = tk.Button(self, text=self._("ui.export"), command=self.export, state="disabled", bg="lightgray")
         self.export_button.grid(row=3, column=3, padx=10, pady=10, sticky=tk.W)
 
         self.import_button = tk.Button(self, text=self._("ui.import"), command=self._import)
         self.import_button.grid(row=3, column=2, padx=10, pady=10, sticky=tk.E)
-
 
     def build_abb_ui(self) -> None:
         """construit l'ui du menu abbreviation"""
@@ -823,7 +832,7 @@ class Application(tk.Tk):
                             path = pathvar.get().strip() or ""
                             additional_param = paramvar.get().strip() or ""
 
-                            if path != "" and (path.lower() in {"shell", "cmd", "explorer"} or (os.path.exists(path) or path.startswith("http" or "www."))):
+                            if path != "" and (path.lower() in {"shell", "cmd", "explorer"} or (os.path.exists(path) or path.startswith("http" or "www.") or path.endswith(".com" or ".fr"))):
 
                                 if path.lower() in {"cmd", "shell"}:
                                     
@@ -1115,9 +1124,9 @@ class Application(tk.Tk):
                     break
 
             else:
-                utils.add_abb(self.abbreviation, source, abb)
+                utils.add_abb(self.abbreviation, source, abb)                       #
                                                                                     # ajoute l'abreviations et actualise le json puis l'initialise pour l'utiliser direct     
-            utils.actualise(abbreviation=self.abbreviation, os_name=platform)  
+            utils.actualise(abbreviation=self.abbreviation, os_name=platform)       #
             keyboard.add_abbreviation(source, abb)
 
             self.abb_build_listbox(refresh=True)
@@ -1129,8 +1138,7 @@ class Application(tk.Tk):
         self.build_menu()
 
     def refresh_ui(self, switch: bool = False) -> None:
-        """clear l'ui actuel et le reconstruit par default
-        l'argument switch permet de passer entre le ``main ui`` (pour les macros) et le ``abb ui`` (pour les abreviations)"""
+        """clear l'ui actuel et le reconstruit switch permet de passer entre le ``main ui`` (pour les macros) et le ``abb ui`` (pour les abreviations)"""
 
         for widget in self.winfo_children() :
             widget.destroy()
@@ -1193,5 +1201,4 @@ class Application(tk.Tk):
         """permet a l'exe de trouver le chemin du fichier/ressource renseigné"""
 
         base = getattr(sys, '_MEIPASS', os.path.abspath("."))
-
         return os.path.join(base, path)

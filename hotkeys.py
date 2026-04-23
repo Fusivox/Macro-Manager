@@ -308,7 +308,7 @@ WantedBy=multi-user.target"""
 
             if isinstance(task, dict):
                 if task.get("active", False) is True:
-                    sched.add_job(callback, trigger=task["trigger"], args=task["args"], kwargs=["kwargs"], id=task["id"], max_instances=1, trigger_args=task["trigger_args"])
+                    sched.add_job(callback, "cron", max_instances=1, **task["kwargs"])
 
         for nb in self.abbreviation:
             source = self.abbreviation[nb]["source"]

@@ -1,11 +1,24 @@
 @echo off
-python -m PyInstaller --onefile ^
-    --clean ^
-    --noconsole ^
-    -n "Macro Manager v2" ^
-    --icon=logo.ico ^
-    hotkeys.py ^
-    --add-data "locales;locales" ^
-    --add-data "logo.ico;."
 
+echo Choose an option 1) build 2) clean
+
+set /p build=
+
+if "%build%"=="1" (
+    python -m PyInstaller --onefile ^
+        --clean ^
+        --noconsole ^
+        -n "Macro Manager v2" ^
+        --icon=logo.ico ^
+        hotkeys.py ^
+        --add-data "locales;locales" ^
+        --add-data "logo.ico;."
+
+) else if "%build%"=="2" (
+    del /q /f *.spec build dist "%APPDATA%/Macro Manager"
+    
+) else (
+    echo Invalid option. Please choose 1 or 2
+    exit
+)
 pause

@@ -224,7 +224,7 @@ def translate_from_callback(actions: list[tuple]) -> list[str]:
 
     return translated_actions
 
-def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None,  os_name="win32") -> None:
+def actualise(data: dict|None = None, settings: dict|None = None, abbreviation: dict|None = None,  os_name: str = "win32") -> None:
     """actualise le fichier json associé :\n
     ``data`` pour les macros,\n
     ``settings`` pour les parametres (langue et version),\n
