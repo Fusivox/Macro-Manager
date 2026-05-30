@@ -118,7 +118,6 @@ class Hotkeys():
                     exit(1)
 
                 self.init_background() # pour que les macros et abreviation test marchent des l'ouverture de l'ui
-                sched.start()
                 app.mainloop()
 
                 keyboard.unhook_all() # quand l'ui est fermé enleve puis remet toutes les macros et abreviations pour eviter les probleme et/ou bugs
@@ -227,7 +226,6 @@ class Hotkeys():
                     exit(1)
 
                 self.init_background()
-                sched.start()
                 app.mainloop()
                 
                 keyboard.unhook_all()
@@ -308,7 +306,8 @@ WantedBy=multi-user.target"""
 
             if isinstance(task, dict):
                 if task.get("active", False) is True:
-                    sched.add_job(callback, "cron", max_instances=1, **task["kwargs"])
+                    sched.add_job(callback, max_instances=1, **task["kwargs"])
+                    print(f">Debug : new tasked macro with trigger {task['kwargs']} do {actions}.")
 
         for nb in self.abbreviation:
             source = self.abbreviation[nb]["source"]

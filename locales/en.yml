@@ -108,11 +108,27 @@ en:
     screenshot: "Takes a screenshot and saves it as a PNG file. Parameters: 'name' defines the file name and 'path' the folder where it will be saved."
 
   tsk:
-    mon: monday
-    tue: tuesday
-    wed: wednesday
-    thu: thursday
-    fri: friday
-    sat: saturday
-    sun: sunday
-    days: monday tuesday wednesday thursday friday saturday sunday
+    validate: Validate
+    placeholder: Choose a schedule
+    every_min: Every X minutes/hours
+    every_day: Every days
+    every_week: Every weeks
+    every_month: Every months
+    advanced: Advanced
+    month: Month
+    days: Days
+    day: Day
+    week_day: Week day
+    hour: Hours
+    minute: Minutes
+    second: Second
+    mon: Mon
+    tue: Tue
+    wed: Wed
+    thu: Thu
+    fri: Fri
+    sat: Sat
+    sun: Sun
+    disable: Disable task
+    remove: Remove task
+    enable: Enable task

@@ -1,4 +1,4 @@
-import tkinter as tk , os, json, utils, i18n, sys, keyboard, mouseinfo, time
+import tkinter as tk , os, json, utils, i18n, sys, keyboard, mouseinfo, hotkeys
 from tkinter import messagebox, simpledialog, filedialog
 
 if sys.platform == "win32": 
@@ -9,6 +9,8 @@ if sys.platform == "linux":
     name = None
     macro_appdata = f"{os.getenv("HOME")}/.config/Macro_Manager/"
     platform = "linux"
+
+hotkeys.sched.start()
 
 class Application(tk.Tk):
     def __init__(self, screenName = name, baseName = None, className = "Tk", useTk = True, sync = False, use = None):
@@ -32,7 +34,7 @@ class Application(tk.Tk):
             self.abbreviation = json.load(f)
 
         self.tk.call("tk", "scaling", 1.75)
-        self.geometry("550x375")
+        self.geometry("550x325")
                 
         self.resizable(False, False)
         
@@ -52,17 +54,26 @@ class Application(tk.Tk):
         """change le texte basé sur l'elements selectionné pour le menu macro"""
 
         self.selection = self.listbox.curselection()
-        Keys = self._("ui.keys")
-        comment = self._("ui.comment")
-        task = self._("ui.task")
-        self.rmv_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
-        self.edit_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
-        self.export_button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
+        Keys, comment, task = self._("ui.keys"), self._("ui.comment"), self._("ui.task")
+        for button in {self.rmv_button, self.edit_button, self.export_button, self.task_button}:
+            button.config(state="normal", bg=self.rmv_button.master.cget("bg"))
         data = self.macros
         if self.selection:
             self.index = str(self.selection[0]+1)
+
             tasked = data[self.index]["tasked"]
-            self.selected.config(text=f"{Keys} : {data[self.index]["keys"]} \n\n{comment} : {data[self.index]["comment"]} \n\n{task} : {False if tasked is False else tasked["trigger"]}" if data[self.index]["comment"] is not None else f"{Keys} : {data[self.index]["keys"]} \n\n{task} : {False if tasked is False else tasked["trigger"]}")
+
+            if tasked:
+                if tasked["active"]:
+                    tasked = "On"
+                else:
+                    tasked = "Off"
+                
+                kwargs = data[self.index]["tasked"]["kwargs"]
+                for key, value in kwargs.items():
+                    if key != "trigger": tasked += f" | {key} : {value}"
+
+            self.selected.config(text=f"{Keys} : {data[self.index]["keys"]} \n\n{comment} : {data[self.index]["comment"]} \n\n{task} : {tasked}" if data[self.index]["comment"] is not None else f"{Keys} : {data[self.index]["keys"]} \n\n{task} : {tasked}")
 
     def abb_on_select(self, event) -> None:
         """change le texte basé sur l'elements selectionné pour le menu abbreviation"""
@@ -114,7 +125,7 @@ class Application(tk.Tk):
             title=self._("ui.key_change"),
             prompt=f"{msg} : {self.macros["0"]["keys"]}"
         )
-        if keys is not None and keys != "":
+        if keys:
             try :
                 open_gui = utils.make_callback([("open", {"window":"gui"})])
                 keyboard.add_hotkey(keys, open_gui)
@@ -269,10 +280,269 @@ class Application(tk.Tk):
             self.task_menu.resizable(False, False)
             self.task_menu.focus_set()
             self.task_menu.transient(self)
-            # TODO : mettre des entry avec labels pour la date (OptionMenu + Spinbox) avec les yml (date.day.1 pour Lundi, date.month.1 pour janvier etc) puis un OptionMenu (?) avec les actions deja creer pour choisir laquel ça utilise 
 
-            day_label = tk.Label(self.task_menu, text=self._("tsk.days"))
-            day_label.grid(row=0, column=0, columnspan=7)
+            def close_task() -> None:
+                """ferme la fenetre du task scheduler et rends le focus au menu de creation de macro"""
+
+                self.focus_set()
+                self.grab_set()
+                self.task_menu.destroy()
+                self.task_running = False
+
+            def change(*args):
+
+                selected = choosevar.get()
+                for widget in self.task_menu.winfo_children():
+                    if widget != choose_button or widget.cget("text") == self._(f"tsk.validate"):
+                        widget.destroy()
+
+                if selected == self._("tsk.every_min"):
+                    interval_label = tk.Label(self.task_menu, text=f"{self._("tsk.minutes")} : ", justify=tk.RIGHT)
+                    interval_label.grid(row=2, column=0, padx=10, pady=10)
+
+                    minutes_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=59, increment=1)
+                    minutes_entry.grid(row=2, column=1, padx=10, pady=10)
+
+                    minutes = utils.convert(minutes_entry.get())
+
+                    hours_label = tk.Label(self.task_menu, text=f"{self._("tsk.hours")} : ", justify=tk.RIGHT)
+                    hours_label.grid(row=1, column=0, padx=10, pady=10)
+
+                    hours_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=23, increment=1)
+                    hours_entry.grid(row=1, column=1, padx=10, pady=10)
+
+                    hours = utils.convert(hours_entry.get())
+
+                    def add_task() -> None:
+                        """ajoute la tache avec les parametres renseigné"""
+
+                        if isinstance(minutes, (int, float)) and isinstance(hours, (int, float)) and (hours > 0 or minutes > 0):
+                            self.macros[self.index]["tasked"] = {"active": True, "kwargs":{"trigger":"interval", "minute":minutes, "hour":hours}}
+                            print(f">Debug : {self.macros[self.index]['tasked']}")
+                            utils.actualise(self.macros, os_name=platform)
+
+                            action = utils.make_callback(self.macros[self.index]["actions"])
+                            hotkeys.sched.add_job(action, max_instances=1, id=f"task_{self.index}", **self.macros[self.index]["tasked"]["kwargs"])
+                            close_task()
+
+                    validate_button = tk.Button(self.task_menu, text=self._("tsk.validate"), command=add_task)
+                    validate_button.grid(row=3, column=1, padx=10, pady=10)
+
+                elif selected == self._("tsk.every_day"):
+                    interval_label = tk.Label(self.task_menu, text=f"{self._("tsk.minutes")} : ", justify=tk.RIGHT)
+                    interval_label.grid(row=2, column=0, padx=10, pady=10)
+
+                    minutes_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=59, increment=1)
+                    minutes_entry.grid(row=2, column=1, padx=10, pady=10)
+
+                    minutes = utils.convert(minutes_entry.get())
+
+                    hours_label = tk.Label(self.task_menu, text=f"{self._("tsk.hours")} : ", justify=tk.RIGHT)
+                    hours_label.grid(row=1, column=0, padx=10, pady=10)
+
+                    hours_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=23, increment=1)
+                    hours_entry.grid(row=1, column=1, padx=10, pady=10)
+
+                    hours = utils.convert(hours_entry.get())
+
+                    def add_task() -> None:
+                        """ajoute la tache avec les parametres renseigné"""
+
+                        if isinstance(minutes, (int, float)) and isinstance(hours, (int, float)) and (hours > 0 or minutes > 0):
+                            self.macros[self.index]["tasked"] = {"active": True, "kwargs":{"trigger":"cron", "minute":minutes, "hour":hours}}
+                            print(f">Debug : {self.macros[self.index]['tasked']}")
+                            utils.actualise(self.macros, os_name=platform)
+
+                            action = utils.make_callback(self.macros[self.index]["actions"])
+                            hotkeys.sched.add_job(action, max_instances=1, id=f"task_{self.index}", **self.macros[self.index]["tasked"]["kwargs"])
+                            close_task()
+
+                    validate_button = tk.Button(self.task_menu, text=self._("tsk.validate"), command=add_task)
+                    validate_button.grid(row=3, column=1, padx=10, pady=10)
+
+                elif selected == self._("tsk.every_week"):
+                    
+                    days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+                    day_vars = {}
+
+                    for row, day in enumerate(days, start=1):
+
+                        label = tk.Label(self.task_menu,text=f"{self._(f'tsk.{day}')} : ",justify=tk.RIGHT)
+                        label.grid(row=row, column=0, padx=10, pady=10)
+
+                        var = tk.BooleanVar()
+                        check = tk.Checkbutton(self.task_menu, variable=var)
+                        check.grid(row=row, column=1, padx=10, pady=10)
+
+                        day_vars[day] = var
+
+                    interval_label = tk.Label(self.task_menu, text=f"{self._("tsk.minutes")} : ", justify=tk.RIGHT)
+                    interval_label.grid(row=8, column=0, padx=10, pady=10)
+
+                    minutes_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=59, increment=1)
+                    minutes_entry.grid(row=8, column=1, padx=10, pady=10)
+
+
+                    hours_label = tk.Label(self.task_menu, text=f"{self._("tsk.hours")} : ", justify=tk.RIGHT)
+                    hours_label.grid(row=9, column=0, padx=10, pady=10)
+
+                    hours_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=23, increment=1)
+                    hours_entry.grid(row=9, column=1, padx=10, pady=10)
+
+                    def add_task() -> None:
+                        """ajoute la tache avec les parametres renseigné"""
+
+                        selected_days = [day for day, var in day_vars.items() if var.get()]
+
+                        hours = utils.convert(hours_entry.get())
+                        minutes = utils.convert(minutes_entry.get())
+
+                        if isinstance(minutes, (int, float)) and isinstance(hours, (int, float)) and (hours > 0 or minutes > 0) and len(selected_days) > 0:
+                            self.macros[self.index]["tasked"] = {"active": True, "kwargs":{"trigger":"cron", "minute":minutes, "hour":hours, "day_of_week":",".join(selected_days)}}
+                            print(f">Debug : {self.macros[self.index]['tasked']}")
+                            utils.actualise(self.macros, os_name=platform)
+
+                            action = utils.make_callback(self.macros[self.index]["actions"])
+                            hotkeys.sched.add_job(action, max_instances=1, id=f"task_{self.index}", **self.macros[self.index]["tasked"]["kwargs"])
+                            close_task()
+
+                    validate_button = tk.Button(self.task_menu, text=self._("tsk.validate"), command=add_task)
+                    validate_button.grid(row=10, column=1, padx=10, pady=10)
+
+                elif selected == self._("tsk.every_month"):
+                    day_label = tk.Label(self.task_menu, text=f"{self._("tsk.day")} : ", justify=tk.RIGHT)
+                    day_label.grid(row=1, column=0, padx=10, pady=10)
+
+                    day_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=1, to=31, increment=1)
+                    day_entry.grid(row=1, column=1, padx=10, pady=10)
+
+                    day = utils.convert(day_entry.get())
+
+                    interval_label = tk.Label(self.task_menu, text=f"{self._("tsk.minutes")} : ", justify=tk.RIGHT)
+                    interval_label.grid(row=2, column=0, padx=10, pady=10)
+
+                    minutes_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=59, increment=1)
+                    minutes_entry.grid(row=2, column=1, padx=10, pady=10)
+
+                    minutes = utils.convert(minutes_entry.get())
+
+                    hours_label = tk.Label(self.task_menu, text=f"{self._("tsk.hours")} : ", justify=tk.RIGHT)
+                    hours_label.grid(row=3, column=0, padx=10, pady=10)
+
+                    hours_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=23, increment=1)
+                    hours_entry.grid(row=3, column=1, padx=10, pady=10)
+
+                    hours = utils.convert(hours_entry.get())
+
+                    def add_task() -> None:
+                        """ajoute la tache avec les parametres renseigné"""
+
+                        if isinstance(day, (int, float)) and isinstance(minutes, (int, float)) and isinstance(hours,(int, float)) and (hours > 0 or minutes > 0) and 1 <= day <= 31:
+                            self.macros[self.index]["tasked"] = {"active": True, "kwargs":{"trigger":"cron", "minute":minutes, "hour":hours,"day":day}}
+                            print(f">Debug : {self.macros[self.index]['tasked']}")
+                            utils.actualise(self.macros, os_name=platform)
+
+                            action = utils.make_callback(self.macros[self.index]["actions"])
+                            hotkeys.sched.add_job(action, max_instances=1, id=f"task_{self.index}", **self.macros[self.index]["tasked"]["kwargs"])
+                            close_task()
+
+                    validate_button = tk.Button(self.task_menu, text=self._("tsk.validate"), command=add_task)
+                    validate_button.grid(row=4,column=1,padx=10,pady=10)
+
+                else:
+                    
+                    params = ["second", "minute", "hour", "day", "week_day", "month"]
+                    entry_var = {}
+
+                    for row, param in enumerate(params, start=1):
+
+                        label = tk.Label(self.task_menu,text=f"{self._(f'tsk.{param}')} : ",justify=tk.RIGHT)
+                        label.grid(row=row, column=0, padx=10, pady=10)
+
+                        var = tk.StringVar()
+                        entry = tk.Entry(self.task_menu, exportselection=0, textvariable=var)
+                        entry.grid(row=row, column=1, padx=10, pady=10)
+
+                        entry_var[param] = var
+
+                        def add_task() -> None:
+                            """ajoute la tache avec les parametres renseigné"""
+
+                            kwargs = {}
+                            for param, var in entry_var.items():
+                                value = utils.convert(var.get())
+                                if value:
+                                    kwargs[param] = value
+
+                            if len(kwargs) > 0:
+                                self.macros[self.index]["tasked"] = {"active": True, "kwargs":{"trigger":"cron", **kwargs}}
+                                print(f">Debug : {self.macros[self.index]['tasked']}")
+                                utils.actualise(self.macros, os_name=platform)
+
+                                print(hotkeys.sched)
+                                print("running =", hotkeys.sched.running)
+                                print("type =", type(hotkeys.sched))
+
+                                action = utils.make_callback(self.macros[self.index]["actions"])
+                                job = hotkeys.sched.add_job(action, max_instances=1, id=f"task_{self.index}", **self.macros[self.index]["tasked"]["kwargs"])
+
+                                print(job)
+                                print(hotkeys.sched.get_jobs())
+
+                                close_task()
+
+                    validate_button = tk.Button(self.task_menu, text=self._("tsk.validate"), command=add_task)
+                    validate_button.grid(row=7, column=1, padx=10, pady=10)
+
+            chooselist = (self._("tsk.every_min"), self._("tsk.every_day"), self._("tsk.every_week"), self._("tsk.every_month"), self._("tsk.advanced"))
+            choosevar = tk.StringVar()
+            choosevar.set(self._(f"tsk.placeholder"))
+
+            choose_button = tk.OptionMenu(self.task_menu, choosevar, *chooselist)
+            choose_button.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
+
+            choosevar.trace_add("write", change)
+
+            if self.macros[self.index]["tasked"]:
+
+                if self.macros[self.index]["tasked"]["active"]:
+
+                    def off():
+                        """désactive la tache programmée"""
+
+                        hotkeys.sched.remove_job(f"task_{self.index}")
+                        self.macros[self.index]["tasked"]["active"] = False
+                        utils.actualise(self.macros, os_name=platform)
+                        close_task()
+
+                    off_button = tk.Button(self.task_menu, text=self._("tsk.disable"), command=off)
+                    off_button.grid(row=1, column=0, padx=10, pady=10)
+                
+                else:
+                
+                    def on():
+                        """réactive la tache programmée"""
+
+                        action = utils.make_callback(self.macros[self.index]["actions"])
+                        hotkeys.sched.add_job(action, max_instances=1, id=f"task_{self.index}", **self.macros[self.index]["tasked"]["kwargs"])
+                        self.macros[self.index]["tasked"]["active"] = True
+                        utils.actualise(self.macros, os_name=platform)
+                        close_task()
+
+                    on_button = tk.Button(self.task_menu, text=self._("tsk.enable"), command=on)
+                    on_button.grid(row=1, column=0, padx=10, pady=10) 
+
+                def remove_task():
+                    """supprime la tache programmée"""
+
+                    try: hotkeys.sched.remove_job(f"task_{self.index}")
+                    except: pass
+                    self.macros[self.index]["tasked"] = False
+                    utils.actualise(self.macros, os_name=platform)
+                    close_task()
+
+                remove_button = tk.Button(self.task_menu, text=self._("tsk.remove"), command=remove_task)
+                remove_button.grid(row=1, column=1, padx=10, pady=10)
 
     def close_task(self):
         self.task_running = False
@@ -291,7 +561,7 @@ class Application(tk.Tk):
         self.build_listbox()
 
         self.selected = tk.Label(self, text="", height=10, wraplength=300, justify="left")
-        self.selected.grid(row=1, column=3, columnspan=2, padx=5)
+        self.selected.grid(row=1, column=3, columnspan=5, padx=5)
 
         self.listbox.bind("<<ListboxSelect>>", self.on_select)
 
@@ -304,14 +574,11 @@ class Application(tk.Tk):
         self.edit_button = tk.Button(self, text=self._("ui.edit"), command=self.edit_macro, state="disabled", bg="lightgray")
         self.edit_button.grid(row=2, column=2, padx=10, pady=10, sticky=tk.W)
 
-        test = tk.Button(self, text=self._("ui.task"), command=self.task_scheduler)
-        test.grid(row=3, column=2, pady=10, padx=10, sticky=tk.W)
-
         self.export_button = tk.Button(self, text=self._("ui.export"), command=self.export, state="disabled", bg="lightgray")
-        self.export_button.grid(row=3, column=3, padx=10, pady=10, sticky=tk.W)
+        self.export_button.grid(row=2, column=4, padx=10, pady=10, sticky=tk.E)
 
-        self.import_button = tk.Button(self, text=self._("ui.import"), command=self._import)
-        self.import_button.grid(row=3, column=2, padx=10, pady=10, sticky=tk.E)
+        self.task_button = tk.Button(self, text=self._("ui.task"), command=self.task_scheduler, state="disabled", bg="lightgray")
+        self.task_button.grid(row=2, column=5, padx=10, pady=10, sticky=tk.W)
 
     def build_abb_ui(self) -> None:
         """construit l'ui du menu abbreviation"""
@@ -360,6 +627,7 @@ class Application(tk.Tk):
 
         if source == "data" :
             rmv = utils.remove(self.macros, nb)
+            hotkeys.sched.remove_job(f"task_{nb}")
             self.macros = {str(i): self.macros[keys] for i, keys in enumerate(sorted(self.macros.keys()))}
             print(f">Debug : {self.macros}")
             if rmv:
@@ -369,6 +637,7 @@ class Application(tk.Tk):
                 self.rmv_button.config(state="disabled", bg="lightgray")
                 self.edit_button.config(state="disabled", bg="lightgray")
                 self.export_button.config(state="disabled", bg="lightgray")
+                self.task_button.config(state="disabled", bg="lightgray")
 
         elif source == "abb" :
             rmv = utils.remove(self.abbreviation, nb)
@@ -380,7 +649,7 @@ class Application(tk.Tk):
                 self.abb_selected.config(text="")
                 self.abb_rmv_button.config(state="disabled", bg="lightgray")
 
-    def new_macro(self, key:str = "", action:list = [], comment:str= "") -> None:
+    def new_macro(self, key:str = "", action:list = [], comment:str= "", tasked: dict|bool = False) -> None:
         """creer la fenetre ou l'on peut renseigner des valeurs pour ``keys``, ``actions`` et ``comment`` avec possibilité de les préremplir dans le cas d'un ``edit_macro``""" 
 
         self.nmcr_menu = tk.Toplevel(self, width=300, height=400)
@@ -428,6 +697,7 @@ class Application(tk.Tk):
             _comment = comment_entry.get() or None
             _actions = list(self.mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox, on stocke un syntaxe utilisateur plus simple a comprendre
             _actions = utils.translate_to_callback(_actions)               # transforme la syntaxe utilisateur en syntaxe programme
+            _tasked = self.macros[self.index]["tasked"] if edit else False
 
             keys_in_use = [key_data["keys"] for key_data in self.macros.values() if key_data["keys"] is not None]
 
@@ -439,7 +709,7 @@ class Application(tk.Tk):
                     )
                     if ask_replace:
                         print(f">Debug : {self.macros}\n")
-                        self.macros[str(keys_in_use.index(_key))] = {"keys":_key, "actions":_actions, "comment":_comment}
+                        self.macros[str(keys_in_use.index(_key))] = {"keys":_key, "actions":_actions, "comment":_comment, "tasked": _tasked}
                         print(f">Debug : {self.macros}")
                         if _key is not None : keyboard.remove_hotkey(_key)
                 
@@ -657,7 +927,7 @@ class Application(tk.Tk):
                                 self.mcr_listbox.insert(tk.END, click_command)
 
                                 close_params_menu()
-                            
+                                
                         validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_click)
                         validate_button.grid(row=4, column=3, padx=10, pady=10)
 
@@ -1080,9 +1350,10 @@ class Application(tk.Tk):
         key = self.macros[self.index]["keys"] or ""
         action = self.macros[self.index]["actions"]
         comment = self.macros[self.index]["comment"] or ""
+        task = self.macros[self.index]["tasked"] or False
 
-        self.new_macro(key, action, comment)
-    
+        self.new_macro(key, action, comment, task)
+
     def new_abbreviation(self) -> None:
         """demande les parametres d'une nouvelle abreviation puis l'ajoute ou remplace si elle existe deja"""
 
@@ -1180,8 +1451,8 @@ class Application(tk.Tk):
 
         self.menu.add_command(label=self._("ui.key"), command=self.gui_keys)
         self.menu.add_command(label=self._("ui.help"), command=self.help)
-
         self.menu.add_command(label=self._("ui.launch_start"), command=self.toggle_gui_launch)
+        self.menu.add_command(label=self._("ui.import"), command=self._import)
 
         self.menu.add_separator()
         self.menu.add_command(label=self._("ui.uninstall"), command=self.confirm)

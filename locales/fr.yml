@@ -106,3 +106,28 @@ fr:
     dragto: "Glisse la souris vers une position précise en maintenant le clic. Paramètres : 'x' et 'y' définissent la position cible, 'duration' le temps du glissement."
     drag: "Glisse la souris relativement à sa position actuelle en maintenant le clic. Paramètres : 'x' et 'y' définissent le décalage (vous pouvez ne mettre qu'un seul des deux), 'duration' le temps du glissement."
     screenshot: "Prend une capture d'écran et l'enregistre en fichier PNG. Paramètres : 'name' définit le nom du fichier et 'path' le dossier où il sera sauvegardé."
+
+  tsk:
+    placeholder: Choisissez une planification
+    every_min: Toutes les X minutes/heures
+    every_day: Tous les jours
+    every_week: Toutes les semaines
+    every_month: Tous les mois
+    advanced: Avancé
+    month: Mois
+    days: Jours
+    day: Jour
+    hours: Heures
+    minutes: Minutes
+    seconds: Secondes
+    week_day: Jour de la semaine
+    mon: Lun
+    tue: Mar
+    wed: Mer
+    thu: Jeu
+    fri: Ven
+    sat: Sam
+    sun: Dim
+    disable: Désactiver la tâche
+    remove: Supprimer la tâche
+    enable: Activer la tâche
