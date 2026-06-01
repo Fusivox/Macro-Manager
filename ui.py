@@ -156,7 +156,7 @@ class Application(tk.Tk):
                 help_label.config(text=self._(f"help.{selected}"))
 
             # v liste des actions possible (a actualiser en même temps que les fonction make_callback et translate dans utils) v
-            chooselist = ("open", "wait", "write", "click", "moveto", "move", "press", "scroll", "dragto", "drag", "hold", "release", "hotkey", "screenshot")
+            chooselist = ("open", "wait", "write", "click", "moveto", "move", "press", "scroll", "dragto", "drag", "hold", "release", "hotkey", "screenshot", "scheduler")
             choosevar = tk.StringVar()
             choosevar.set(chooselist[0])
 

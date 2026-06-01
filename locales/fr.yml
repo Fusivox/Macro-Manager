@@ -106,7 +106,8 @@ fr:
     dragto: "Glisse la souris vers une position précise en maintenant le clic. Paramètres : 'x' et 'y' définissent la position cible, 'duration' le temps du glissement."
     drag: "Glisse la souris relativement à sa position actuelle en maintenant le clic. Paramètres : 'x' et 'y' définissent le décalage (vous pouvez ne mettre qu'un seul des deux), 'duration' le temps du glissement."
     screenshot: "Prend une capture d'écran et l'enregistre en fichier PNG. Paramètres : 'name' définit le nom du fichier et 'path' le dossier où il sera sauvegardé."
-
+    scheduler: "Planifie l'exécution d'une macro à des intervalles réguliers si l'ordinateur est lancé a cet horraire.\n Parametres : Every X minutes/hours : la macro s'exécutera toutes les X minutes ou heures, Every day : la macro s'exécutera tous les jours a l'horraire choisi, Every week : la macro s'exécutera toutes les semaines au jour et horraire choisi, Every month : la macro s'exécutera tous les mois à la date et horraire choisi, Advanced : Permet de choisir une planification plus précise : \n '-*/X' --> execute l'action toutes les X catégorie \n - ',' permet de selectionner plusieur catégorie (ex: 1,5 pour les jours du mois)\n '-' indique une plage de catégorie (ex: 1-5 pour les jours de la semaine)\n NOTE : en selectionnant la date 1 et le jour lundi (avec 1) la macro s'executera tous les mois le lundi qui tombe le 1er du mois."
+  
   tsk:
     placeholder: Choisissez une planification
     every_min: Toutes les X minutes/heures
@@ -131,3 +132,4 @@ fr:
     disable: Désactiver la tâche
     remove: Supprimer la tâche
     enable: Activer la tâche
+

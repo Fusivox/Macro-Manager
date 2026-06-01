@@ -106,7 +106,8 @@ en:
     dragto: "Drags the mouse to a specific position while holding the click. Parameters: 'x' and 'y' define the target position and 'duration' the drag time."
     drag: "Drags the mouse relative to its current position while holding the click. Parameters: 'x' and 'y' define the offset (you can only put one of them so the mouse will stay on the same coordinate for the non-specified axis) and 'duration' the drag time."
     screenshot: "Takes a screenshot and saves it as a PNG file. Parameters: 'name' defines the file name and 'path' the folder where it will be saved."
-
+    scheduler: "Schedule a macro to run at regular intervals if the computer is running at that time.\n Settings: Every X minutes/hours: the macro will run every X minutes or hours, Every day: the macro will run every day at the selected time, Every week: the macro will run every week on the selected day and time, Every month: the macro will run every month on the selected date and time, Advanced: Allows you to choose a more precise schedule: \n ‘-*/X’ --> runs the action every X category \n - ‘,’ allows you to select multiple categories (e.g., 1,5 for days of the month)\n ‘-’ indicates a range of categories (e.g., 1-5 for days of the week)\n NOTE: By selecting the date 1 and the day Monday (with 1), the macro will run every month on the Monday that falls on the 1st of the month."
+  
   tsk:
     validate: Validate
     placeholder: Choose a schedule
