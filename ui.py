@@ -627,7 +627,8 @@ class Application(tk.Tk):
 
         if source == "data" :
             rmv = utils.remove(self.macros, nb)
-            hotkeys.sched.remove_job(f"task_{nb}")
+            try: hotkeys.sched.remove_job(f"task_{nb}")
+            except: pass
             self.macros = {str(i): self.macros[keys] for i, keys in enumerate(sorted(self.macros.keys()))}
             print(f">Debug : {self.macros}")
             if rmv:
