@@ -633,9 +633,10 @@ class Application(tk.Tk):
 
         elif source == "abb" :
             rmv = utils.remove(self.abbreviation, nb)
-            self.abbreviation = {str(i): self.abbreviation[keys] for i, keys in enumerate(sorted(self.abbreviation.keys()))}
             print(f">Debug : {self.abbreviation}")
             if rmv:
+                self.abbreviation = {str(i): self.abbreviation[keys] for i, keys in enumerate(sorted(self.abbreviation.keys()))}
+                keyboard.remove_abbreviation(self.abbreviation[nb]["source"])
                 self.abb_build_listbox(refresh=True)
                 self.abb_listbox.select_clear(0, tk.END)
                 self.abb_selected.config(text="")
