@@ -479,15 +479,8 @@ class Application(tk.Tk):
                                 print(f">Debug : {self.macros[self.index]['tasked']}")
                                 utils.actualise(self.macros, os_name=platform)
 
-                                print(hotkeys.sched)
-                                print("running =", hotkeys.sched.running)
-                                print("type =", type(hotkeys.sched))
-
                                 action = utils.make_callback(self.macros[self.index]["actions"])
-                                job = hotkeys.sched.add_job(action, max_instances=1, id=f"task_{self.index}", **self.macros[self.index]["tasked"]["kwargs"])
-
-                                print(job)
-                                print(hotkeys.sched.get_jobs())
+                                hotkeys.sched.add_job(action, max_instances=1, id=f"task_{self.index}", **self.macros[self.index]["tasked"]["kwargs"])
 
                                 close_task()
 
@@ -544,7 +537,7 @@ class Application(tk.Tk):
                 remove_button = tk.Button(self.task_menu, text=self._("tsk.remove"), command=remove_task)
                 remove_button.grid(row=1, column=1, padx=10, pady=10)
 
-    def close_task(self):
+    def close_task(self) -> None:
         self.task_running = False
         self.task_menu.destroy()
 
@@ -635,10 +628,8 @@ class Application(tk.Tk):
                 self.build_listbox(refresh=True)
                 self.listbox.select_clear(0, tk.END)
                 self.selected.config(text="")
-                self.rmv_button.config(state="disabled", bg="lightgray")
-                self.edit_button.config(state="disabled", bg="lightgray")
-                self.export_button.config(state="disabled", bg="lightgray")
-                self.task_button.config(state="disabled", bg="lightgray")
+                for button in {self.rmv_button, self.edit_button, self.export_button, self.task_button}:
+                    button.config(state="disabled", bg="lightgray")
 
         elif source == "abb" :
             rmv = utils.remove(self.abbreviation, nb)
@@ -650,7 +641,7 @@ class Application(tk.Tk):
                 self.abb_selected.config(text="")
                 self.abb_rmv_button.config(state="disabled", bg="lightgray")
 
-    def new_macro(self, key:str = "", action:list = [], comment:str= "", tasked: dict|bool = False) -> None:
+    def new_macro(self, key:str = "", action:list = [], comment:str= "") -> None:
         """creer la fenetre ou l'on peut renseigner des valeurs pour ``keys``, ``actions`` et ``comment`` avec possibilité de les préremplir dans le cas d'un ``edit_macro``""" 
 
         self.nmcr_menu = tk.Toplevel(self, width=300, height=400)
@@ -1334,7 +1325,7 @@ class Application(tk.Tk):
         add_button = tk.Button(self.nmcr_menu, text=self._("ui.naction"), justify=tk.LEFT, command=add_action)
         add_button.grid(row=3, column=0, sticky=tk.W, padx=10, pady=10)
 
-        def remove_action():
+        def remove_action() -> None:
             selected = self.mcr_listbox.curselection()
             if selected: 
                 self.mcr_listbox.delete(selected[0])
@@ -1351,9 +1342,8 @@ class Application(tk.Tk):
         key = self.macros[self.index]["keys"] or ""
         action = self.macros[self.index]["actions"]
         comment = self.macros[self.index]["comment"] or ""
-        task = self.macros[self.index]["tasked"] or False
 
-        self.new_macro(key, action, comment, task)
+        self.new_macro(key, action, comment)
 
     def new_abbreviation(self) -> None:
         """demande les parametres d'une nouvelle abreviation puis l'ajoute ou remplace si elle existe deja"""
@@ -1399,7 +1389,7 @@ class Application(tk.Tk):
                 utils.add_abb(self.abbreviation, source, abb)                       #
                                                                                     # ajoute l'abreviations et actualise le json puis l'initialise pour l'utiliser direct     
             utils.actualise(abbreviation=self.abbreviation, os_name=platform)       #
-            keyboard.add_abbreviation(source, abb)
+            keyboard.add_abbreviation(source, abb)                                  #
 
             self.abb_build_listbox(refresh=True)
             self.nabb_menu.destroy()
