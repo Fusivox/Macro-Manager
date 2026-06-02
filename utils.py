@@ -24,8 +24,12 @@ def make_callback(actions: list):
                         subprocess.Popen(["konsole"], cwd=params["folder"])
 
                 elif params["window"] == "explorer": #("open", {"window":"explorer", "folder":"Dossier dans lequel le navigateur de fichier est ouvert si spécifié sinon celui par default"})
-                    try: subprocess.Popen(["Explorer", params["folder"]], shell=True)
-                    except Exception: subprocess.Popen(["Dolphin", params["folder"]], shell=True)
+                    path = params["folder"]
+                    try: subprocess.Popen(["Explorer", path], shell=True) if path else subprocess.Popen(["Explorer"], shell=True)
+                    except: 
+                        try:
+                            subprocess.Popen(["Dolphin", params["folder"]], shell=True)
+                        except: print("Aucun navigateur de fichier trouvé")
 
                 else:
                     path = params["window"]

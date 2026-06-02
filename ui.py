@@ -261,6 +261,7 @@ class Application(tk.Tk):
 
             if not temp["keys"] in keys_in_use:
                 utils.add_mcr(self.macros, keys=temp["keys"], actions=temp["actions"], comment=temp["comment"])
+                keyboard.add_hotkey(temp["keys"], utils.make_callback(temp["actions"]))
                 
             else:
                 messagebox.showerror(title=self._("htk.err_title"), message=self._("ui.key_used").format(key=temp["keys"]))
@@ -618,18 +619,23 @@ class Application(tk.Tk):
     def remove(self, source: str, nb) -> None:
         """retire un éléments du fichier json séléctionné, ``data`` pour les macros ou ``abb`` pour les abreviations"""
 
-        if source == "data" :
+        if source == "data":
+            keys = self.macros[nb]["keys"]
+            if keys: keyboard.remove_hotkey(keys)             # enleve la hotkey de la macro pour eviter les erreurs de hotkey inexistante apres la suppression de la macro
             rmv = utils.remove(self.macros, nb)
-            try: hotkeys.sched.remove_job(f"task_{nb}")
-            except: pass
-            self.macros = {str(i): self.macros[keys] for i, keys in enumerate(sorted(self.macros.keys()))}
             print(f">Debug : {self.macros}")
             if rmv:
+                self.macros = {str(i): self.macros[keys] for i, keys in enumerate(sorted(self.macros.keys()))}          # réindexe les macros pour eviter les erreurs de hotkey inexistante apres la suppression de la macro
+                try: hotkeys.sched.remove_job(f"task_{nb}")
+                except: pass
                 self.build_listbox(refresh=True)
                 self.listbox.select_clear(0, tk.END)
                 self.selected.config(text="")
                 for button in {self.rmv_button, self.edit_button, self.export_button, self.task_button}:
                     button.config(state="disabled", bg="lightgray")
+            elif keys:
+                action = utils.make_callback(self.macros[nb]["actions"])            # retablie la macro dans le cas ou la suppression a echoué pour eviter les erreurs de hotkey inexistante apres la suppression de la macro
+                keyboard.add_hotkey(self.macros[nb]["keys"], action)
 
         elif source == "abb" :
             rmv = utils.remove(self.abbreviation, nb)
@@ -701,16 +707,19 @@ class Application(tk.Tk):
                         message=self._("ui.macro_exist")
                     )
                     if ask_replace:
-                        print(f">Debug : {self.macros}\n")
-                        self.macros[str(keys_in_use.index(_key))] = {"keys":_key, "actions":_actions, "comment":_comment, "tasked": _tasked}
+                        print(f">Debug : {self.macros}")
+                        utils.remove(self.macros, str(keys_in_use.index(_key)))
+                        utils.actualise(data=self.macros, os_name=platform)
                         print(f">Debug : {self.macros}")
                         if _key is not None : keyboard.remove_hotkey(_key)
                 
                 else:
                     if edit:
-                        self.remove("data", self.index)
-                    utils.add_mcr(self.macros, _key, _actions, _comment)
-                    utils.actualise(data=self.macros, os_name=platform)   
+                        utils.remove(self.macros, str(self.index))
+
+                utils.add_mcr(self.macros, _key, _actions, _comment)
+                self.macros = {str(i): self.macros[keys] for i, keys in enumerate(sorted(self.macros.keys()))}
+                utils.actualise(data=self.macros, os_name=platform)   
 
                 if _key is not None :                                   # Initialise la macro si des touches sont définis
                     callback = utils.make_callback(_actions)
@@ -1106,7 +1115,7 @@ class Application(tk.Tk):
 
                                 else : open_command = f"{selected_action} : {path}"
 
-                                if additional_param != "" and ("cmd" in open_command or "explorer" in open_command) and (os.path.exists(additional_param) or (additional_param.lower().startswith("shell:") and platform == "win32")):
+                                if additional_param != "" and (path.lower() in {"cmd", "shell", "explorer"}) and (os.path.exists(additional_param) or (additional_param.lower().startswith("shell:") and platform == "win32")):
                                     open_command += f" ;; param : {additional_param}"
 
                                 self.mcr_listbox.insert(tk.END, open_command)
