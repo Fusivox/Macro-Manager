@@ -13,6 +13,8 @@ if "%build%"=="1" (
         hotkeys.py ^
         --add-data "locales;locales" ^
         --add-data "logo.ico;."
+    move "dist\Macro Manager v2.exe" "Macro Manager v2.exe"
+    del /q /f *.spec build dist
 
 ) else if "%build%"=="2" (
     del /q /f *.spec build dist "%APPDATA%/Macro Manager"
