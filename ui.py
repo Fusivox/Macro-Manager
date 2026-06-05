@@ -628,25 +628,29 @@ class Application(tk.Tk):
                 self.macros = {str(i): self.macros[keys] for i, keys in enumerate(sorted(self.macros.keys()))}          # réindexe les macros pour eviter les erreurs de hotkey inexistante apres la suppression de la macro
                 try: hotkeys.sched.remove_job(f"task_{nb}")
                 except: pass
-                self.build_listbox(refresh=True)
                 self.listbox.select_clear(0, tk.END)
                 self.selected.config(text="")
                 for button in {self.rmv_button, self.edit_button, self.export_button, self.task_button}:
                     button.config(state="disabled", bg="lightgray")
             elif keys:
                 action = utils.make_callback(self.macros[nb]["actions"])            # retablie la macro dans le cas ou la suppression a echoué pour eviter les erreurs de hotkey inexistante apres la suppression de la macro
-                keyboard.add_hotkey(self.macros[nb]["keys"], action)
+                keyboard.add_hotkey(keys, action)
+
+            self.build_listbox(refresh=True)
 
         elif source == "abb" :
+            keyboard.remove_abbreviation(self.abbreviation[nb]["source"])
             rmv = utils.remove(self.abbreviation, nb)
             print(f">Debug : {self.abbreviation}")
             if rmv:
                 self.abbreviation = {str(i): self.abbreviation[keys] for i, keys in enumerate(sorted(self.abbreviation.keys()))}
-                keyboard.remove_abbreviation(self.abbreviation[nb]["source"])
-                self.abb_build_listbox(refresh=True)
                 self.abb_listbox.select_clear(0, tk.END)
                 self.abb_selected.config(text="")
                 self.abb_rmv_button.config(state="disabled", bg="lightgray")
+            else:
+                keyboard.add_abbreviation(self.abbreviation[nb]["source"], self.abbreviation[nb]["text"])
+            
+            self.abb_build_listbox(refresh=True)
 
     def new_macro(self, key:str = "", action:list = [], comment:str= "") -> None:
         """creer la fenetre ou l'on peut renseigner des valeurs pour ``keys``, ``actions`` et ``comment`` avec possibilité de les préremplir dans le cas d'un ``edit_macro``""" 
