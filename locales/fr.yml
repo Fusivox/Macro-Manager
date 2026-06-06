@@ -89,6 +89,7 @@ fr:
     export_fail: "Le fichier n'a pas pu être exporter,\nréessayer plus tard"
     key_used: "{key} déjà utilisé, macro importé sans touches associés"
     mcr_type: fichiers .mcr
+    insert_action: Insérer
 
   help:
     main: "Ceci est le menu d'aide, vous pouvez choisir une action pour lire son manuel."

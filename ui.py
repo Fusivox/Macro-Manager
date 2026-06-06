@@ -755,7 +755,7 @@ class Application(tk.Tk):
                 self.nmcr_menu.grab_set()
                 add_action_menu.destroy()
 
-            def ask_params() -> None:
+            def ask_params(insert: bool = False) -> None:
                 """demande les parametres de l'actions en train d'être ajouter"""
 
                 selected_action = actions_list.get(actions_list.curselection()[0])
@@ -768,7 +768,6 @@ class Application(tk.Tk):
                     global params_menu
                     params_menu = tk.Toplevel(add_action_menu, width=300, height=400)
                     params_menu.title(title)
-                    params_menu.grab_set()
                     params_menu.focus_set()
                     params_menu.transient(add_action_menu)
                     params_menu.resizable(False, False)
@@ -816,22 +815,41 @@ class Application(tk.Tk):
 
                 if selected_action == "wait":
                     time = simpledialog.askfloat(title=title, prompt=self._("ui.wait"))
-                    if time is not None : self.mcr_listbox.insert(tk.END, f"{selected_action} : {time}") 
+                    if time is not None : 
+                        if insert:
+                            selected_index = self.mcr_listbox.curselection()
+                            self.mcr_listbox.insert(selected_index[0], f"{selected_action} : {time}")
+                        else:
+                            self.mcr_listbox.insert(tk.END, f"{selected_action} : {time}") 
 
                 elif selected_action == "hold":
                     key = simpledialog.askstring(title=title, prompt=self._("ui.hold"))
-                    if key in utils.POSSIBLE_KEYS: self.mcr_listbox.insert(tk.END, f"{selected_action} : {key}")
+                    if key in utils.POSSIBLE_KEYS: 
+                        if insert:
+                            selected_index = self.mcr_listbox.curselection()
+                            self.mcr_listbox.insert(selected_index[0], f"{selected_action} : {key}")
+                        else:
+                            self.mcr_listbox.insert(tk.END, f"{selected_action} : {key}")
 
                 elif selected_action == "release":
                     key = simpledialog.askstring(title=title, prompt=self._("ui.release"))
-                    if key in utils.POSSIBLE_KEYS: self.mcr_listbox.insert(tk.END, f"{selected_action} : {key}")
+                    if key in utils.POSSIBLE_KEYS: 
+                        if insert:
+                            selected_index = self.mcr_listbox.curselection()
+                            self.mcr_listbox.insert(selected_index[0], f"{selected_action} : {key}")
+                        else:
+                            self.mcr_listbox.insert(tk.END, f"{selected_action} : {key}")
 
                 elif selected_action == "hotkey":
                     keys = simpledialog.askstring(title=title, prompt=self._("ui.release"))
                     try :
                         keyboard.add_hotkey(keys, lambda: None)
                         keyboard.remove_hotkey(keys)
-                        self.mcr_listbox.insert(tk.END, f"{selected_action} : {keys}")
+                        if insert:
+                            selected_index = self.mcr_listbox.curselection()
+                            self.mcr_listbox.insert(selected_index[0], f"{selected_action} : {keys}")
+                        else:
+                            self.mcr_listbox.insert(tk.END, f"{selected_action} : {keys}")
 
                     except Exception:
                         messagebox.showerror(title=self._("ui.invalid_key"), message=self._("ui.key_eg"))
@@ -864,7 +882,11 @@ class Application(tk.Tk):
                                 if interval != 0:
                                     write_command += f" ;; interval : {interval}"
 
-                                self.mcr_listbox.insert(tk.END, write_command)
+                                if insert:
+                                    selected_index = self.mcr_listbox.curselection()
+                                    self.mcr_listbox.insert(selected_index[0], write_command)
+                                else:
+                                    self.mcr_listbox.insert(tk.END, write_command)
 
                                 close_params_menu()
                                 
@@ -936,7 +958,11 @@ class Application(tk.Tk):
                                 if interval != 0:
                                     click_command += f" ;; interval : {interval}"
 
-                                self.mcr_listbox.insert(tk.END, click_command)
+                                if insert:
+                                    selected_index = self.mcr_listbox.curselection()
+                                    self.mcr_listbox.insert(selected_index[0], click_command)
+                                else:
+                                    self.mcr_listbox.insert(tk.END, click_command)
 
                                 close_params_menu()
                                 
@@ -978,7 +1004,11 @@ class Application(tk.Tk):
                                 if y is not None:
                                     moveto_command += f" ;; y : {y}"
 
-                                self.mcr_listbox.insert(tk.END, moveto_command)
+                                if insert:
+                                    selected_index = self.mcr_listbox.curselection()
+                                    self.mcr_listbox.insert(selected_index[0], moveto_command)
+                                else:
+                                    self.mcr_listbox.insert(tk.END, moveto_command)
 
                                 close_params_menu()
 
@@ -1020,7 +1050,11 @@ class Application(tk.Tk):
                                 if y is not None:
                                     move_command += f" ;; y : {y}"
 
-                                self.mcr_listbox.insert(tk.END, move_command)
+                                if insert:
+                                    selected_index = self.mcr_listbox.curselection()
+                                    self.mcr_listbox.insert(selected_index[0], move_command)
+                                else:
+                                    self.mcr_listbox.insert(tk.END, move_command)
 
                                 close_params_menu()
 
@@ -1061,7 +1095,11 @@ class Application(tk.Tk):
                                     if interval != 0:
                                         press_command += f" ;; interval : {interval}"
 
-                                self.mcr_listbox.insert(tk.END, press_command)
+                                if insert:
+                                    selected_index = self.mcr_listbox.curselection()
+                                    self.mcr_listbox.insert(selected_index[0], press_command)
+                                else:
+                                    self.mcr_listbox.insert(tk.END, press_command)
 
                                 close_params_menu()
 
@@ -1116,7 +1154,11 @@ class Application(tk.Tk):
 
                             if dev_mode: 
                                 open_command = f"{selected_action} : {path} ;; param : {additional_param}"
-                                self.mcr_listbox.insert(tk.END, open_command)
+                                if insert:
+                                    selected_index = self.mcr_listbox.curselection()
+                                    self.mcr_listbox.insert(selected_index[0], open_command)
+                                else:
+                                    self.mcr_listbox.insert(tk.END, open_command)
                                 close_params_menu()
                             else:
                                 if path != "" and (path.lower() in {"shell", "cmd", "explorer"} or (os.path.exists(path) or path.startswith("http" or "www.") or path.endswith(".com" or ".fr"))):
@@ -1133,8 +1175,12 @@ class Application(tk.Tk):
                                     if additional_param != "" and (path.lower() in {"cmd", "shell", "explorer"}) and (os.path.exists(additional_param) or (additional_param.lower().startswith("shell:") and platform == "win32")):
                                         open_command += f" ;; param : {additional_param}"
 
-                                    self.mcr_listbox.insert(tk.END, open_command)
-                                    
+                                    if insert:
+                                        selected_index = self.mcr_listbox.curselection()
+                                        self.mcr_listbox.insert(selected_index[0], open_command)
+                                    else:
+                                        self.mcr_listbox.insert(tk.END, open_command)
+
                                     close_params_menu()
                                 
                                 else: messagebox.showerror(title=self._("ui.path_err_title"), message=self._("ui.path_err")) 
@@ -1189,7 +1235,11 @@ class Application(tk.Tk):
                                 if amount != 0:
                                     scroll_command += f" ;; amount : {amount}"
 
-                                self.mcr_listbox.insert(tk.END, scroll_command)
+                                if insert:
+                                    selected_index = self.mcr_listbox.curselection()
+                                    self.mcr_listbox.insert(selected_index[0], scroll_command)
+                                else:
+                                    self.mcr_listbox.insert(tk.END, scroll_command)
 
                                 close_params_menu()
 
@@ -1231,7 +1281,11 @@ class Application(tk.Tk):
                                 if y is not None:
                                     dragto_command += f" ;; y : {y}"
 
-                                self.mcr_listbox.insert(tk.END, dragto_command)
+                                if insert:
+                                    selected_index = self.mcr_listbox.curselection()
+                                    self.mcr_listbox.insert(selected_index[0], dragto_command)
+                                else:
+                                    self.mcr_listbox.insert(tk.END, dragto_command)
 
                                 close_params_menu()
 
@@ -1273,7 +1327,11 @@ class Application(tk.Tk):
                                 if y is not None:
                                     drag_command += f" ;; y : {y}"
 
-                                self.mcr_listbox.insert(tk.END, drag_command)
+                                if insert:
+                                    selected_index = self.mcr_listbox.curselection()
+                                    self.mcr_listbox.insert(selected_index[0], drag_command)
+                                else:
+                                    self.mcr_listbox.insert(tk.END, drag_command)
 
                                 close_params_menu()
 
@@ -1316,8 +1374,12 @@ class Application(tk.Tk):
                             if os.path.exists(path):
                                 screen_command += f" ;; path : {path}"
 
-                                self.mcr_listbox.insert(tk.END, screen_command)
-                                
+                                if insert:
+                                    selected_index = self.mcr_listbox.curselection()
+                                    self.mcr_listbox.insert(selected_index[0], screen_command)
+                                else:
+                                    self.mcr_listbox.insert(tk.END, screen_command)
+
                                 close_params_menu()
 
                             else: messagebox.showerror(title=self._("ui.path_err_title"), message=self._("ui.path_err"))
@@ -1346,6 +1408,9 @@ class Application(tk.Tk):
 
             choose_button = tk.Button(add_action_menu, text=self._("ui.choose_act"), command=ask_params)
             choose_button.grid(row=1, column=1, sticky=tk.E, padx=10, pady=10)
+
+            insert_button = tk.Button(add_action_menu, text=self._("ui.insert_action"), justify=tk.RIGHT, command=lambda: ask_params(insert=True))
+            insert_button.grid(row=1, column=0, sticky=tk.W, padx=10, pady=10, columnspan=2)
 
         add_button = tk.Button(self.nmcr_menu, text=self._("ui.naction"), justify=tk.LEFT, command=add_action)
         add_button.grid(row=3, column=0, sticky=tk.W, padx=10, pady=10)

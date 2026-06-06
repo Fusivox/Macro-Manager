@@ -89,6 +89,7 @@ en:
     export_fail: "File couldn't be exported,\nmcr_titletry again later"
     key_used: "{key} keys already in use, macro imported without keys"
     mcr_type: .mcr files
+    insert_action: Insert
     
   help:
     main: "This is the help menu, you can choose an action to read it's manual."
