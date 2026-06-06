@@ -1,6 +1,12 @@
 import tkinter as tk , os, json, utils, i18n, sys, keyboard, mouseinfo, hotkeys
 from tkinter import messagebox, simpledialog, filedialog
 
+if sys.executable.endswith("python.exe"):
+    dev_mode = True
+    print(f">Debug : DEV MODE ACTIVATED")
+else:
+    dev_mode = False
+
 if sys.platform == "win32": 
     name = "Main Page"
     macro_appdata = f"{os.getenv("APPDATA")}\\Macro Manager\\"
@@ -893,7 +899,7 @@ class Application(tk.Tk):
                         clicks_label = tk.Label(params_menu, text=f"{self._("ui.clicks")} :", justify=tk.RIGHT)
                         clicks_label.grid(row=2, column=0, padx=10, pady=10)
 
-                        clicks_entry = tk.Spinbox(params_menu, exportselection=0, from_=0, to=1000000, increment=1)
+                        clicks_entry = tk.Spinbox(params_menu, exportselection=0, from_=1, to=1000000, increment=1)
                         clicks_entry.grid(row=2, column=1, padx=10, pady=10)
 
                         interval_label = tk.Label(params_menu, text=f"{self._("ui.interval")} :", justify=tk.RIGHT)
@@ -1108,25 +1114,30 @@ class Application(tk.Tk):
                             path = pathvar.get().strip() or ""
                             additional_param = paramvar.get().strip() or ""
 
-                            if path != "" and (path.lower() in {"shell", "cmd", "explorer"} or (os.path.exists(path) or path.startswith("http" or "www.") or path.endswith(".com" or ".fr"))):
-
-                                if path.lower() in {"cmd", "shell"}:
-                                    
-                                    if platform == "win32":
-                                        open_command = f"{selected_action} : cmd"
-                                    else:
-                                        open_command = f"{selected_action} : shell"
-
-                                else : open_command = f"{selected_action} : {path}"
-
-                                if additional_param != "" and (path.lower() in {"cmd", "shell", "explorer"}) and (os.path.exists(additional_param) or (additional_param.lower().startswith("shell:") and platform == "win32")):
-                                    open_command += f" ;; param : {additional_param}"
-
+                            if dev_mode: 
+                                open_command = f"{selected_action} : {path} ;; param : {additional_param}"
                                 self.mcr_listbox.insert(tk.END, open_command)
-                                
                                 close_params_menu()
-                            
-                            else: messagebox.showerror(title=self._("ui.path_err_title"), message=self._("ui.path_err")) 
+                            else:
+                                if path != "" and (path.lower() in {"shell", "cmd", "explorer"} or (os.path.exists(path) or path.startswith("http" or "www.") or path.endswith(".com" or ".fr"))):
+
+                                    if path.lower() in {"cmd", "shell"}:
+                                        
+                                        if platform == "win32":
+                                            open_command = f"{selected_action} : cmd"
+                                        else:
+                                            open_command = f"{selected_action} : shell"
+
+                                    else : open_command = f"{selected_action} : {path}"
+
+                                    if additional_param != "" and (path.lower() in {"cmd", "shell", "explorer"}) and (os.path.exists(additional_param) or (additional_param.lower().startswith("shell:") and platform == "win32")):
+                                        open_command += f" ;; param : {additional_param}"
+
+                                    self.mcr_listbox.insert(tk.END, open_command)
+                                    
+                                    close_params_menu()
+                                
+                                else: messagebox.showerror(title=self._("ui.path_err_title"), message=self._("ui.path_err")) 
 
                         validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_open)
                         validate_button.grid(row=2, column=2, padx=10, pady=10)

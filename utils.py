@@ -136,7 +136,7 @@ def translate_to_callback(actions: list[str]) -> list[tuple]:
             translated_actions.append(("write", {"text": parts["write"], "interval": parts.get("interval", 0)}))
 
         elif "click" in parts:
-            translated_actions.append(("click", {"x": parts.get("x", None), "y": parts.get("y", None), "clicks": parts.get("clicks", 1), "interval": parts.get("interval", 0), "button": parts["button"], "duration": parts.get("duration", 0)}))
+            translated_actions.append(("click", {"x": parts.get("x", None), "y": parts.get("y", None), "clicks": parts.get("clicks", 1), "interval": parts.get("interval", 0), "button": parts["click"], "duration": parts.get("duration", 0)}))
 
         elif "moveto" in parts:
             translated_actions.append(("moveto", {"x": parts.get("x", None), "y": parts.get("y", None), "duration": parts["moveto"]}))
@@ -166,7 +166,7 @@ def translate_to_callback(actions: list[str]) -> list[tuple]:
             translated_actions.append(("release", {"key": parts["key"]}))
 
         elif "hotkey" in parts:
-            translated_actions.append(("hotkey", {"keys": parts["keys"]}))
+            translated_actions.append(("hotkey", {"keys": parts["hotkey"]}))
 
         elif "screenshot" in parts:
             translated_actions.append(("screenshot", {"name": parts.get("name", None), "path": parts.get("path", None)}))
