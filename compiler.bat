@@ -8,7 +8,7 @@ if "%build%"=="1" (
     python -m PyInstaller --onefile ^
         --clean ^
         --noconsole ^
-        -n "Macro Manager v2" ^
+        -n "Macro Manager" ^
         --icon=logo.ico ^
         hotkeys.py ^
         --add-data "locales;locales" ^

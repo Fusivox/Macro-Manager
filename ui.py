@@ -256,22 +256,23 @@ class Application(tk.Tk):
     def _import(self):
         """ouvre le menu pour importer une macro en .mcr"""
 
-        path = filedialog.askopenfilename(
+        path = filedialog.askopenfilenames(
             title=self._("ui.files"),
             filetypes=[(self._("ui.mcr_type"), "*.mcr")]
         )
-        if path:
-            temp = utils.import_mcr(path)
-            print(temp)
+        if len(path) > 0:
             keys_in_use = [key_data["keys"] for key_data in self.macros.values() if key_data["keys"] is not None]
-
-            if not temp["keys"] in keys_in_use:
-                utils.add_mcr(self.macros, keys=temp["keys"], actions=temp["actions"], comment=temp["comment"])
-                keyboard.add_hotkey(temp["keys"], utils.make_callback(temp["actions"]))
+            for p in path:
+                temp = utils.import_mcr(p)
+                print(temp)
                 
-            else:
-                messagebox.showerror(title=self._("htk.err_title"), message=self._("ui.key_used").format(key=temp["keys"]))
-                utils.add_mcr(self.macros, keys=None, actions=temp["actions"], comment=temp["comment"])
+                if not temp["keys"] in keys_in_use:
+                    utils.add_mcr(self.macros, keys=temp["keys"], actions=temp["actions"], comment=temp["comment"])
+                    keyboard.add_hotkey(temp["keys"], utils.make_callback(temp["actions"]))
+                    
+                else:
+                    messagebox.showerror(title=self._("htk.err_title"), message=self._("ui.key_used").format(key=temp["keys"]))
+                    utils.add_mcr(self.macros, keys=None, actions=temp["actions"], comment=temp["comment"])
 
             utils.actualise(self.macros, os_name=platform)
             self.build_listbox(refresh=True)
@@ -310,18 +311,17 @@ class Application(tk.Tk):
                     minutes_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=59, increment=1)
                     minutes_entry.grid(row=2, column=1, padx=10, pady=10)
 
-                    minutes = utils.convert(minutes_entry.get())
-
                     hours_label = tk.Label(self.task_menu, text=f"{self._("tsk.hours")} : ", justify=tk.RIGHT)
                     hours_label.grid(row=1, column=0, padx=10, pady=10)
 
                     hours_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=23, increment=1)
                     hours_entry.grid(row=1, column=1, padx=10, pady=10)
 
-                    hours = utils.convert(hours_entry.get())
-
                     def add_task() -> None:
                         """ajoute la tache avec les parametres renseigné"""
+
+                        minutes = utils.convert(minutes_entry.get() or None)
+                        hours = utils.convert(hours_entry.get() or None)
 
                         if isinstance(minutes, (int, float)) and isinstance(hours, (int, float)) and (hours > 0 or minutes > 0):
                             self.macros[self.index]["tasked"] = {"active": True, "kwargs":{"trigger":"interval", "minute":minutes, "hour":hours}}
@@ -342,18 +342,17 @@ class Application(tk.Tk):
                     minutes_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=59, increment=1)
                     minutes_entry.grid(row=2, column=1, padx=10, pady=10)
 
-                    minutes = utils.convert(minutes_entry.get())
-
                     hours_label = tk.Label(self.task_menu, text=f"{self._("tsk.hours")} : ", justify=tk.RIGHT)
                     hours_label.grid(row=1, column=0, padx=10, pady=10)
 
                     hours_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=23, increment=1)
                     hours_entry.grid(row=1, column=1, padx=10, pady=10)
 
-                    hours = utils.convert(hours_entry.get())
-
                     def add_task() -> None:
                         """ajoute la tache avec les parametres renseigné"""
+
+                        minutes = utils.convert(minutes_entry.get() or None)
+                        hours = utils.convert(hours_entry.get() or None)
 
                         if isinstance(minutes, (int, float)) and isinstance(hours, (int, float)) and (hours > 0 or minutes > 0):
                             self.macros[self.index]["tasked"] = {"active": True, "kwargs":{"trigger":"cron", "minute":minutes, "hour":hours}}
@@ -389,7 +388,6 @@ class Application(tk.Tk):
                     minutes_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=59, increment=1)
                     minutes_entry.grid(row=8, column=1, padx=10, pady=10)
 
-
                     hours_label = tk.Label(self.task_menu, text=f"{self._("tsk.hours")} : ", justify=tk.RIGHT)
                     hours_label.grid(row=9, column=0, padx=10, pady=10)
 
@@ -401,8 +399,8 @@ class Application(tk.Tk):
 
                         selected_days = [day for day, var in day_vars.items() if var.get()]
 
-                        hours = utils.convert(hours_entry.get())
-                        minutes = utils.convert(minutes_entry.get())
+                        hours = utils.convert(hours_entry.get() or None )
+                        minutes = utils.convert(minutes_entry.get() or None)
 
                         if isinstance(minutes, (int, float)) and isinstance(hours, (int, float)) and (hours > 0 or minutes > 0) and len(selected_days) > 0:
                             self.macros[self.index]["tasked"] = {"active": True, "kwargs":{"trigger":"cron", "minute":minutes, "hour":hours, "day_of_week":",".join(selected_days)}}
@@ -423,15 +421,11 @@ class Application(tk.Tk):
                     day_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=1, to=31, increment=1)
                     day_entry.grid(row=1, column=1, padx=10, pady=10)
 
-                    day = utils.convert(day_entry.get())
-
                     interval_label = tk.Label(self.task_menu, text=f"{self._("tsk.minutes")} : ", justify=tk.RIGHT)
                     interval_label.grid(row=2, column=0, padx=10, pady=10)
 
                     minutes_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=59, increment=1)
                     minutes_entry.grid(row=2, column=1, padx=10, pady=10)
-
-                    minutes = utils.convert(minutes_entry.get())
 
                     hours_label = tk.Label(self.task_menu, text=f"{self._("tsk.hours")} : ", justify=tk.RIGHT)
                     hours_label.grid(row=3, column=0, padx=10, pady=10)
@@ -439,10 +433,12 @@ class Application(tk.Tk):
                     hours_entry = tk.Spinbox(self.task_menu, exportselection=0, from_=0, to=23, increment=1)
                     hours_entry.grid(row=3, column=1, padx=10, pady=10)
 
-                    hours = utils.convert(hours_entry.get())
-
                     def add_task() -> None:
                         """ajoute la tache avec les parametres renseigné"""
+
+                        day = utils.convert(day_entry.get() or None)
+                        minutes = utils.convert(minutes_entry.get() or None)
+                        hours = utils.convert(hours_entry.get() or None)
 
                         if isinstance(day, (int, float)) and isinstance(minutes, (int, float)) and isinstance(hours,(int, float)) and (hours > 0 or minutes > 0) and 1 <= day <= 31:
                             self.macros[self.index]["tasked"] = {"active": True, "kwargs":{"trigger":"cron", "minute":minutes, "hour":hours,"day":day}}
@@ -477,7 +473,7 @@ class Application(tk.Tk):
 
                             kwargs = {}
                             for param, var in entry_var.items():
-                                value = utils.convert(var.get())
+                                value = utils.convert(var.get() or None)
                                 if value:
                                     kwargs[param] = value
 
@@ -632,6 +628,7 @@ class Application(tk.Tk):
             print(f">Debug : {self.macros}")
             if rmv:
                 self.macros = {str(i): self.macros[keys] for i, keys in enumerate(sorted(self.macros.keys()))}          # réindexe les macros pour eviter les erreurs de hotkey inexistante apres la suppression de la macro
+                utils.actualise(data=self.macros, os_name=platform)
                 try: hotkeys.sched.remove_job(f"task_{nb}")
                 except: pass
                 self.listbox.select_clear(0, tk.END)
@@ -650,6 +647,7 @@ class Application(tk.Tk):
             print(f">Debug : {self.abbreviation}")
             if rmv:
                 self.abbreviation = {str(i): self.abbreviation[keys] for i, keys in enumerate(sorted(self.abbreviation.keys()))}
+                utils.actualise(abbreviation=self.abbreviation, os_name=platform)
                 self.abb_listbox.select_clear(0, tk.END)
                 self.abb_selected.config(text="")
                 self.abb_rmv_button.config(state="disabled", bg="lightgray")
@@ -706,7 +704,6 @@ class Application(tk.Tk):
             _comment = comment_entry.get() or None
             _actions = list(self.mcr_listbox.get(0, tk.END))                 # creer une liste avec les actions dans la listbox, on stocke un syntaxe utilisateur plus simple a comprendre
             _actions = utils.translate_to_callback(_actions)               # transforme la syntaxe utilisateur en syntaxe programme
-            _tasked = self.macros[self.index]["tasked"] if edit else False
 
             keys_in_use = [key_data["keys"] for key_data in self.macros.values() if key_data["keys"] is not None]
 
@@ -717,18 +714,12 @@ class Application(tk.Tk):
                         message=self._("ui.macro_exist")
                     )
                     if ask_replace:
-                        print(f">Debug : {self.macros}")
-                        utils.remove(self.macros, str(keys_in_use.index(_key)))
-                        utils.actualise(data=self.macros, os_name=platform)
-                        print(f">Debug : {self.macros}")
-                        if _key is not None : keyboard.remove_hotkey(_key)
+                        self.remove("data", [key for key, value in self.macros.items() if value["keys"] == _key][0])
                 
-                else:
-                    if edit:
-                        utils.remove(self.macros, str(self.index))
+                elif edit:
+                    self.remove("data", str(self.index))
 
                 utils.add_mcr(self.macros, _key, _actions, _comment)
-                self.macros = {str(i): self.macros[keys] for i, keys in enumerate(sorted(self.macros.keys()))}
                 utils.actualise(data=self.macros, os_name=platform)   
 
                 if _key is not None :                                   # Initialise la macro si des touches sont définis

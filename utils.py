@@ -14,14 +14,13 @@ def make_callback(actions: list):
                     app = ui.Application()
                     app.mainloop()
 
-                elif params["window"] == "cmd": #("open", {"window":"cmd", "folder":"Dossier dans lequel le cmd est ouvert si spécifié sinon celui par default"})
-                    subprocess.Popen(["cmd.exe"], cwd=params["folder"])         
-
-                elif params["window"] == "shell":#("open", {"window":"shell", "folder":"Dossier dans lequel le shell est ouvert si spécifié sinon celui par default"})
-                    try:
-                        subprocess.Popen(["xterm"], cwd=params["folder"])
-                    except Exception:
-                        subprocess.Popen(["konsole"], cwd=params["folder"])
+                elif params["window"] in {"cmd", "shell"}: #("open", {"window":"cmd", "folder":"Dossier dans lequel le cmd est ouvert si spécifié sinon celui par default"})
+                    try: subprocess.Popen(["cmd.exe"], cwd=params["folder"])
+                    except:
+                        try:
+                            subprocess.Popen(["xterm"], cwd=params["folder"])
+                        except:
+                            subprocess.Popen(["konsole"], cwd=params["folder"])
 
                 elif params["window"] == "explorer": #("open", {"window":"explorer", "folder":"Dossier dans lequel le navigateur de fichier est ouvert si spécifié sinon celui par default"})
                     path = params["folder"]
@@ -38,13 +37,12 @@ def make_callback(actions: list):
                             try:
                                 os.startfile(path)
 
-                            except Exception:
+                            except:
                                 webbrowser.open(path)
 
                     else:
                         subprocess.run(["xdg-open", path])
                         
-
             elif action == "wait": #("wait", #temps en secondes)
                 time.sleep(params["time"])
 
@@ -281,13 +279,13 @@ def add_abb(data: dict, source: str, text: str) -> None:
 def remove(data: dict, nb: str|int, id: bool = True) -> bool:
     """retire un élément d'un dictionnaire et renvoie True si réussit sinon envoie False"""
 
-    try :
+    try:
         if id: data.pop(nb)
         else: del data[nb]
         
         return True
         
-    except Exception: return False
+    except: return False
     
 def delete_win32() -> bool:
     """Supprime toute l'arborescence des fichier Macro Manager, renvoie True si réussie sinon False"""
@@ -305,7 +303,7 @@ def delete_win32() -> bool:
 
         else: return False
 
-    except Exception:
+    except:
         return False
 
 def delete_linux() -> bool:
@@ -321,7 +319,7 @@ def delete_linux() -> bool:
 
         else: return False
 
-    except Exception:
+    except:
         return False
 
 def export_mcr(input: list|dict, output_path: str = "macros.mcr") -> str:
