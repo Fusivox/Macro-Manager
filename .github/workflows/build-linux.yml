@@ -20,9 +20,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pyinstaller
-
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
+      
+          if [ -f requirements_linux.txt ]; then
+            pip install -r requirements_linux.txt
           fi
 
       - name: Build Binary
