@@ -1,0 +1,44 @@
+name: Build Linux
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Build Binary
+        run: |
+          pyinstaller \
+            --onefile \
+            --clean \
+            --noconsole \
+            -n "Macro Manager v2" \
+            --icon=logo.ico \
+            hotkeys.py \
+            --add-data "locales:locales" \
+            --add-data "logo.ico:."
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Macro-Manager-v2-Linux
+          path: dist/Macro Manager v2
