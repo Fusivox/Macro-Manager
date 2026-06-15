@@ -1,7 +1,7 @@
 import sys
 if sys.platform == "win32": from win32com.client import Dispatch
-elif sys.platform != "linux":raise Exception("This app sadly only works on Windows and linux (for now hopefully :D)")
-import json, os, ui, utils, i18n, keyboard
+elif sys.platform != "linux":raise Exception("This app sadly only works on Windows and linux")
+import json, os, ui, utils, i18n, keyboard, threading
 from apscheduler.schedulers.background import BackgroundScheduler
 
 sched = BackgroundScheduler()
@@ -36,16 +36,14 @@ class Hotkeys():
                 with open(f"{self.appdata}\\settings.json", "r") as f:
                     self.settings = json.load(f)
 
-                i18n.set('locale', self.settings["lang"])
-                i18n.set("fallback", self.settings["fallback"])
-
                 print(self.macros)
                 self.init_background()
-                sched.start()
 
-                if self.settings["GUI on launch"]:
-                    app = ui.Application()
-                    app.mainloop()
+                scheduler = threading.Thread(target=sched.start, daemon=True)
+                scheduler.start()
+
+                gui = threading.Thread(target=ui.run, daemon=True)
+                gui.start()
 
                 keyboard.wait()
 
@@ -117,11 +115,11 @@ class Hotkeys():
                     utils.delete_win32()
                     exit(1)
 
-                self.init_background() # pour que les macros et abreviation test marchent des l'ouverture de l'ui
-                app.mainloop()
+                gui = threading.Thread(target=ui.run, daemon=True)
+                gui.start()
 
-                keyboard.unhook_all() # quand l'ui est fermé enleve puis remet toutes les macros et abreviations pour eviter les probleme et/ou bugs
                 self.init_background()
+
                 keyboard.wait()
 
         elif sys.platform == "linux":
@@ -144,15 +142,15 @@ class Hotkeys():
                 with open(f"{self.config}/settings.json", "r") as f:
                     self.settings = json.load(f)
 
-                i18n.set('locale', self.settings["lang"])
-                i18n.set("fallback", self.settings["fallback"])
-
                 print(self.macros)
+
                 self.init_background()
 
-                if self.settings["GUI on launch"]:
-                    app = ui.Application()
-                    app.mainloop()
+                scheduler = threading.Thread(target=sched.start, daemon=True)
+                scheduler.start()
+
+                gui = threading.Thread(target=ui.run, daemon=True)
+                gui.start()
 
                 keyboard.wait()
 
@@ -225,15 +223,15 @@ class Hotkeys():
                     utils.delete_linux()
                     exit(1)
 
+                gui = threading.Thread(target=ui.run, daemon=True)
+                gui.start()
+
                 self.init_background()
-                app.mainloop()
-                
-                keyboard.unhook_all()
-                self.init_background()
+
                 keyboard.wait()
-                
+
     def create_shortcut_win32(self) -> None:
-        """creer le raccourci de l'app dans le dossier startup de windows pour que l'app se lance au démarage de windows pour ne pas avoir besoin de la lancer a chaque fois"""
+        """creer le raccourci de l'app dans le dossier startup de windows pour que l'app se lance au démarage de windows"""
 
         shortcut_path = f"{os.getenv("APPDATA")}\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Macro Manager.lnk"
         path = sys.executable
@@ -246,7 +244,7 @@ class Hotkeys():
         shortcut.save()
                 
     def create_service_linux(self) -> None:
-        """creer le service linux de l'app pour que l'app se lance au démarage de linux pour ne pas avoir besoin de la lancer a chaque fois"""
+        """creer le service linux de l'app pour que l'app se lance au démarage de linux"""
 
         path = "/opt/Macro_Manager/"
         service = """[Unit]

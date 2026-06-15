@@ -3,7 +3,7 @@ from tkinter import messagebox, simpledialog, filedialog
 
 if sys.executable.endswith("python.exe"):
     dev_mode = True
-    print(f">Debug : DEV MODE ACTIVATED")
+    print(f">Debug : DEV MODE ACTIVATED\n\tthere will be less verification at the creation of macros and debug messages will be printed in the console")
 else:
     dev_mode = False
 
@@ -52,6 +52,9 @@ class Application(tk.Tk):
         self.help_running = False
         self.task_running = False
         self.current_menu = "main"
+
+        if not self.settings["GUI on launch"]:
+            self.withdraw()
         
         self.build_menu()
         self.build_main_ui()
@@ -97,7 +100,13 @@ class Application(tk.Tk):
         """actualise tout les fichiers json avant de fermer l'appli"""
 
         utils.actualise(self.macros, self.settings, self.abbreviation, platform)
-        self.destroy()
+        self.withdraw()
+
+    def re_open(self) -> None:
+        """reouvre l'application"""
+
+        self.deiconify()
+        self.lift()
 
     def confirm(self) -> None:
         """demande de confirmation avant de suppr l'appli completement"""
@@ -1144,13 +1153,16 @@ class Application(tk.Tk):
                             additional_param = paramvar.get().strip() or ""
 
                             if dev_mode: 
-                                open_command = f"{selected_action} : {path} ;; param : {additional_param}"
+                                open_command = f"{selected_action} : {path}"
+                                if additional_param != "":
+                                    open_command += f" ;; param : {additional_param}"
                                 if insert:
                                     selected_index = self.mcr_listbox.curselection()
                                     self.mcr_listbox.insert(selected_index[0], open_command)
                                 else:
                                     self.mcr_listbox.insert(tk.END, open_command)
                                 close_params_menu()
+                                
                             else:
                                 if path != "" and (path.lower() in {"shell", "cmd", "explorer"} or (os.path.exists(path) or path.startswith("http" or "www.") or path.endswith(".com" or ".fr"))):
 
@@ -1545,3 +1557,10 @@ class Application(tk.Tk):
 
         base = getattr(sys, '_MEIPASS', os.path.abspath("."))
         return os.path.join(base, path)
+
+def run() -> None:
+    """lance l'application"""
+
+    global app
+    app = Application()
+    app.mainloop()

@@ -11,8 +11,7 @@ def make_callback(actions: list):
             if action == "open":
 
                 if params["window"] == "gui": #("open", {"window":"gui"}) sert a ouvrir l'ui pricipale
-                    app = ui.Application()
-                    app.mainloop()
+                    ui.app.re_open()
 
                 elif params["window"] in {"cmd", "shell"}: #("open", {"window":"cmd", "folder":"Dossier dans lequel le cmd est ouvert si spécifié sinon celui par default"})
                     try: subprocess.Popen(["cmd.exe"], cwd=params["folder"])
