@@ -17,12 +17,13 @@ the current list of action is :
 - press another hotkey
 - take a screenshot
 
-you can basically do everything you want with this list but if you think something could be usefull try suggesting it !
-defining a hotkey for an action list is not forced, it's usefull for the task scheduler or turning off a hotkey without deleting it.
+By default the ui keybind is ctrl+alt+a but you can change it in the option menu.
+You can basically do everything you want with this list but if you think something could be usefull try suggesting it !
+Defining a hotkey for an action list is not forced, it's usefull for the task scheduler or turning off a hotkey without deleting it.
 
 # Abbreviation
 
-very simple, a source (like "@@") that gets replaced by a set text (like your email), usefull for things you type often !
+Very simple, a source (like "@@") that gets replaced by a set text (like your email), usefull for things you type often !
 
 # task scheduler
 
