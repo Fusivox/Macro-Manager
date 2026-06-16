@@ -108,26 +108,37 @@ class Application(tk.Tk):
         self.deiconify()
         self.lift()
 
+    def _quit(self) -> None:
+        """ferme l'application"""
+
+        self.close()
+        self.destroy()
+        hotkeys.quit()
+
     def confirm(self) -> None:
         """demande de confirmation avant de suppr l'appli completement"""
 
         sure = messagebox.askokcancel(
             title=self._("ui.confirm"),
-            message=self._("ui.dlt_confirm")
+            message=self._("ui.dlt_confirm"),
+            parent=self
         )
         if sure :
             dlt = utils.delete_win32() if platform == "win32" else utils.delete_linux()
             if dlt:
                 messagebox.showinfo(
                     title=self._("ui.info"),
-                    message=self._("ui.dlt_success")
+                    message=self._("ui.dlt_success"),
+                    parent=self
                 )
                 self.destroy()
-                exit()
+                hotkeys.quit()
+
             else : 
                 messagebox.showerror(
                     title=self._("ui.info"),
-                    message=self._("ui.dlt_error")
+                    message=self._("ui.dlt_error"),
+                    parent=self
                 )
 
     def gui_keys(self) -> None:
@@ -138,7 +149,8 @@ class Application(tk.Tk):
         old_keys = self.macros["0"]["keys"]
         keys = simpledialog.askstring(
             title=self._("ui.key_change"),
-            prompt=f"{msg} : {self.macros["0"]["keys"]}"
+            prompt=f"{msg} : {self.macros["0"]["keys"]}",
+            parent=self
         )
         if keys:
             try :
@@ -151,7 +163,8 @@ class Application(tk.Tk):
                 message = self._("ui.key_eg").format(key=keys)
                 messagebox.showerror(
                     title=self._("ui.invalid_key"),
-                    message=message
+                    message=message,
+                    parent=self
                 )
 
     def help(self) -> None:
@@ -207,7 +220,7 @@ class Application(tk.Tk):
         
         utils.actualise(settings=self.settings, os_name=platform)
 
-        messagebox.showinfo(title=self._("htk.info_title"), message=self._(f"ui.launch_start_{param}"))
+        messagebox.showinfo(title=self._("htk.info_title"), message=self._(f"ui.launch_start_{param}"), parent=self)
 
     def export(self):
         """ouvre le menu pour exporter une macro en fichier .mcr """
@@ -236,7 +249,8 @@ class Application(tk.Tk):
             """ouvre une fenetre de recherche de dossier et mets son chemin dans l'entry"""
 
             path = filedialog.askdirectory(
-                title=self._("ui.folder")
+                title=self._("ui.folder"),
+                parent=self.export_menu
             )
             if path: pathvar.set(path)
 
@@ -253,9 +267,9 @@ class Application(tk.Tk):
                 utils.export_mcr(self.macros[self.index], file)
 
                 if os.path.exists(file + ".mcr" if not file.endswith(".mcr") else file):
-                    messagebox.showinfo(title=self._("htk.info_title"), message=self._("ui.export_succes"))
+                    messagebox.showinfo(title=self._("htk.info_title"), message=self._("ui.export_succes"), parent=self.export_menu)
                 else:
-                    messagebox.showerror(title=self._("htk.err_title"), message=self._("ui.export_fail"))
+                    messagebox.showerror(title=self._("htk.err_title"), message=self._("ui.export_fail"), parent=self.export_menu)
 
                 self.export_menu.destroy()
 
@@ -267,7 +281,8 @@ class Application(tk.Tk):
 
         path = filedialog.askopenfilenames(
             title=self._("ui.files"),
-            filetypes=[(self._("ui.mcr_type"), "*.mcr")]
+            filetypes=[(self._("ui.mcr_type"), "*.mcr")],
+            parent=self
         )
         if len(path) > 0:
             keys_in_use = [key_data["keys"] for key_data in self.macros.values() if key_data["keys"] is not None]
@@ -280,7 +295,7 @@ class Application(tk.Tk):
                     keyboard.add_hotkey(temp["keys"], utils.make_callback(temp["actions"]))
                     
                 else:
-                    messagebox.showerror(title=self._("htk.err_title"), message=self._("ui.key_used").format(key=temp["keys"]))
+                    messagebox.showerror(title=self._("htk.err_title"), message=self._("ui.key_used").format(key=temp["keys"]), parent=self)
                     utils.add_mcr(self.macros, keys=None, actions=temp["actions"], comment=temp["comment"])
 
             utils.actualise(self.macros, os_name=platform)
@@ -720,7 +735,8 @@ class Application(tk.Tk):
                 if _key in keys_in_use:    
                     ask_replace = messagebox.askyesno(
                         title=self._("macro_exist_title"),          #Si une macro existe deja, ça demande si ça la remplace
-                        message=self._("ui.macro_exist")
+                        message=self._("ui.macro_exist"),
+                        parent=self.nmcr_menu
                     )
                     if ask_replace:
                         self.remove("data", [key for key, value in self.macros.items() if value["keys"] == _key][0])
@@ -740,7 +756,8 @@ class Application(tk.Tk):
             else:
                 messagebox.showerror(
                     title=self._("ui.no_actions_title"),
-                    message=self._("ui.no_actions")
+                    message=self._("ui.no_actions"),
+                    parent=self.nmcr_menu
                 )
 
         def add_action() -> None:
@@ -769,6 +786,7 @@ class Application(tk.Tk):
                     params_menu = tk.Toplevel(add_action_menu, width=300, height=400)
                     params_menu.title(title)
                     params_menu.focus_set()
+                    params_menu.grab_set()
                     params_menu.transient(add_action_menu)
                     params_menu.resizable(False, False)
 
@@ -814,7 +832,7 @@ class Application(tk.Tk):
                     params_menu.destroy()
 
                 if selected_action == "wait":
-                    time = simpledialog.askfloat(title=title, prompt=self._("ui.wait"))
+                    time = simpledialog.askfloat(title=title, prompt=self._("ui.wait"), parent=add_action_menu)
                     if time is not None : 
                         if insert:
                             selected_index = self.mcr_listbox.curselection()
@@ -823,7 +841,7 @@ class Application(tk.Tk):
                             self.mcr_listbox.insert(tk.END, f"{selected_action} : {time}") 
 
                 elif selected_action == "hold":
-                    key = simpledialog.askstring(title=title, prompt=self._("ui.hold"))
+                    key = simpledialog.askstring(title=title, prompt=self._("ui.hold"), parent=add_action_menu)
                     if key in utils.POSSIBLE_KEYS: 
                         if insert:
                             selected_index = self.mcr_listbox.curselection()
@@ -832,7 +850,7 @@ class Application(tk.Tk):
                             self.mcr_listbox.insert(tk.END, f"{selected_action} : {key}")
 
                 elif selected_action == "release":
-                    key = simpledialog.askstring(title=title, prompt=self._("ui.release"))
+                    key = simpledialog.askstring(title=title, prompt=self._("ui.release"), parent=add_action_menu)
                     if key in utils.POSSIBLE_KEYS: 
                         if insert:
                             selected_index = self.mcr_listbox.curselection()
@@ -841,7 +859,7 @@ class Application(tk.Tk):
                             self.mcr_listbox.insert(tk.END, f"{selected_action} : {key}")
 
                 elif selected_action == "hotkey":
-                    keys = simpledialog.askstring(title=title, prompt=self._("ui.release"))
+                    keys = simpledialog.askstring(title=title, prompt=self._("ui.release"), parent=add_action_menu)
                     try :
                         keyboard.add_hotkey(keys, lambda: None)
                         keyboard.remove_hotkey(keys)
@@ -852,7 +870,7 @@ class Application(tk.Tk):
                             self.mcr_listbox.insert(tk.END, f"{selected_action} : {keys}")
 
                     except Exception:
-                        messagebox.showerror(title=self._("ui.invalid_key"), message=self._("ui.key_eg"))
+                        messagebox.showerror(title=self._("ui.invalid_key"), message=self._("ui.key_eg"), parent=add_action_menu)
 
                 else:
                     init_params_menu()
@@ -1121,7 +1139,8 @@ class Application(tk.Tk):
 
                             path = filedialog.askopenfilename(
                                 title=self._("ui.files"),
-                                filetypes=[(self._("ui.file_type"), "*.*")]
+                                filetypes=[(self._("ui.file_type"), "*.*")],
+                                parent=params_menu
                             )
                             if path: pathvar.set(path)
 
@@ -1139,7 +1158,8 @@ class Application(tk.Tk):
                             """ouvre une fenetre de recherche de dossier et mets son chemin dans l'entry"""
 
                             path = filedialog.askdirectory(
-                                title=self._("ui.folder")
+                                title=self._("ui.folder"),
+                                parent=params_menu
                             )
                             if path: paramvar.set(path)
 
@@ -1186,7 +1206,7 @@ class Application(tk.Tk):
 
                                     close_params_menu()
                                 
-                                else: messagebox.showerror(title=self._("ui.path_err_title"), message=self._("ui.path_err")) 
+                                else: messagebox.showerror(title=self._("ui.path_err_title"), message=self._("ui.path_err"), parent=params_menu) 
 
                         validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_open)
                         validate_button.grid(row=2, column=2, padx=10, pady=10)
@@ -1385,7 +1405,7 @@ class Application(tk.Tk):
 
                                 close_params_menu()
 
-                            else: messagebox.showerror(title=self._("ui.path_err_title"), message=self._("ui.path_err"))
+                            else: messagebox.showerror(title=self._("ui.path_err_title"), message=self._("ui.path_err"), parent=params_menu)
 
                         validate_button = tk.Button(params_menu, text=self._("ui.choose_act"), command=add_screenshot)
                         validate_button.grid(row=2, column=2, padx=10, pady=10)
@@ -1539,6 +1559,7 @@ class Application(tk.Tk):
         self.menu.add_command(label=self._("ui.import"), command=self._import)
 
         self.menu.add_separator()
+        self.menu.add_command(label=self._("ui.close"), command=self._quit)
         self.menu.add_command(label=self._("ui.uninstall"), command=self.confirm)
 
         if self.current_menu == "main":

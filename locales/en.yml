@@ -90,6 +90,7 @@ en:
     key_used: "{key} keys already in use, macro imported without keys"
     mcr_type: .mcr files
     insert_action: Insert
+    close: Close
     
   help:
     main: "This is the help menu, you can choose an action to read it's manual."

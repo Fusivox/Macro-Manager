@@ -90,6 +90,7 @@ fr:
     key_used: "{key} déjà utilisé, macro importé sans touches associés"
     mcr_type: fichiers .mcr
     insert_action: Insérer
+    close: Fermer
 
   help:
     main: "Ceci est le menu d'aide, vous pouvez choisir une action pour lire son manuel."

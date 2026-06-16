@@ -95,7 +95,9 @@ class Hotkeys():
                 }
                 utils.actualise(self.macros, self.settings, self.abbreviation)
                 
-                app = ui.Application()
+                gui = threading.Thread(target=ui.run, daemon=True)
+                gui.start()
+
                 ask_confirm = ui.messagebox.askokcancel(
                     title=_("htk.info_title"),
                     message=_("htk.startup_msg")
@@ -111,12 +113,9 @@ class Hotkeys():
                         title=_("htk.info_title"),
                         message=_("htk.cancelled_msg")
                     )
-                    app.destroy()
                     utils.delete_win32()
-                    exit(1)
-
-                gui = threading.Thread(target=ui.run, daemon=True)
-                gui.start()
+                    print(">Debug : User refused to create the shortcut, app will now exit")
+                    sys.exit(1)
 
                 self.init_background()
 
@@ -203,7 +202,10 @@ class Hotkeys():
                     }
                 }
                 utils.actualise(self.macros, self.settings, self.abbreviation, os_name="linux")
-                app = ui.Application()
+
+                gui = threading.Thread(target=ui.run, daemon=True)
+                gui.start()
+
                 ask_confirm = ui.messagebox.askokcancel(
                     title=_("htk.info_title"),
                     message=_("htk.startup_msg")
@@ -219,12 +221,8 @@ class Hotkeys():
                         title=_("htk.info_title"),
                         message=_("htk.cancelled_msg")
                     )
-                    app.destroy()
                     utils.delete_linux()
                     exit(1)
-
-                gui = threading.Thread(target=ui.run, daemon=True)
-                gui.start()
 
                 self.init_background()
 
@@ -312,6 +310,13 @@ WantedBy=multi-user.target"""
             text = self.abbreviation[nb]["text"]
             keyboard.add_abbreviation(source, text)
             print(f">Debug : New abbreviation {source}, replaced by {text}")
+
+def quit() -> None:
+    """ferme l'application"""
+
+    keyboard.unhook_all()
+    sched.shutdown(wait=False)
+    sys.exit(0)
 
 if __name__ == "__main__":
     hotkeys = Hotkeys()
