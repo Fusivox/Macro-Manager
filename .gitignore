@@ -2,9 +2,10 @@ Uninstall.exe
 dist/
 build/
 __pycache__/
-test.py
 MacroManager
 env/
 *.spec
 None*
 *.mcr
+test.*
+test/
