@@ -1,17 +1,17 @@
 package main
 
 import (
+	"compress/gzip"
+	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
+	"path"
+	"strings"
 	"time"
 
 	"github.com/toqueteos/webbrowser"
 )
-
-type Action struct {
-	action string
-	args   map[string]any
-}
 
 func make_callback(actions []Action) func() {
 
@@ -68,7 +68,7 @@ func make_callback(actions []Action) func() {
 				}
 
 			case "wait":
-				duration := time.Duration(params["time"].(float32)) * time.Second
+				duration := time.Duration(params["time"].(float64)) * time.Second
 				time.Sleep(duration)
 
 			case "write":
@@ -101,4 +101,82 @@ func make_callback(actions []Action) func() {
 	}
 
 	return callback
+}
+
+func actualise(data map[int]Macro, settings Settings, abbreviation map[int]Abbreviation) {
+	if data != nil {
+		databyte, err := json.Marshal(data)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		err = os.WriteFile(path.Join(appdata, "data.json"), databyte, 0644)
+	}
+	if settings.Lang != "" {
+		settingsbyte, err := json.Marshal(settings)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		err = os.WriteFile(path.Join(appdata, "settings.json"), settingsbyte, 0644)
+	}
+	if abbreviation != nil {
+		abbbyte, err := json.Marshal(abbreviation)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		err = os.WriteFile(path.Join(appdata, "settings.json"), abbbyte, 0644)
+	}
+}
+
+func add_mcr(keys, comment string, actions []Action) {
+
+	macros[len(macros)] = Macro{Keys: keys, Comment: comment, Actions: actions, Task: false}
+}
+
+func add_abb(source, text string) {
+
+	abbreviation[len(abbreviation)] = Abbreviation{Source: source, Text: text}
+}
+
+func remove(data map[int]any, nb int) {
+
+	delete(data, nb)
+}
+
+func export_mcr(input Macro, outputPath string) {
+
+	if outputPath == "" {
+		outputPath = "macros.mcr"
+	} else if !strings.HasSuffix(outputPath, ".mcr") {
+		outputPath += ".mcr"
+	}
+
+	f_out, err := os.Create(outputPath)
+	if err != nil {
+		panic(err)
+	}
+	defer f_out.Close()
+
+	gz := gzip.NewWriter(f_out)
+	defer gz.Close()
+
+	encoder := json.NewEncoder(gz)
+	if err := encoder.Encode(input); err != nil {
+		panic(err)
+	}
+}
+
+func import_mcr(inputPath string) Macro {
+
+	file, _ := os.Open(inputPath)
+	defer file.Close()
+
+	gz, _ := gzip.NewReader(file)
+	defer gz.Close()
+
+	var macro Macro
+	json.NewDecoder(gz).Decode(&macro)
+	return macro
 }
