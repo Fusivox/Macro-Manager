@@ -9,10 +9,10 @@ import (
 )
 
 type Macro struct {
-	Keys    string   `json:"keys"`
-	Actions []Action `json:"actions"`
-	Task    any      `json:"tasked"`
-	Comment string   `json:"comment"`
+	Keys    string         `json:"keys"`
+	Actions []Action       `json:"actions"`
+	Task    map[string]any `json:"tasked"`
+	Comment string         `json:"comment"`
 }
 
 type Action struct {
@@ -71,4 +71,33 @@ func main() {
 
 	json.Unmarshal(settingsByte, &settings)
 
+}
+
+func init_background() {
+	for nb := range macros {
+		keys := macros[nb].Keys
+		actions := macros[nb].Actions
+		task := macros[nb].Task
+		callback := make_callback(actions)
+
+		fmt.Println(callback)
+
+		if keys != "" {
+			// keyboard.add_hotkey(keys, callback)
+			fmt.Println(">Debug : new hotkey", keys, ", do", actions)
+		} else {
+			fmt.Println(">Debug: New action that has no keys :", actions)
+		}
+
+		if task["active"] == true {
+			// sched.add_job(callback, max_instances=1, **task["kwargs"])
+			fmt.Println(">Debug : new tasked macro with trigger", task["kwargs"], "do", actions)
+		}
+	}
+	for nb := range abbreviation {
+		source := abbreviation[nb].Source
+		text := abbreviation[nb].Text
+		// keyboard.add_abbreviation(source, text)
+		fmt.Println(">Debug : New abbreviation", source, ", replaced by", text)
+	}
 }
