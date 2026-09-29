@@ -132,7 +132,7 @@ func actualise(data map[int]Macro, settings Settings, abbreviation map[int]Abbre
 
 func add_mcr(keys, comment string, actions []Action) {
 
-	macros[len(macros)] = Macro{Keys: keys, Comment: comment, Actions: actions, Task: false}
+	macros[len(macros)] = Macro{Keys: keys, Comment: comment, Actions: actions, Task: map[string]any{"active": false}}
 }
 
 func add_abb(source, text string) {
