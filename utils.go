@@ -145,7 +145,7 @@ func remove(data map[int]any, nb int) {
 	delete(data, nb)
 }
 
-func export_mcr(input Macro, outputPath string) {
+func export_mcr(input Macro, outputPath string) bool {
 
 	if outputPath == "" {
 		outputPath = "macros.mcr"
@@ -155,7 +155,7 @@ func export_mcr(input Macro, outputPath string) {
 
 	f_out, err := os.Create(outputPath)
 	if err != nil {
-		panic(err)
+		return false
 	}
 	defer f_out.Close()
 
@@ -164,8 +164,9 @@ func export_mcr(input Macro, outputPath string) {
 
 	encoder := json.NewEncoder(gz)
 	if err := encoder.Encode(input); err != nil {
-		panic(err)
+		return false
 	}
+	return true
 }
 
 func import_mcr(inputPath string) Macro {
